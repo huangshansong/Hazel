@@ -11,6 +11,7 @@ If you want to try this out, you need to download premake5.exe to your working d
 如果您想试试这个，你可以下载premake5.exe到工作目录，然后打开cmd，运行代码：call premake5.exe vs2019（我的VS版本是vs2019，你可以自己尝试其他版本）。然后你可以双击刚才生成的.sln，在vs里打开它。
 
 reference:
+
  [1] https://github.com/TheCherno/Hazel
  
  
