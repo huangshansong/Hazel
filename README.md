@@ -3,6 +3,7 @@ Hazel Engine
 
 This is a game engine to practice some of my ideas about the game engine. Most of the code was typed by myself, I referenced [1] and [2]. 
 这是我为了实践自己关于游戏引擎的想法制作的游戏引擎。大部分代码是我手打的，我参考了[1]和[2]。
+
 its name, Hazel, is the same with [1]’s.
 它的名字，Hazel，和[1]的是一样的。
 
@@ -11,7 +12,11 @@ If you want to try this out, you need to download premake5.exe to your working d
 
 reference:
  [1] https://github.com/TheCherno/Hazel
+ 
+ 
  [2] https://learnopengl-cn.github.io/
+ 
+ 
  [3] http://www.realtimerendering.com/
  
  
