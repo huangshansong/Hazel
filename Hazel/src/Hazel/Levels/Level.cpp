@@ -48,8 +48,16 @@ namespace Hazel
             Actor* actor;
             actor = new Actor();
             Model* model;
-			model = new Model(FileSystem::getPath("resources/objects/3d_other_ue4lcjddw/ue4lcjddw.json"), "PBR");
+			//model = new Model(FileSystem::getPath("resources/objects/3d_other_ue4lcjddw/ue4lcjddw_LOD0.fbx"), ShaderName::PBR, true, glm::vec3(-5.0f, 5.0f, 0.0f));
+            //actor->models.emplace_back(model);
+            model = new Model(FileSystem::getPath("resources/objects/container_barrel_udlmcdhqx/udlmcdhqx_LOD0.fbx"), ShaderName::PBR, true, glm::vec3(5.0f, 5.0f, 0.0f));
             actor->models.emplace_back(model);
+            //model = new Model(FileSystem::getPath("resources/objects/wood_other_ueukbgzfa/ueukbgzfa_LOD0.fbx"), ShaderName::PBR, true, glm::vec3(0.0f, 0.0f, 0.0f));
+            //actor->models.emplace_back(model);
+            //model = new Model(FileSystem::getPath("resources/objects/backpack/backpack.obj"), ShaderName::Blinn_Phong, true, glm::vec3(0.0f, 0.0f, 0.0f));
+            //actor->models.emplace_back(model);
+
+
             m_Actors.emplace_back(actor);
 
 
@@ -74,7 +82,7 @@ namespace Hazel
                 
                 for (Shader* shader : Application::m_Window->m_Viewport->m_Shaders)
                 {
-                    if (shader->name == "PBR") 
+                    if (shader->name == ShaderName::PBR) 
                     {
                         shader->setVec3("lightPositions[" + std::to_string(i) + "]", newPos);
                         shader->setVec3("lightColors[" + std::to_string(i) + "]", lightColors[i]);
@@ -98,15 +106,15 @@ namespace Hazel
 
         glm::mat4 view = dynamic_cast<Camera*>(Application::m_Window->m_Viewport->currentLevel->m_Actors[0])->GetViewMatrix();//here m_Actors[0] is the camera, should be changed later
         Application::m_Window->m_Viewport->currentShader->setMat4("view", view);
-        glm::mat4 modelTrans = glm::mat4(1.0f);
-        modelTrans = glm::translate(modelTrans, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-        modelTrans = glm::scale(modelTrans, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
-        Application::m_Window->m_Viewport->currentShader->setMat4("model", modelTrans);
         
         for (Actor* actor : Application::m_Window->m_Viewport->currentLevel->m_Actors)
         {
             for (Model* model : actor->models)
             {
+                glm::mat4 modelTrans = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f));	// it's a bit too big for our scene, so scale it down
+                //modelTrans = glm::translate(modelTrans, model->transform); 
+                modelTrans = glm::translate(modelTrans, glm::vec3(0.0f, 0.0f, 0.0f));
+                Application::m_Window->m_Viewport->currentShader->setMat4("model", modelTrans);
                 model->Draw(*Application::m_Window->m_Viewport->currentShader);
             }
         }

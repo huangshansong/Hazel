@@ -53,7 +53,7 @@ namespace Hazel {
         // render the mesh
         void Draw(Shader& shader)
         {
-            if(shader.name == "PBR")
+            if(shader.name == ShaderName::PBR)
             {
                 // bind appropriate textures
                 unsigned int albedoNr = 1;
@@ -62,6 +62,7 @@ namespace Hazel {
                 unsigned int metallicNr = 1;
                 unsigned int roughnessNr = 1;
                 unsigned int aoNr = 1;
+                unsigned int displacementNr = 1;
 
                 for (unsigned int i = 0; i < textures.size(); i++)
                 {
@@ -81,6 +82,9 @@ namespace Hazel {
                         number = std::to_string(roughnessNr++); // transfer unsigned int to stream
                     else if (name == "texture_ao")
                         number = std::to_string(aoNr++); // transfer unsigned int to stream
+                    else if (name == "texture_displacement")
+                        number = std::to_string(displacementNr++); // transfer unsigned int to stream
+
 
                     // now set the sampler to the correct texture unit
                     glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
@@ -88,13 +92,13 @@ namespace Hazel {
                     glBindTexture(GL_TEXTURE_2D, textures[i].id);
                 }
             }
-            else if(shader.name == "Blinn-Phong")
+            else if(shader.name == ShaderName::Blinn_Phong)
             {
                 // bind appropriate textures
                 unsigned int diffuseNr = 1;
                 unsigned int specularNr = 1;
                 unsigned int normalNr = 1;
-                unsigned int heightNr = 1;
+                unsigned int ambientLightNr = 1;
                 for (unsigned int i = 0; i < textures.size(); i++)
                 {
                     glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
@@ -107,8 +111,8 @@ namespace Hazel {
                         number = std::to_string(specularNr++); // transfer unsigned int to stream
                     else if (name == "texture_normal")
                         number = std::to_string(normalNr++); // transfer unsigned int to stream
-                    else if (name == "texture_height")
-                        number = std::to_string(heightNr++); // transfer unsigned int to stream
+                    else if (name == "texture_ambientLight")
+                        number = std::to_string(ambientLightNr++); // transfer unsigned int to stream
 
                     // now set the sampler to the correct texture unit
                     glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
@@ -159,13 +163,14 @@ namespace Hazel {
             // vertex texture coords
             glEnableVertexAttribArray(2);
             glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+            /*
             // vertex tangent
             glEnableVertexAttribArray(3);
             glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
             // vertex bitangent
             glEnableVertexAttribArray(4);
             glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
-
+            */
             glBindVertexArray(0);
         }
     };

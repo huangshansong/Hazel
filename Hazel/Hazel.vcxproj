@@ -631,4 +631,4 @@ IF EXIST ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll\ (xcopy /Q /E /Y /I
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-</Project>
+</Project> 

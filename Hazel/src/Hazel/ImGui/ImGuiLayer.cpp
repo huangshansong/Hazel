@@ -65,7 +65,7 @@ namespace Hazel {
 		ImGui::Text("Click to select the shader.");               // Display some text (you can use a format strings too)
 
 		for (Shader* shader : Application::m_Window->m_Viewport->m_Shaders) 
-			if (ImGui::Button(shader->name.c_str())) 
+			if (ImGui::Button(shaderNames[static_cast<int>(shader->name)]))
 				Application::m_Window->m_Viewport->currentShader = shader;
 
 		ImGui::SameLine();

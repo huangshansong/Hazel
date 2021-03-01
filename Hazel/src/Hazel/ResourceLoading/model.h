@@ -9,6 +9,9 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include "Hazel/Core.h"
+#include "Hazel/Log.h"
+
 #include "mesh.h"
 #include "shader.h"
 
@@ -22,16 +25,19 @@ namespace Hazel {
     {
     public:
         // model data 
+        bool fromQuixel;
         vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
-        string shaderType;
-        vector<Mesh>    meshes;
+        ShaderName shaderName;
+        vector<Mesh> meshes;
         string directory;
+        string modelName;
+        glm::vec3 transform;
         bool gammaCorrection;
 
         // constructor, expects a filepath to a 3D model.
-        Model(string const& path, string const& shaderType, bool gamma = false) : gammaCorrection(gamma)
+        Model(string const& path, ShaderName shaderName, bool fromQuixel, glm::vec3 transform, bool gamma = false) 
+            : gammaCorrection(gamma), shaderName(shaderName), fromQuixel(fromQuixel), transform(transform)
         {
-            this->shaderType = shaderType;
             loadModel(path);
         }
 
@@ -48,7 +54,8 @@ namespace Hazel {
         {
             // read file via ASSIMP
             Assimp::Importer importer;
-            const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+            //const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+            const aiScene* scene = importer.ReadFile(path, 0);
             // check for errors
             if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
             {
@@ -58,6 +65,12 @@ namespace Hazel {
             // retrieve the directory path of the filepath
             directory = path.substr(0, path.find_last_of('/'));
 
+            //set the model's name, only for the Quxel's model
+            if (fromQuixel)
+            {
+                modelName = path.substr(path.find_last_of('/') + 1, path.find_last_of('_') - path.find_last_of('/') - 1);
+            }
+            
             // process ASSIMP's root node recursively
             processNode(scene->mRootNode, scene);
         }
@@ -115,6 +128,7 @@ namespace Hazel {
                     vec.x = mesh->mTextureCoords[0][i].x;
                     vec.y = mesh->mTextureCoords[0][i].y;
                     vertex.TexCoords = vec;
+                    /*
                     // tangent
                     vector.x = mesh->mTangents[i].x;
                     vector.y = mesh->mTangents[i].y;
@@ -125,6 +139,7 @@ namespace Hazel {
                     vector.y = mesh->mBitangents[i].y;
                     vector.z = mesh->mBitangents[i].z;
                     vertex.Bitangent = vector;
+                    */
                 }
                 else
                     vertex.TexCoords = glm::vec2(0.0f, 0.0f);
@@ -142,7 +157,7 @@ namespace Hazel {
             // process materials
             aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
             
-            if (shaderType == "PBR")
+            if (shaderName == ShaderName::PBR)
             {
 
                 vector<Texture> albedo = loadMaterialTextures(material, aiTextureType_BASE_COLOR, "texture_albedo");
@@ -157,9 +172,12 @@ namespace Hazel {
                 textures.insert(textures.end(), roughness.begin(), roughness.end());
                 std::vector<Texture> ao = loadMaterialTextures(material, aiTextureType_AMBIENT_OCCLUSION, "texture_ao");
                 textures.insert(textures.end(), ao.begin(), ao.end());
+                std::vector<Texture> displacement = loadMaterialTextures(material, aiTextureType_DISPLACEMENT, "texture_displacement");
+                textures.insert(textures.end(), displacement.begin(), displacement.end());
+                
 
             }
-            else if (shaderType == "Blinn-Phong")
+            else if (shaderName == ShaderName::Blinn_Phong)
             {
 
                 // we assume a convention for sampler names in the shaders. Each diffuse texture should be named
@@ -179,8 +197,8 @@ namespace Hazel {
                 std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
                 textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
                 // 4. height maps
-                std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
-                textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+                std::vector<Texture> ambientLightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_ambientLight");
+                textures.insert(textures.end(), ambientLightMaps.begin(), ambientLightMaps.end());
             }
             
             // return a mesh object created from the extracted mesh data
@@ -192,6 +210,7 @@ namespace Hazel {
         vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName)
         {
             vector<Texture> textures;
+            bool NoTextureInModelFile = true;
             for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
             {
                 aiString str;
@@ -216,6 +235,63 @@ namespace Hazel {
                     textures.push_back(texture);
                     textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
                 }
+
+                NoTextureInModelFile = false;
+            }
+            if (NoTextureInModelFile)
+            {
+                // this is for the Quixel's models
+                if (fromQuixel)
+                {
+                    string textureFileName;
+                    bool textureNotConsidered = false;
+                    switch (type)
+                    {
+                    case aiTextureType_BASE_COLOR :
+                    {
+                        textureFileName = modelName + "_8K_Albedo.jpg";
+                        break;
+                    }
+                    case aiTextureType_NORMAL_CAMERA:
+                    {
+                        textureFileName = modelName + "_8K_Normal_LOD0.jpg";
+                        break;
+                    }
+                    case aiTextureType_DIFFUSE_ROUGHNESS:
+                    {
+                        textureFileName = modelName + "_8K_Roughness.jpg";
+                        break;
+                    }
+                    default:
+                    {
+                        textureNotConsidered = true;
+                    }
+                    }
+                    if (!textureNotConsidered)
+                    {
+                        bool skip = false;
+                        for (unsigned int j = 0; j < textures_loaded.size(); j++)
+                        {
+                            if (std::strcmp(textures_loaded[j].path.data(), textureFileName.c_str()) == 0)
+                            {
+                                textures.push_back(textures_loaded[j]);
+                                skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
+                                break;
+                            }
+                        }
+                        if (!skip)
+                        {   // if texture hasn't been loaded already, load it
+                            Texture texture;
+                            texture.id = TextureFromFile(textureFileName.c_str(), this->directory);
+                            texture.type = typeName;
+                            texture.path = textureFileName.c_str();
+                            textures.push_back(texture);
+                            textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
+                            //HZ_CORE_INFO(typeName.c_str());
+                        }
+                    }
+                }
+                
             }
             return textures;
         }

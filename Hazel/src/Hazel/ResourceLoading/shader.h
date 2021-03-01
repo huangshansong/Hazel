@@ -9,14 +9,26 @@
 
 namespace Hazel {
 
+    //add every new shader's name here
+    enum class ShaderName
+    {
+        PBR = 0, Blinn_Phong, 
+    };
+
+    const char* const shaderNames[] =
+    {
+        "PBR",
+        "Blinn_Phong"
+    };
+
     class Shader
     {
     public:
         unsigned int ID;
-        std::string name;
+        ShaderName name;
         // constructor generates the shader on the fly
         // ------------------------------------------------------------------------
-        Shader(std::string shaderName, const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr)
+        Shader(ShaderName shaderName, const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr)
         {
             name = shaderName;
 

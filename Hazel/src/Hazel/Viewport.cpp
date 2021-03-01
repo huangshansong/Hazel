@@ -27,13 +27,10 @@ namespace Hazel {
 
 		// build and compile shaders
 		// -------------------------
-		Shader* shader = new Shader("PBR", FileSystem::getPath("src/1.2.pbr.vs").c_str(), FileSystem::getPath("src/1.2.pbr.fs").c_str());
+		//Shader* shader = new Shader(ShaderName::PBR, FileSystem::getPath("src/1.2.pbr.vs").c_str(), FileSystem::getPath("src/1.2.pbr.fs").c_str());
+		Shader* shader = new Shader(ShaderName::PBR, FileSystem::getPath("src/1.2.pbr.vs").c_str(), FileSystem::getPath("src/1.2.pbr.fs").c_str());
+
 		shader->use();
-		shader->setInt("albedoMap", 0);
-		shader->setInt("normalMap", 1);
-		shader->setInt("metallicMap", 2);
-		shader->setInt("roughnessMap", 3);
-		shader->setInt("aoMap", 4);
         //push the shader into vector
 		m_Shaders.emplace_back(shader);
 
