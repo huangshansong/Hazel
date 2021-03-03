@@ -11,6 +11,7 @@
 
 #include "Hazel/Core.h"
 #include "Hazel/Log.h"
+#include "Hazel/Actors/landscape.h"
 
 #include "mesh.h"
 #include "shader.h"
@@ -27,25 +28,34 @@ namespace Hazel {
         // model data 
         bool fromQuixel;
         vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
+        Shader* shader;
         ShaderName shaderName;
-        vector<Mesh> meshes;
+        vector<Mesh*> meshes;
         string directory;
         string modelName;
         glm::vec3 transform;
         bool gammaCorrection;
 
         // constructor, expects a filepath to a 3D model.
-        Model(string const& path, ShaderName shaderName, bool fromQuixel, glm::vec3 transform, bool gamma = false) 
-            : gammaCorrection(gamma), shaderName(shaderName), fromQuixel(fromQuixel), transform(transform)
+        Model(string const& path, Shader* shader, bool fromQuixel, glm::vec3 transform, bool gamma = false) 
+            : shader(shader), fromQuixel(fromQuixel), transform(transform), gammaCorrection(gamma)
         {
+            shaderName = shader->name;
             loadModel(path);
+        }
+        // constructor, expects a heightMap, for landscape
+        Model(Landscape* landscape, Shader* shader, bool gamma = false)//!!!should add Material and texCords later!!!
+            :shader(shader), gammaCorrection(gamma)
+        {
+            shaderName = shader->name;
+            loadModel(landscape);
         }
 
         // draws the model, and thus all its meshes
-        void Draw(Shader& shader)
+        void Draw()
         {
             for (unsigned int i = 0; i < meshes.size(); i++)
-                meshes[i].Draw(shader);
+                meshes[i]->Draw(*shader);
         }
 
     private:
@@ -84,7 +94,7 @@ namespace Hazel {
                 // the node object only contains indices to index the actual objects in the scene. 
                 // the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
                 aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-                meshes.push_back(processMesh(mesh, scene));
+                meshes.emplace_back(processMesh(mesh, scene));
             }
             // after we've processed all of the meshes (if any) we then recursively process each of the children nodes
             for (unsigned int i = 0; i < node->mNumChildren; i++)
@@ -94,12 +104,12 @@ namespace Hazel {
 
         }
 
-        Mesh processMesh(aiMesh* mesh, const aiScene* scene)
+        Mesh* processMesh(aiMesh* mesh, const aiScene* scene)
         {
             // data to fill
-            vector<Vertex> vertices;
-            vector<unsigned int> indices;
-            vector<Texture> textures;
+            vector<Vertex>* vertices = new vector<Vertex>;
+            vector<unsigned int>* indices = new vector<unsigned int>;
+            vector<Texture>* textures = new vector<Texture>;
 
             // walk through each of the mesh's vertices
             for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -144,7 +154,7 @@ namespace Hazel {
                 else
                     vertex.TexCoords = glm::vec2(0.0f, 0.0f);
 
-                vertices.push_back(vertex);
+                (*vertices).push_back(vertex);
             }
             // now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
             for (unsigned int i = 0; i < mesh->mNumFaces; i++)
@@ -152,7 +162,7 @@ namespace Hazel {
                 aiFace face = mesh->mFaces[i];
                 // retrieve all indices of the face and store them in the indices vector
                 for (unsigned int j = 0; j < face.mNumIndices; j++)
-                    indices.push_back(face.mIndices[j]);
+                    (*indices).push_back(face.mIndices[j]);
             }
             // process materials
             aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
@@ -161,19 +171,19 @@ namespace Hazel {
             {
 
                 vector<Texture> albedo = loadMaterialTextures(material, aiTextureType_BASE_COLOR, "texture_albedo");
-                textures.insert(textures.end(), albedo.begin(), albedo.end());
+                (*textures).insert((*textures).end(), albedo.begin(), albedo.end());
                 vector<Texture> normal = loadMaterialTextures(material, aiTextureType_NORMAL_CAMERA, "texture_normal");
-                textures.insert(textures.end(), normal.begin(), normal.end());
+                (*textures).insert((*textures).end(), normal.begin(), normal.end());
                 std::vector<Texture> emission = loadMaterialTextures(material, aiTextureType_EMISSION_COLOR, "texture_emission");
-                textures.insert(textures.end(), emission.begin(), emission.end());
+                (*textures).insert((*textures).end(), emission.begin(), emission.end());
                 std::vector<Texture> metallic = loadMaterialTextures(material, aiTextureType_METALNESS, "texture_metallic");
-                textures.insert(textures.end(), metallic.begin(), metallic.end());
+                (*textures).insert((*textures).end(), metallic.begin(), metallic.end());
                 std::vector<Texture> roughness = loadMaterialTextures(material, aiTextureType_DIFFUSE_ROUGHNESS, "texture_roughness");
-                textures.insert(textures.end(), roughness.begin(), roughness.end());
+                (*textures).insert((*textures).end(), roughness.begin(), roughness.end());
                 std::vector<Texture> ao = loadMaterialTextures(material, aiTextureType_AMBIENT_OCCLUSION, "texture_ao");
-                textures.insert(textures.end(), ao.begin(), ao.end());
+                (*textures).insert((*textures).end(), ao.begin(), ao.end());
                 std::vector<Texture> displacement = loadMaterialTextures(material, aiTextureType_DISPLACEMENT, "texture_displacement");
-                textures.insert(textures.end(), displacement.begin(), displacement.end());
+                (*textures).insert((*textures).end(), displacement.begin(), displacement.end());
                 
 
             }
@@ -189,20 +199,20 @@ namespace Hazel {
 
                 // 1. diffuse maps
                 vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-                textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+                (*textures).insert((*textures).end(), diffuseMaps.begin(), diffuseMaps.end());
                 // 2. specular maps
                 vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-                textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+                (*textures).insert((*textures).end(), specularMaps.begin(), specularMaps.end());
                 // 3. normal maps
                 std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
-                textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+                (*textures).insert((*textures).end(), normalMaps.begin(), normalMaps.end());
                 // 4. height maps
                 std::vector<Texture> ambientLightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_ambientLight");
-                textures.insert(textures.end(), ambientLightMaps.begin(), ambientLightMaps.end());
+                (*textures).insert((*textures).end(), ambientLightMaps.begin(), ambientLightMaps.end());
             }
             
             // return a mesh object created from the extracted mesh data
-            return Mesh(vertices, indices, textures);
+            return new Mesh(vertices, indices, textures);
         }
 
         // checks all material textures of a given type and loads the textures if they're not loaded yet.
@@ -294,6 +304,48 @@ namespace Hazel {
                 
             }
             return textures;
+        }
+
+        // loads a model from heightMap and stores the resulting meshes in the meshes vector.
+        void loadModel(Landscape* landscape)
+        {
+            // data to fill
+            vector<Vertex>* vertices = new vector<Vertex>;
+            vector<unsigned int>* indices = new vector<unsigned int>;
+            vector<Texture>* textures = new vector<Texture>;
+            
+            unsigned int Width = landscape->getWidth();
+            unsigned int Length = landscape->getLength();
+
+            for (int i = 0; i < Width; i++)
+            {
+                for (int j = 0; j < Length; j++)
+                {
+                    Vertex vertex;
+                    glm::vec3 vector;
+                    vector.x = (float)i;
+                    vector.z = (float)j;
+                    vector.y = landscape->getHeight(i, j);
+                    vertex.Position = vector;
+
+                    (*vertices).emplace_back(vertex);
+
+                }
+            }
+            for (unsigned int i = 0; i < Width - 1; i++)
+            {
+                for (unsigned int j = 0; j < Length - 1; j++)
+                {
+                    (*indices).emplace_back(i * Width + j);            //left top
+                    (*indices).emplace_back(i * Width + j + 1);        //right top
+                    (*indices).emplace_back((i + 1) * Width + j);      //left bottom
+                    (*indices).emplace_back((i + 1) * Width + j);      //left bottom
+                    (*indices).emplace_back(i * Width + j + 1);        //right top
+                    (*indices).emplace_back((i + 1) * Width + j + 1);  //right bottom
+                }
+            }
+
+            meshes.emplace_back(new Mesh(vertices, indices, textures));
         }
     };
 

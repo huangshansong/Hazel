@@ -6,6 +6,7 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 
+#include "Material.h"
 #include "shader.h"
 
 using namespace std;
@@ -25,22 +26,16 @@ namespace Hazel {
         glm::vec3 Bitangent;
     };
 
-    struct Texture {
-        unsigned int id;
-        string type;
-        string path;
-    };
-
     class Mesh {
     public:
         // mesh Data
-        vector<Vertex>       vertices;
-        vector<unsigned int> indices;
-        vector<Texture>      textures;
+        vector<Vertex>*       vertices;
+        vector<unsigned int>* indices;
+        vector<Texture>*      textures;
         unsigned int VAO;
 
         // constructor
-        Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
+        Mesh(vector<Vertex>* vertices, vector<unsigned int>* indices, vector<Texture>* textures)
         {
             this->vertices = vertices;
             this->indices = indices;
@@ -64,12 +59,12 @@ namespace Hazel {
                 unsigned int aoNr = 1;
                 unsigned int displacementNr = 1;
 
-                for (unsigned int i = 0; i < textures.size(); i++)
+                for (unsigned int i = 0; i < (*textures).size(); i++)
                 {
                     glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
                     // retrieve texture number (the N in diffuse_textureN)
                     string number;
-                    string name = textures[i].type;
+                    string name = (*textures)[i].type;
                     if (name == "texture_albedo")
                         number = std::to_string(albedoNr++);
                     else if (name == "texture_normal")
@@ -89,7 +84,7 @@ namespace Hazel {
                     // now set the sampler to the correct texture unit
                     glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
                     // and finally bind the texture
-                    glBindTexture(GL_TEXTURE_2D, textures[i].id);
+                    glBindTexture(GL_TEXTURE_2D, (*textures)[i].id);
                 }
             }
             else if(shader.name == ShaderName::Blinn_Phong)
@@ -99,12 +94,12 @@ namespace Hazel {
                 unsigned int specularNr = 1;
                 unsigned int normalNr = 1;
                 unsigned int ambientLightNr = 1;
-                for (unsigned int i = 0; i < textures.size(); i++)
+                for (unsigned int i = 0; i < (*textures).size(); i++)
                 {
                     glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
                     // retrieve texture number (the N in diffuse_textureN)
                     string number;
-                    string name = textures[i].type;
+                    string name = (*textures)[i].type;
                     if (name == "texture_diffuse")
                         number = std::to_string(diffuseNr++);
                     else if (name == "texture_specular")
@@ -117,13 +112,13 @@ namespace Hazel {
                     // now set the sampler to the correct texture unit
                     glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
                     // and finally bind the texture
-                    glBindTexture(GL_TEXTURE_2D, textures[i].id);
+                    glBindTexture(GL_TEXTURE_2D, (*textures)[i].id);
                 }
             }
 
             // draw mesh
             glBindVertexArray(VAO);
-            glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, (*indices).size(), GL_UNSIGNED_INT, 0);
             glBindVertexArray(0);
 
             // always good practice to set everything back to defaults once configured.
@@ -148,10 +143,10 @@ namespace Hazel {
             // A great thing about structs is that their memory layout is sequential for all its items.
             // The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
             // again translates to 3/2 floats which translates to a byte array.
-            glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, (*vertices).size() * sizeof(Vertex), &((*vertices)[0]), GL_STATIC_DRAW);
 
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, (*indices).size() * sizeof(unsigned int), &((*indices)[0]), GL_STATIC_DRAW);
 
             // set the vertex attribute pointers
             // vertex Positions

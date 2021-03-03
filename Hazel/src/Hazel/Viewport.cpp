@@ -52,4 +52,12 @@ namespace Hazel {
         currentShader->use();
 
 	}
+	Shader* Viewport::getShader(ShaderName shaderName) const
+	{
+		for (Shader* shader : m_Shaders)
+		{
+			if (shader->name == shaderName) return shader;
+		}
+		return nullptr;
+	}
 }

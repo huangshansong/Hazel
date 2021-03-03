@@ -1377,6 +1377,9 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
+    <ClInclude Include="src\Hazel\Actors\landscape.h" />
+    <ClInclude Include="src\Hazel\HazelMathLib.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\Material.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Hazel\Actors\Actor.cpp">
@@ -1424,5 +1427,7 @@
     <ClCompile Include="src\hzpch.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\Hazel\Actors\landscape.cpp" />
+    <ClCompile Include="src\Hazel\HazelMathLib.cpp" />
   </ItemGroup>
 </Project>

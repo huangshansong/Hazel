@@ -158,6 +158,7 @@ IF EXIST ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll\ (xcopy /Q /E /Y /I
     <ClInclude Include="src\Hazel.h" />
     <ClInclude Include="src\Hazel\Actors\Actor.h" />
     <ClInclude Include="src\Hazel\Actors\camera.h" />
+    <ClInclude Include="src\Hazel\Actors\landscape.h" />
     <ClInclude Include="src\Hazel\Application.h" />
     <ClInclude Include="src\Hazel\Core.h" />
     <ClInclude Include="src\Hazel\EntryPoint.h" />
@@ -165,6 +166,7 @@ IF EXIST ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll\ (xcopy /Q /E /Y /I
     <ClInclude Include="src\Hazel\Events\Event.h" />
     <ClInclude Include="src\Hazel\Events\KeyEvent.h" />
     <ClInclude Include="src\Hazel\Events\MouseEvent.h" />
+    <ClInclude Include="src\Hazel\HazelMathLib.h" />
     <ClInclude Include="src\Hazel\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\Hazel\KeyCode.h" />
     <ClInclude Include="src\Hazel\Layer.h" />
@@ -173,6 +175,7 @@ IF EXIST ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll\ (xcopy /Q /E /Y /I
     <ClInclude Include="src\Hazel\Levels\LevelLayer.h" />
     <ClInclude Include="src\Hazel\Log.h" />
     <ClInclude Include="src\Hazel\ResourceLoading\FileSystem.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\Material.h" />
     <ClInclude Include="src\Hazel\ResourceLoading\mesh.h" />
     <ClInclude Include="src\Hazel\ResourceLoading\model.h" />
     <ClInclude Include="src\Hazel\ResourceLoading\shader.h" />
@@ -600,7 +603,9 @@ IF EXIST ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll\ (xcopy /Q /E /Y /I
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Hazel\Actors\Actor.cpp" />
+    <ClCompile Include="src\Hazel\Actors\landscape.cpp" />
     <ClCompile Include="src\Hazel\Application.cpp" />
+    <ClCompile Include="src\Hazel\HazelMathLib.cpp" />
     <ClCompile Include="src\Hazel\ImGui\ImGuiLayer.cpp" />
     <ClCompile Include="src\Hazel\LayerStack.cpp" />
     <ClCompile Include="src\Hazel\Levels\Level.cpp" />
@@ -631,4 +636,4 @@ IF EXIST ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll\ (xcopy /Q /E /Y /I
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-</Project> 
+</Project>

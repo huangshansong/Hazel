@@ -13,6 +13,7 @@ namespace Hazel {
 		
 		unsigned int GetWidth() const { return width; }
 		unsigned int GetHeight() const { return height; }
+		Shader* getShader(ShaderName shaderName) const ;
 
 		bool firstCursor;
 		bool cursorCaptured;

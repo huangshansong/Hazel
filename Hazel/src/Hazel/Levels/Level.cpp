@@ -12,6 +12,7 @@
 #include "Hazel/Application.h"
 #include "Hazel/Actors/Actor.h"
 #include "Hazel/Actors/camera.h"
+#include "Hazel/Actors/landscape.h"
 
 #include "Level.h"
 
@@ -50,14 +51,18 @@ namespace Hazel
             Model* model;
 			//model = new Model(FileSystem::getPath("resources/objects/3d_other_ue4lcjddw/ue4lcjddw_LOD0.fbx"), ShaderName::PBR, true, glm::vec3(-5.0f, 5.0f, 0.0f));
             //actor->models.emplace_back(model);
-            model = new Model(FileSystem::getPath("resources/objects/container_barrel_udlmcdhqx/udlmcdhqx_LOD0.fbx"), ShaderName::PBR, true, glm::vec3(5.0f, 5.0f, 0.0f));
-            actor->models.emplace_back(model);
+            //model = new Model(FileSystem::getPath("resources/objects/container_barrel_udlmcdhqx/udlmcdhqx_LOD0.fbx"), Application::m_Window->m_Viewport->getShader(ShaderName::PBR), true, glm::vec3(5.0f, 5.0f, 0.0f));
+            //actor->models.emplace_back(model);
             //model = new Model(FileSystem::getPath("resources/objects/wood_other_ueukbgzfa/ueukbgzfa_LOD0.fbx"), ShaderName::PBR, true, glm::vec3(0.0f, 0.0f, 0.0f));
             //actor->models.emplace_back(model);
             //model = new Model(FileSystem::getPath("resources/objects/backpack/backpack.obj"), ShaderName::Blinn_Phong, true, glm::vec3(0.0f, 0.0f, 0.0f));
             //actor->models.emplace_back(model);
 
-
+            Landscape* landscape = new Landscape;
+            landscape->gen_Landscape(100, 100);
+            model = new Model(landscape, Application::m_Window->m_Viewport->getShader(ShaderName::PBR));
+            actor = new Actor;
+            actor->models.emplace_back(model);
             m_Actors.emplace_back(actor);
 
 
@@ -68,7 +73,7 @@ namespace Hazel
                 glm::mat4 projection = glm::perspective(
                     glm::radians(camera->Zoom),
                     (float)Application::m_Window->m_Viewport->GetWidth() / (float)Application::m_Window->m_Viewport->GetWidth(),
-                    0.1f, 100.0f);
+                    0.1f, 1000.0f);
 
                 shader->setMat4("projection", projection);
 
@@ -109,16 +114,13 @@ namespace Hazel
         
         for (Actor* actor : Application::m_Window->m_Viewport->currentLevel->m_Actors)
         {
-            for (Model* model : actor->models)
-            {
-                glm::mat4 modelTrans = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f));	// it's a bit too big for our scene, so scale it down
-                //modelTrans = glm::translate(modelTrans, model->transform); 
-                modelTrans = glm::translate(modelTrans, glm::vec3(0.0f, 0.0f, 0.0f));
-                Application::m_Window->m_Viewport->currentShader->setMat4("model", modelTrans);
-                model->Draw(*Application::m_Window->m_Viewport->currentShader);
-            }
+            actor->OnRender();
         }
         
+    }
+
+    void Level::gen_ItemLocation()
+    {
     }
 
 }

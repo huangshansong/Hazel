@@ -12,6 +12,8 @@ namespace Hazel
 		void Init();
 		void OnRender();
 		
+		void gen_ItemLocation();
+
 		static bool firstLevel;
 
 		std::vector<Actor*> m_Actors;

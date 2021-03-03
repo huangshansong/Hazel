@@ -12,6 +12,7 @@ namespace Hazel
 	public :
 		virtual void OnEvent(Event&);
 		virtual void OnUpdate();
+		virtual void OnRender();
 
 		std::vector<Model*> models;
 	};
