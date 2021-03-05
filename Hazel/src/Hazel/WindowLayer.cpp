@@ -5,55 +5,61 @@
 #include "WindowLayer.h"
 #include "Application.h"
 #include "Core.h"
+#include "Log.h"
 
 
 
 namespace Hazel {
-
-	void WindowLayer::OnAttach()
+	
+	void WindowLayer::onAttach()
 	{
-		Application::m_Window = Window::Create();
+		Window* window = Window::create();
+		Application::WindowSetter::setWindow(window);
+	}
+
+	void WindowLayer::onDetach()
+	{
+		delete Application::getWindow();
+
+		glfwTerminate();
+		HZ_CORE_INFO("glfwTerminate();");
+	}
+
+	void WindowLayer::onRender()
+	{
+		Application::getWindow()->onRender();
 
 	}
 
-	void WindowLayer::OnDetach()
-	{
-		delete Application::m_Window;
-	}
-
-	void WindowLayer::OnRender()
-	{
-		Application::m_Window->OnRender();
-
-	}
-
-	void WindowLayer::OnEvent(Event& event)
+	void WindowLayer::onEvent(Event& event)
 	{
 		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(WindowLayer::OnWindowClose));
+		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(WindowLayer::onWindowClose));
 
 	}
 
-	void WindowLayer::OnUpdate()
+	void WindowLayer::onUpdate()
 	{
-		Begin();
-		OnRender();
-		End();
+		begin();
+		onRender();
+		end();
 	}
 
-	void WindowLayer::Begin()
+	void WindowLayer::begin()
 	{
 
 	}
 
-	void WindowLayer::End()
+	void WindowLayer::end()
 	{
-		glfwSwapBuffers(static_cast<GLFWwindow*>(Application::m_Window->GetNativeWindow()));
+		glfwSwapBuffers(static_cast<GLFWwindow*>(Application::getWindow()->getNativeWindow()));
+		//HZ_CORE_INFO("glfwSwapBuffers(static_cast<GLFWwindow*>(Application::getWindow()->GetNativeWindow()));");
 		glfwPollEvents();
+		//HZ_CORE_INFO("glfwPollEvents();");
 	}
 
-	bool WindowLayer::OnWindowClose(WindowCloseEvent& e) {
-		Application::m_WindowClose = true;
+	bool WindowLayer::onWindowClose(WindowCloseEvent& e) {
+		Application::WindowCloseSetter::setWindowClose(true);
 		return true;
 	}
 }

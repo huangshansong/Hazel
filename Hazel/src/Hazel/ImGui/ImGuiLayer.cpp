@@ -15,7 +15,7 @@
 
 namespace Hazel {
 
-	void ImGuiLayer::OnAttach()
+	void ImGuiLayer::onAttach()
 	{
 		// Setup Dear ImGui context
 		IMGUI_CHECKVERSION();
@@ -41,12 +41,12 @@ namespace Hazel {
 		}
 
 		// Setup Platform/Renderer bindings
-		ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(Application::m_Window->GetNativeWindow()), true);
+		ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(Application::getWindow()->getNativeWindow()), true);
 		ImGui_ImplOpenGL3_Init("#version 330");
 
 	}
 
-	void ImGuiLayer::OnDetach()
+	void ImGuiLayer::onDetach()
 	{
 		// Cleanup
 		ImGui_ImplOpenGL3_Shutdown();
@@ -56,50 +56,43 @@ namespace Hazel {
 
 	void showDemo2() {
 
-		ImGui::SetNextWindowSize({400, 170});
+		ImGui::SetNextWindowSize({220, 100});
 
-		ImGui::Begin("Shader Selection");                          // Create a window called "Hello, world!" and append into it.
+		ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
 		ImGui::SetWindowFontScale(2.0f);
 
-		ImGui::Text("Click to select the shader.");               // Display some text (you can use a format strings too)
-
-		for (Shader* shader : Application::m_Window->m_Viewport->m_Shaders) 
-			if (ImGui::Button(shaderNames[static_cast<int>(shader->name)]))
-				Application::m_Window->m_Viewport->currentShader = shader;
-
-		ImGui::SameLine();
 		ImGui::Text("\n(%.1f FPS)", ImGui::GetIO().Framerate);
 
 		ImGui::End();
 		
 	}
 
-	void ImGuiLayer::OnRender()
+	void ImGuiLayer::onRender()
 	{
-		static bool show_demo_window = true;
+		//static bool show_demo_window = true;
 		//ImGui::ShowDemoWindow(&show_demo_window);
 		showDemo2();
 	}
 
-	void ImGuiLayer::OnUpdate()
+	void ImGuiLayer::onUpdate()
 	{
-		Begin();
-		OnRender();
-		End();
+		begin();
+		onRender();
+		end();
 	}
 
-	void ImGuiLayer::Begin()
+	void ImGuiLayer::begin()
 	{
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 	}
 
-	void ImGuiLayer::End()
+	void ImGuiLayer::end()
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		io.DisplaySize = ImVec2(Application::m_Window->GetWidth(), Application::m_Window->GetHeight());
+		io.DisplaySize = ImVec2(Application::getWindow()->getWidth(), Application::getWindow()->getHeight());
 
 		// Rendering
 		ImGui::Render();

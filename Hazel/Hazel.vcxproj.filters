@@ -114,12 +114,6 @@
     <ClInclude Include="src\Hazel\ResourceLoading\shader.h">
       <Filter>src\Hazel\ResourceLoading</Filter>
     </ClInclude>
-    <ClInclude Include="src\Hazel\ResourceLoading\shader_m.h">
-      <Filter>src\Hazel\ResourceLoading</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Hazel\ResourceLoading\shader_s.h">
-      <Filter>src\Hazel\ResourceLoading</Filter>
-    </ClInclude>
     <ClInclude Include="src\Hazel\Viewport.h">
       <Filter>src\Hazel</Filter>
     </ClInclude>
@@ -1429,5 +1423,9 @@
     </ClCompile>
     <ClCompile Include="src\Hazel\Actors\landscape.cpp" />
     <ClCompile Include="src\Hazel\HazelMathLib.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\mesh.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\model.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\shader.cpp" />
+    <ClCompile Include="src\Hazel\Actors\camera.cpp" />
   </ItemGroup>
 </Project>

@@ -5,21 +5,25 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
+#include <stb_image.h>
 
 #include "Hazel/ResourceLoading/shader.h"
+#include "Hazel/ResourceLoading/mesh.h"
 #include "Hazel/ResourceLoading/model.h"
 #include "Hazel/ResourceLoading/FileSystem.h"
 #include "Hazel/Application.h"
 #include "Hazel/Actors/Actor.h"
 #include "Hazel/Actors/camera.h"
 #include "Hazel/Actors/landscape.h"
+#include "Hazel/Log.h"
+#include "Hazel/Core.h"
 
 #include "Level.h"
 
 
 namespace Hazel
 {
-	bool Level::firstLevel = true;
+	bool Level::m_FirstLevel = true;
 
     // lights
         // ------
@@ -29,53 +33,89 @@ namespace Hazel
     glm::vec3 lightColors[] = {
         glm::vec3(150.0f, 150.0f, 150.0f),
     };
-    int nrRows = 7;
-    int nrColumns = 7;
-    float spacing = 2.5;
+    
 
-
-	void Level::Init()
+	void Level::init()
 	{
-		if (firstLevel) {
-			firstLevel = false;
+		if (m_FirstLevel) {
+			m_FirstLevel = false;
 
 			//add camera
-			Camera* camera = new Camera(glm::vec3(0.0f, 0.0f, 10.0f));
+			Camera* camera = new Camera(glm::vec3(0.0f, 0.0f, 1.0f));
+
+            Viewport::CameraSetter::setCamera(Application::getWindow()->getViewport(), camera);
+            
 			m_Actors.emplace_back(camera);
 
-			// tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
-			stbi_set_flip_vertically_on_load(true);
 
             Actor* actor;
-            actor = new Actor();
             Model* model;
-			//model = new Model(FileSystem::getPath("resources/objects/3d_other_ue4lcjddw/ue4lcjddw_LOD0.fbx"), ShaderName::PBR, true, glm::vec3(-5.0f, 5.0f, 0.0f));
-            //actor->models.emplace_back(model);
-            //model = new Model(FileSystem::getPath("resources/objects/container_barrel_udlmcdhqx/udlmcdhqx_LOD0.fbx"), Application::m_Window->m_Viewport->getShader(ShaderName::PBR), true, glm::vec3(5.0f, 5.0f, 0.0f));
-            //actor->models.emplace_back(model);
-            //model = new Model(FileSystem::getPath("resources/objects/wood_other_ueukbgzfa/ueukbgzfa_LOD0.fbx"), ShaderName::PBR, true, glm::vec3(0.0f, 0.0f, 0.0f));
-            //actor->models.emplace_back(model);
-            //model = new Model(FileSystem::getPath("resources/objects/backpack/backpack.obj"), ShaderName::Blinn_Phong, true, glm::vec3(0.0f, 0.0f, 0.0f));
-            //actor->models.emplace_back(model);
+            Shader* shader;
+            if (Application::getCanDisplayTest())
+            {
+                stbi_set_flip_vertically_on_load(false);//the backpack model don't need to flip texture
+                model = new Model(FileSystem::getPath("resources/objects/backpack/backpack.obj"), false);
+                HZ_CORE_INFO("model = new Model()");
+                shader = new Shader(ShaderType::Blinn_Phong, FileSystem::getPath("src/blinn_phong_diffuse.vs").c_str(), FileSystem::getPath("src/blinn_phong_diffuse.fs").c_str());
+                HZ_CORE_INFO("shader = new Shader()");
+                m_Shaders.emplace_back(shader);
+                
+                for (Mesh* mesh : model->m_Meshes)
+                {
+                    Mesh::ShaderSetter::setShader(mesh, shader);
+                }
+                actor = new Actor;
+                actor->setModel(model);
+                m_Actors.emplace_back(actor);
 
-            Landscape* landscape = new Landscape;
-            landscape->gen_Landscape(100, 100);
-            model = new Model(landscape, Application::m_Window->m_Viewport->getShader(ShaderName::PBR));
-            actor = new Actor;
-            actor->models.emplace_back(model);
-            m_Actors.emplace_back(actor);
+            }
+            else 
+            {
+                // tell stb_image.h to flip loaded texture's on the y-axis.
+                stbi_set_flip_vertically_on_load(true);
 
+                Landscape* landscape = new Landscape;
+                landscape->gen_Landscape(1000, 1000);
+                landscape->getMaterialsPaths().emplace_back(FileSystem::getPath("resources/surfaces/grass_wild_sgmkajak/"));
+                landscape->getMaterialsPaths().emplace_back(FileSystem::getPath("resources/surfaces/ground_other_vbljegefw/"));
+                landscape->getMaterialsPaths().emplace_back(FileSystem::getPath("resources/surfaces/moss_ground_umilae2n/"));
+                landscape->getMaterialsPaths().emplace_back(FileSystem::getPath("resources/surfaces/rock_rough_vctkajjg/"));
+                landscape->getMaterialsPaths().emplace_back(FileSystem::getPath("resources/surfaces/snow_pure_uephfgudy/"));
+                model = new Model(landscape);
+                // build and compile shaders for every mesh
+                // -------------------------
+                shader = new Shader(ShaderType::PBR, FileSystem::getPath("src/1.2.pbr.vs").c_str(), FileSystem::getPath("src/1.2.pbr.fs").c_str());
+                shader->use();
+                HZ_CORE_INFO("shader->use();");
+                shader->setFloat("heightScale", 1.0f);
+                HZ_CORE_INFO("shader->setFloat(heightScale);");
+                m_Shaders.emplace_back(shader);
+                //Shader* shader = new Shader(ShaderName::PBR, FileSystem::getPath("src/PBR_albedo.vs").c_str(), FileSystem::getPath("src/PBR_albedo.fs").c_str());
 
-            for (Shader* shader : Application::m_Window->m_Viewport->m_Shaders)
+                for (Mesh* mesh : model->m_Meshes)
+                {
+                    Mesh::ShaderSetter::setShader(mesh, shader);
+                }
+                actor = new Actor;
+                actor->setModel(model);
+                m_Actors.emplace_back(actor);
+
+            }
+            
+
+            for (Shader* shader : m_Shaders)
             {
                 // initialize static shader uniforms before rendering
                 // --------------------------------------------------
                 glm::mat4 projection = glm::perspective(
-                    glm::radians(camera->Zoom),
-                    (float)Application::m_Window->m_Viewport->GetWidth() / (float)Application::m_Window->m_Viewport->GetWidth(),
-                    0.1f, 1000.0f);
+                    glm::radians(camera->getZoom()),
+                    (float)Application::getWindow()->getViewport()->getWidth() / (float)Application::getWindow()->getViewport()->getWidth(),
+                    0.1f, 100.0f);
 
+                shader->use();
+                HZ_CORE_INFO("shader->use();");
                 shader->setMat4("projection", projection);
+                HZ_CORE_INFO("shader->setMat4(projection);");
 
             }
 
@@ -85,13 +125,27 @@ namespace Hazel
                 glm::vec3 newPos = lightPositions[i] + glm::vec3(sin(glfwGetTime() * 5.0) * 5.0, 0.0, 0.0);
                 newPos = lightPositions[i];
                 
-                for (Shader* shader : Application::m_Window->m_Viewport->m_Shaders)
+                for (Shader* shader : m_Shaders)
                 {
-                    if (shader->name == ShaderName::PBR) 
+                    if (shader->m_ShaderType == ShaderType::PBR) 
                     {
-                        shader->setVec3("lightPositions[" + std::to_string(i) + "]", newPos);
-                        shader->setVec3("lightColors[" + std::to_string(i) + "]", lightColors[i]);
+                        //shader->use();
+                        //HZ_CORE_INFO("shader->use();");
+                        //shader->setVec3("lightPositions[" + std::to_string(i) + "]", newPos);
+                        //shader->setVec3("lightColors[" + std::to_string(i) + "]", lightColors[i]);
                     }
+                }
+            }
+            for (Shader* shader : m_Shaders)
+            {
+                if (shader->m_ShaderType == ShaderType::PBR)
+                {
+                    shader->use();
+                    HZ_CORE_INFO("shader->use();");
+                    shader->setVec3("lightColor", glm::vec3(150.0f, 150.0f, 150.0f));
+                    HZ_CORE_INFO("shader->setVec3(lightColor);");
+                    shader->setVec3("lightDirection", glm::vec3(1.0f, 1.5f, 2.0f));
+                    HZ_CORE_INFO("shader->setVec3(lightDirection);");
                 }
             }
 
@@ -101,20 +155,19 @@ namespace Hazel
 		}
 	}
 
-    void Level::OnRender()
+    void Level::onRender()
     {
-        // render
-        // ------
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-        glm::mat4 view = dynamic_cast<Camera*>(Application::m_Window->m_Viewport->currentLevel->m_Actors[0])->GetViewMatrix();//here m_Actors[0] is the camera, should be changed later
-        Application::m_Window->m_Viewport->currentShader->setMat4("view", view);
         
-        for (Actor* actor : Application::m_Window->m_Viewport->currentLevel->m_Actors)
+        glm::mat4 view = Application::getWindow()->getViewport()->getCamera()->getViewMatrix();
+        glm::vec3 camPos = Application::getWindow()->getViewport()->getCamera()->getCameraPosition();
+        for (Shader* shader : m_Shaders)
         {
-            actor->OnRender();
+            shader->use();
+            //HZ_CORE_INFO("shader->use();");
+            shader->setMat4("view", view);
+            //HZ_CORE_INFO("shader->setMat4(view);");
+            shader->setVec3("camPos", camPos);
+            //HZ_CORE_INFO("shader->setsetVec3(camPos);");
         }
         
     }

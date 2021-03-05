@@ -2,67 +2,71 @@
 
 #include <GLFW/glfw3.h>
 
+#include "Core.h"
+#include "Log.h"
+
 #include "ViewportLayer.h"
 #include "Application.h"
 #include "KeyCode.h"
 
 namespace Hazel {
-	void ViewportLayer::OnAttach()
+	void ViewportLayer::onAttach()
 	{
-		Application::m_Window->m_Viewport = new Viewport();
-		Application::m_Window->m_Viewport->Init();
+		Application::getWindow()->setViewport(new Viewport);
+		Application::getWindow()->getViewport()->init();
 		
 	}
-	void ViewportLayer::OnDetach()
+	void ViewportLayer::onDetach()
 	{
-		delete Application::m_Window->m_Viewport;
+		delete Application::getWindow()->getViewport();
 	}
-	void ViewportLayer::OnRender()
+	void ViewportLayer::onRender()
 	{
-		Application::m_Window->m_Viewport->OnRender();
+		Application::getWindow()->getViewport()->onRender();
 	}
-	void ViewportLayer::OnEvent(Event& event)
+	void ViewportLayer::onEvent(Event& event)
 	{
 		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<FramebufferResizeEvent>(BIND_EVENT_FN(ViewportLayer::OnFramebufferResize));
-		dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(ViewportLayer::OnKeyPressed));
+		dispatcher.Dispatch<FramebufferResizeEvent>(BIND_EVENT_FN(ViewportLayer::onFramebufferResize));
+		dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(ViewportLayer::onKeyPressed));
 
 	}
-	void ViewportLayer::OnUpdate()
+	void ViewportLayer::onUpdate()
 	{
-		Begin();
-		OnRender();
-		End();
+		begin();
+		onRender();
+		end();
 	}
 
-	void ViewportLayer::Begin()
+	void ViewportLayer::begin()
 	{
 		
 	}
 
-	void ViewportLayer::End()
+	void ViewportLayer::end()
 	{
 	}
 
 
-	bool ViewportLayer::OnFramebufferResize(FramebufferResizeEvent& e) {
-		glViewport(0, 0, e.GetWidth(), e.GetHeight());
+	bool ViewportLayer::onFramebufferResize(FramebufferResizeEvent& e) {
+		glViewport(0, 0, e.getWidth(), e.getHeight());
 		return true;
 	}
 
-	bool ViewportLayer::OnKeyPressed(KeyPressedEvent& e)
+	bool ViewportLayer::onKeyPressed(KeyPressedEvent& e)
 	{
-		switch (e.GetKeyCode()) {
+		switch (e.getKeyCode()) {
 		case HZ_KEY_ESCAPE: {
-			glfwSetInputMode(static_cast<GLFWwindow*>(Application::m_Window->GetNativeWindow()), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-			HZ_CORE_INFO("CURSOR SET!");
-			Application::m_Window->m_Viewport->cursorCaptured = false;
+			glfwSetInputMode(static_cast<GLFWwindow*>(Application::getWindow()->getNativeWindow()), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			HZ_CORE_INFO("CURSOR APPEAR!");
+			Application::getWindow()->getViewport()->m_CursorCaptured = false;
 			break;
 		}
 		case HZ_KEY_F5: {
-			glfwSetInputMode(static_cast<GLFWwindow*>(Application::m_Window->GetNativeWindow()), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-			Application::m_Window->m_Viewport->cursorCaptured = true;
-			Application::m_Window->m_Viewport->firstCursor = true;
+			glfwSetInputMode(static_cast<GLFWwindow*>(Application::getWindow()->getNativeWindow()), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			HZ_CORE_INFO("CURSOR CAPTRUED!");
+			Application::getWindow()->getViewport()->m_CursorCaptured = true;
+			Application::getWindow()->getViewport()->m_FirstCursor = true;
 			break;
 		}
 		}

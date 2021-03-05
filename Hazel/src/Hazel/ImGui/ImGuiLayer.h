@@ -7,15 +7,16 @@ namespace Hazel {
 	//layer ImGui handles the events by itself
 	//and it sends the events to other layers
 	class HAZEL_API ImGuiLayer :public Layer {
-	public:
+		friend class Application;
+	private:
 		
-		virtual void OnAttach() override;
-		virtual void OnDetach() override;
-		virtual void OnRender() override;
-		virtual void OnUpdate() override;
+		virtual void onAttach() override;
+		virtual void onDetach() override;
+		virtual void onRender() override;
+		virtual void onUpdate() override;
 		
-		void Begin();
-		void End();
+		void begin();
+		void end();
 
 	protected:
 		std::string m_DebugName = "ImGuiLayer";

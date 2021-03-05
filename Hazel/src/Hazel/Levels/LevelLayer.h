@@ -1,17 +1,21 @@
 #pragma once
 
 #include "Hazel/Layer.h"
+#include "Hazel/Levels/Level.h"
 
 namespace Hazel {
 
 	class HAZEL_API LevelLayer :public Layer {
+		friend class Application;
 	public:
 
-		virtual void OnAttach() override;
-		virtual void OnDetach() override;
-		virtual void OnRender() override;
-		virtual void OnEvent(Event& event) override;
-		virtual void OnUpdate() override;
+	private:
+
+		virtual void onAttach() override;
+		virtual void onDetach() override;
+		virtual void onRender() override;
+		virtual void onEvent(Event& event) override;
+		virtual void onUpdate() override;
 
 
 	protected:

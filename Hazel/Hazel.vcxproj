@@ -179,8 +179,6 @@ IF EXIST ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll\ (xcopy /Q /E /Y /I
     <ClInclude Include="src\Hazel\ResourceLoading\mesh.h" />
     <ClInclude Include="src\Hazel\ResourceLoading\model.h" />
     <ClInclude Include="src\Hazel\ResourceLoading\shader.h" />
-    <ClInclude Include="src\Hazel\ResourceLoading\shader_m.h" />
-    <ClInclude Include="src\Hazel\ResourceLoading\shader_s.h" />
     <ClInclude Include="src\Hazel\Viewport.h" />
     <ClInclude Include="src\Hazel\ViewportLayer.h" />
     <ClInclude Include="src\Hazel\Window.h" />
@@ -603,6 +601,7 @@ IF EXIST ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll\ (xcopy /Q /E /Y /I
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Hazel\Actors\Actor.cpp" />
+    <ClCompile Include="src\Hazel\Actors\camera.cpp" />
     <ClCompile Include="src\Hazel\Actors\landscape.cpp" />
     <ClCompile Include="src\Hazel\Application.cpp" />
     <ClCompile Include="src\Hazel\HazelMathLib.cpp" />
@@ -611,6 +610,9 @@ IF EXIST ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll\ (xcopy /Q /E /Y /I
     <ClCompile Include="src\Hazel\Levels\Level.cpp" />
     <ClCompile Include="src\Hazel\Levels\LevelLayer.cpp" />
     <ClCompile Include="src\Hazel\Log.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\mesh.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\model.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\shader.cpp" />
     <ClCompile Include="src\Hazel\Viewport.cpp" />
     <ClCompile Include="src\Hazel\ViewportLayer.cpp" />
     <ClCompile Include="src\Hazel\Window.cpp" />

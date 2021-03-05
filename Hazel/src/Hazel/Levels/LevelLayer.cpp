@@ -2,6 +2,8 @@
 
 #include "Hazel/Actors/Actor.h"
 #include "Hazel/Application.h"
+#include "Hazel/Core.h"
+#include "Hazel/Log.h"
 
 #include "LevelLayer.h"
 #include "Level.h"
@@ -9,37 +11,44 @@
 namespace Hazel
 {
     
-    void LevelLayer::OnEvent(Event& event)
+    void LevelLayer::onEvent(Event& event)
     {
-        for (Actor* actor : Application::m_Window->m_Viewport->currentLevel->m_Actors)
+        for (Actor* actor : Application::getWindow()->getViewport()->getLevel()->m_Actors)
         {
-            actor->OnEvent(event);
+            actor->onEvent(event);
         }
     }
     
-    void LevelLayer::OnUpdate()
+    void LevelLayer::onUpdate()
     {
-        for (Actor* actor : Application::m_Window->m_Viewport->currentLevel->m_Actors)
+        HZ_CORE_ASSERT(Application::getWindow()->getViewport()->getLevel(), "NO CURRENTLEVEL! CHECK IF THERE IS NO LEVEL IN THE STACK!");
+
+        onRender();
+
+        //levelLayer manage the actorLayer, 
+        //instead of calling actorLayer->OnUpdate() in the Application.cpp
+        for (Actor* actor : Application::getWindow()->getViewport()->getLevel()->m_Actors)
         {
-            actor->OnUpdate();
+            actor->onUpdate();
         }
-        OnRender();
+        
     }
 
-    void LevelLayer::OnAttach()
+    void LevelLayer::onAttach()
     {
-        Application::m_Window->m_Viewport->currentLevel = new Level();
-        Application::m_Window->m_Viewport->currentLevel->Init();
+        Level* level = new Level;
+        level->init();
+        Viewport::LevelSetter::setLevel(Application::getWindow()->getViewport(), level);
     }
 
-    void LevelLayer::OnDetach()
+    void LevelLayer::onDetach()
     {
-        delete Application::m_Window->m_Viewport->currentLevel;
+        delete Application::getWindow()->getViewport()->getLevel();
     }
 
-    void LevelLayer::OnRender()
+    void LevelLayer::onRender()
     {
-        Application::m_Window->m_Viewport->currentLevel->OnRender();
+        Application::getWindow()->getViewport()->getLevel()->onRender();
     }
 }
 

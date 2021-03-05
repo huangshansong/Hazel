@@ -21,15 +21,15 @@ namespace Hazel {
 
 	WindowsWindow::WindowsWindow(const WindowProps& props)
 	{
-		Init(props);
+		init(props);
 	}
 
 	WindowsWindow::~WindowsWindow()
 	{
-		Shutdown();
+		shutdown();
 	}
 
-	void WindowsWindow::Init(const WindowProps& props)
+	void WindowsWindow::init(const WindowProps& props)
 	{
 		m_Data.Title = props.Title;
 		m_Data.Width = props.Width;
@@ -42,6 +42,7 @@ namespace Hazel {
 		{
 			int success = glfwInit();
 			HZ_CORE_ASSERT(success, "Could not initialize GLFW!");
+			HZ_CORE_INFO("glfwInit() successfully called.");
 
 			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -58,11 +59,14 @@ namespace Hazel {
 			HZ_CORE_ASSERT(1, "Failed to create GLFW window");
 			glfwTerminate();
 		}
+		HZ_CORE_INFO("glfwCreateWindow() successfully called.");
 
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		HZ_CORE_ASSERT(status, "Failed to initialize Glad!");
+		HZ_CORE_INFO("gladLoadGLLoader() successfully called.");
+
 		glfwSetWindowUserPointer(m_Window, &m_Data);
-		SetVSync(true);
+		setVSync(true);
 
 		
 		// Set GLFW callbacks
@@ -79,7 +83,7 @@ namespace Hazel {
 		glfwSetFramebufferSizeCallback(m_Window, [](GLFWwindow * window, int width, int height)
 		{
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-			WindowCloseEvent event;
+			FramebufferResizeEvent event(width, height);
 			data.EventCallback(event);
 		});
 
@@ -164,19 +168,19 @@ namespace Hazel {
 		
 	}
 
-	void WindowsWindow::Shutdown()
+	void WindowsWindow::shutdown()
 	{
 		glfwDestroyWindow(m_Window);
 		
 	}
 
 
-	void WindowsWindow::OnRender()
+	void WindowsWindow::onRender()
 	{
 		
 	}
 
-	void WindowsWindow::SetVSync(bool enabled)
+	void WindowsWindow::setVSync(bool enabled)
 	{
 		if (enabled)
 			glfwSwapInterval(1);
@@ -186,7 +190,7 @@ namespace Hazel {
 		m_Data.VSync = enabled;
 	}
 
-	bool WindowsWindow::IsVSync() const
+	bool WindowsWindow::isVSync() const
 	{
 		return m_Data.VSync;
 	}

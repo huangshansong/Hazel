@@ -7,18 +7,18 @@ public:
 		m_DebugName = "Example";
 	}
 
-	void OnUpdate() override {
+	void onUpdate() override {
 		HZ_INFO("ExampleLayer::Update");
 	}
 
-	virtual void OnRender() override
+	virtual void onRender() override
 	{
 
 		
 
 	}
 
-	void OnEvent(Hazel::Event& event) override {
+	void onEvent(Hazel::Event& event) override {
 		HZ_TRACE("{0}", event);
 	}
 };
@@ -26,13 +26,13 @@ public:
 class Sandbox : public Hazel::Application{
 public:
 	Sandbox() {
-		//PushLayer(new ExampleLayer());
+		//pushLayer(new ExampleLayer());
 
 	}
 
 
 };
 
-Hazel::Application*  Hazel::CreateApplication() {
+Hazel::Application*  Hazel::createApplication() {
 	return new Sandbox;
 }

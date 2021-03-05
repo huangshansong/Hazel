@@ -3,9 +3,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "ResourceLoading/shader.h"
-#include "ResourceLoading/FileSystem.h"
-
 #include "Viewport.h"
 #include "Application.h"
 #include "Core.h"
@@ -15,49 +12,32 @@
 
 namespace Hazel {
     
-	void Viewport::Init()
+	void Viewport::init()
 	{
-		width = Application::m_Window->GetWidth();
-		height = Application::m_Window->GetHeight();
-		glViewport(0, 0, width, height);
-        
+		m_Width = Application::getWindow()->getWidth();
+		m_Height = Application::getWindow()->getHeight();
+		glViewport(0, 0, m_Width, m_Height);
+
+		m_CursorCaptured = false;
+
 		// configure global opengl state
 		glEnable(GL_DEPTH_TEST);
+		HZ_CORE_INFO("glEnable(GL_DEPTH_TEST).");
 		glfwWindowHint(GLFW_SAMPLES, 4);
-
-		// build and compile shaders
-		// -------------------------
-		//Shader* shader = new Shader(ShaderName::PBR, FileSystem::getPath("src/1.2.pbr.vs").c_str(), FileSystem::getPath("src/1.2.pbr.fs").c_str());
-		Shader* shader = new Shader(ShaderName::PBR, FileSystem::getPath("src/1.2.pbr.vs").c_str(), FileSystem::getPath("src/1.2.pbr.fs").c_str());
-
-		shader->use();
-        //push the shader into vector
-		m_Shaders.emplace_back(shader);
-
-		/*
-        shader = new Shader("Blin-Phong", FileSystem::getPath("src/1.model_loading.vs").c_str(), FileSystem::getPath("src/1.model_loading.fs").c_str());
-        shader->use();
-        //push the shader into vector
-        m_Shaders.emplace_back(shader);
-		*/
-
-		//set initial ShaderID, now it's Blin-Phong shader
-		currentShader = shader;
+		HZ_CORE_INFO("glfwWindowHint(GLFW_SAMPLES, 4).");
+		glfwSetInputMode(static_cast<GLFWwindow*>(Application::getWindow()->getNativeWindow()), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		HZ_CORE_INFO("CURSOR APPEAR!");
 
 	}
 
-	void Viewport::OnRender()
+	void Viewport::onRender()
 	{
-        
-        currentShader->use();
+		// render
+		// ------
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		//HZ_CORE_INFO("glClearColor();");
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//HZ_CORE_INFO("glClear();");
 
-	}
-	Shader* Viewport::getShader(ShaderName shaderName) const
-	{
-		for (Shader* shader : m_Shaders)
-		{
-			if (shader->name == shaderName) return shader;
-		}
-		return nullptr;
 	}
 }

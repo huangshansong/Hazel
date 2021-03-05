@@ -9,23 +9,26 @@
 namespace Hazel {
 
 	class HAZEL_API ViewportLayer :public Layer {
-	public:
+		friend class Application;
+	private:
 
-		virtual void OnAttach() override;
-		virtual void OnDetach() override;
-		virtual void OnRender() override;
-		virtual void OnEvent(Event& event) override;
-		virtual void OnUpdate() override;
+		virtual void onAttach() override;
+		virtual void onDetach() override;
+		virtual void onRender() override;
+		virtual void onEvent(Event& event) override;
+		virtual void onUpdate() override;
 
-		void Begin();
-		void End();
+		void begin();
+		void end();
 
-
-		bool OnFramebufferResize(FramebufferResizeEvent& e);
-		bool OnKeyPressed(KeyPressedEvent& e);
-
+	
 	protected:
 		std::string m_DebugName = "ViewportLayer";
+
+	private:
+		bool onFramebufferResize(FramebufferResizeEvent& e);
+		bool onKeyPressed(KeyPressedEvent& e);
+
 	};
 
 }

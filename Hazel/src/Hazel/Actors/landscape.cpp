@@ -13,64 +13,64 @@ namespace Hazel
 
 	void Landscape::gen_Landscape(const unsigned int width, const unsigned int length)
 	{
-		Width = width;
-		Length = length;
+		m_Width = width;
+		m_Length = length;
 		//set the MAXHEIGHT according to the WIDTH and LENGTH
-		Maxheight = std::fminf(Width, Length) / 4.0f;
+		m_Maxheight = std::fminf(m_Width, m_Length) / 4.0f;
 
 		//malloc heightMap
-		if (heightMap != nullptr)
+		if (m_HeightMap != nullptr)
 		{
-			for (int i = 1; i < Width; i++)
+			for (int i = 1; i < m_Width; i++)
 			{
-				free(heightMap[i]);
+				free(m_HeightMap[i]);
 			}
-			free(heightMap);
+			free(m_HeightMap);
 		}
-		heightMap = nullptr;
-		heightMap = (float**)malloc(sizeof(float*) * Width);
-		HZ_CORE_ASSERT(heightMap, "heightMap not successfully malloced!");
-		for (int i = 0; i < Width; i++)
+		m_HeightMap = nullptr;
+		m_HeightMap = (float**)malloc(sizeof(float*) * m_Width);
+		HZ_CORE_ASSERT(m_HeightMap, "heightMap not successfully malloced!");
+		for (int i = 0; i < m_Width; i++)
 		{
-			heightMap[i] = (float*)malloc(sizeof(float) * Length);
-			HZ_CORE_ASSERT(heightMap[i], "heightMap not successfully malloced!");
+			m_HeightMap[i] = (float*)malloc(sizeof(float) * m_Length);
+			HZ_CORE_ASSERT(m_HeightMap[i], "heightMap not successfully malloced!");
 			//HZ_CORE_INFO((void*)heightMap[i]);
 		}
 		//set heightMap values
-		for (int j = 0; j < Length; j++)
+		for (int j = 0; j < m_Length; j++)
 		{
-			for (int i = 1; i < Width; i++)
+			for (int i = 1; i < m_Width; i++)
 			{
-				heightMap[i][j] = 1E-5f;
+				m_HeightMap[i][j] = 1E-5f;
 				//HZ_CORE_INFO(heightMap[i][j]);
 			}
 		}
 		//malloc peak2hillMap
-		if (peak2hillMap == nullptr)
+		if (m_Peak2hillMap == nullptr)
 		{
-			peak2hillMap = (float**)malloc(sizeof(float*) * Width);
-			HZ_CORE_ASSERT(peak2hillMap, "peak2hillMap not successfully malloced!");
-			for (int i = 0; i < Width; i++)
+			m_Peak2hillMap = (float**)malloc(sizeof(float*) * m_Width);
+			HZ_CORE_ASSERT(m_Peak2hillMap, "peak2hillMap not successfully malloced!");
+			for (int i = 0; i < m_Width; i++)
 			{
-				peak2hillMap[i] = nullptr;
-				peak2hillMap[i] = (float*)malloc(sizeof(float) * Length);
-				HZ_CORE_ASSERT(peak2hillMap[i], "peak2hillMap not successfully malloced!");
+				m_Peak2hillMap[i] = nullptr;
+				m_Peak2hillMap[i] = (float*)malloc(sizeof(float) * m_Length);
+				HZ_CORE_ASSERT(m_Peak2hillMap[i], "peak2hillMap not successfully malloced!");
 			}
 			//set peak2hillMap values
-			for (int j = 0; j < Length; j++)
+			for (int j = 0; j < m_Length; j++)
 			{
-				peak2hillMap[0][j] = normalDistributionFunc((float)j, 0.0f, std::fminf(Width, Length) / 12);//the value 12 determine the shape of the hill
-				for (int i = 1; i < Width; i++)
+				m_Peak2hillMap[0][j] = normalDistributionFunc((float)j, 0.0f, std::fminf(m_Width, m_Length) / 12);//the value 12 determine the shape of the hill
+				for (int i = 1; i < m_Width; i++)
 				{
-					peak2hillMap[i][j] = peak2hillMap[0][j] / peak2hillMap[0][0] * normalDistributionFunc((float)i, 0.0f, std::fminf(Width, Length) / 12);
+					m_Peak2hillMap[i][j] = m_Peak2hillMap[0][j] / m_Peak2hillMap[0][0] * normalDistributionFunc((float)i, 0.0f, std::fminf(m_Width, m_Length) / 12);
 				}
 			}
-			float peakPoint = normalDistributionFunc(0.0f, 0.0f, std::fminf(Width, Length) / 12);
-			for (int i = 0; i < Width; i++)
+			float peakPoint = normalDistributionFunc(0.0f, 0.0f, std::fminf(m_Width, m_Length) / 12);
+			for (int i = 0; i < m_Width; i++)
 			{
-				for (int j = 0; j < Length; j++)
+				for (int j = 0; j < m_Length; j++)
 				{
-					peak2hillMap[i][j] /= peakPoint;
+					m_Peak2hillMap[i][j] /= peakPoint;
 					//HZ_CORE_INFO(peak2hillMap[i][j]);
 				}
 			}
@@ -114,7 +114,7 @@ namespace Hazel
 			{
 				Peak peakCur;
 				setPeak(peakCur, peakPre, mainpeak);
-				if (0 <= peakCur.x && peakCur.x < Width && 0 <= peakCur.y && peakCur.y < Length)
+				if (0 <= peakCur.x && peakCur.x < m_Width && 0 <= peakCur.y && peakCur.y < m_Length)
 				{
 					mountain.peaks.emplace_back(peakCur);
 					peakCount++;
@@ -131,7 +131,7 @@ namespace Hazel
 			{
 				Peak peakCur;
 				setPeak(peakCur, peakPre, mainpeak);
-				if (0 <= peakCur.x && peakCur.x < Width && 0 <= peakCur.y && peakCur.y < Length)
+				if (0 <= peakCur.x && peakCur.x < m_Width && 0 <= peakCur.y && peakCur.y < m_Length)
 				{
 					mountain.peaks.emplace_back(peakCur);
 					peakCount++;
@@ -151,21 +151,21 @@ namespace Hazel
 
 	Landscape::~Landscape()
 	{
-		if (heightMap != nullptr)
+		if (m_HeightMap != nullptr)
 		{
-			for (int i = 1; i < Width; i++)
+			for (int i = 1; i < m_Width; i++)
 			{
-				free(heightMap[i]);
+				free(m_HeightMap[i]);
 			}
-			free(heightMap);
+			free(m_HeightMap);
 		}
-		if (peak2hillMap != nullptr)
+		if (m_Peak2hillMap != nullptr)
 		{
-			for (int i = 1; i < Width; i++)
+			for (int i = 1; i < m_Width; i++)
 			{
-				free(peak2hillMap[i]);
+				free(m_Peak2hillMap[i]);
 			}
-			free(peak2hillMap);
+			free(m_Peak2hillMap);
 		}
 		
 	}
@@ -176,12 +176,12 @@ namespace Hazel
 		{
 			for (Peak peak : mountain.peaks)
 			{
-				for (int i = 0; i < Width; i++)
+				for (int i = 0; i < m_Width; i++)
 				{
-					for (int j = 0; j < Length; j++)
+					for (int j = 0; j < m_Length; j++)
 					{
 						
-						heightMap[i][j] = heightInteractionFunc(peak2hillMap[std::abs(i - peak.x)][std::abs(j - peak.y)] * peak.height, heightMap[i][j]);
+						m_HeightMap[i][j] = heightInteractionFunc(m_Peak2hillMap[std::abs(i - peak.x)][std::abs(j - peak.y)] * peak.height, m_HeightMap[i][j]);
 						//if(heightMap[i][j] > 1E2f || heightMap[i][j] < 0.0f) HZ_CORE_INFO(heightMap[i][j]);
 					}
 				}
@@ -199,29 +199,29 @@ namespace Hazel
 
 		//the first parameter is the mean(¦Ì), the second is the standard deviation(¦Ò) 
 		//probability of plus or minus 1 standard deviation(¦Ò) = 68.3%
-		distribution.param(std::normal_distribution<float>::param_type(Width / 2, Width / 2));
+		distribution.param(std::normal_distribution<float>::param_type(m_Width / 2, m_Width / 2));
 		mainpeak.x = -1;
-		distribution.param(std::normal_distribution<float>::param_type(Length / 2, Length / 2));
+		distribution.param(std::normal_distribution<float>::param_type(m_Length / 2, m_Length / 2));
 		mainpeak.y = -1;
 		int count = 0;
 		do
 		{
-			while (mainpeak.x < 0 || mainpeak.x >= Width)
+			while (mainpeak.x < 0 || mainpeak.x >= m_Width)
 			{
 				mainpeak.x = (int)distribution(random_Generator);
 			}
-			while (mainpeak.y < 0 || mainpeak.y >= Length)
+			while (mainpeak.y < 0 || mainpeak.y >= m_Length)
 			{
 				mainpeak.y = (int)distribution(random_Generator);
 			}
 			count++;
 
-		} while (count <= 100 || heightMap[mainpeak.x][mainpeak.y] > Maxheight / 1E1f);
+		} while (count <= 100 || m_HeightMap[mainpeak.x][mainpeak.y] > m_Maxheight / 1E1f);
 		
 
-		distribution.param(std::normal_distribution<float>::param_type(Maxheight / 2, Maxheight / 2));
+		distribution.param(std::normal_distribution<float>::param_type(m_Maxheight / 2, m_Maxheight / 2));
 		mainpeak.height = -1.0f;
-		while (mainpeak.height < 1.0f || mainpeak.height > Maxheight)
+		while (mainpeak.height < 1.0f || mainpeak.height > m_Maxheight)
 		{
 			mainpeak.height = distribution(random_Generator);
 		}
@@ -247,7 +247,7 @@ namespace Hazel
 		{
 			peakCur.direction = distribution(random_Generator);
 		}
-		distribution.param(std::normal_distribution<float>::param_type(peakPre.height * 4.0f / 10.0f, peakPre.height * 4.0f / 10.0f / 2.0f));//4.0f is the length/height ratio.
+		distribution.param(std::normal_distribution<float>::param_type(peakPre.height * 4.0f / 5.0f, peakPre.height * 4.0f / 5.0f / 2.0f));//4.0f is the length/height ratio.
 		float distance = -1.0f;
 		while (distance < 1E-5f)
 		{

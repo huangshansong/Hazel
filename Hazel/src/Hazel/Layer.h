@@ -8,16 +8,20 @@ namespace Hazel {
 
 	class HAZEL_API Layer
 	{
+		friend class Application;
+		friend class LayerStack;
 	public:
 		virtual ~Layer() = default;
 
-		virtual void OnAttach() {}
-		virtual void OnDetach() {}
-		virtual void OnRender() {}
-		virtual void OnEvent(Event& event) {}
-		virtual void OnUpdate(){}
+	protected:
+		
+		virtual void onAttach() {}
+		virtual void onDetach() {}
+		virtual void onRender() {}
+		virtual void onEvent(Event& event) {}
+		virtual void onUpdate(){}
 
-		const std::string& GetName() const { return m_DebugName; }
+		const std::string& getName() const { return m_DebugName; }
 	protected:
 		std::string m_DebugName = "Layer";
 	};

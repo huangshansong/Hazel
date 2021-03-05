@@ -9,11 +9,18 @@ namespace Hazel
 {
 	class HAZEL_API Actor
 	{
-	public :
-		virtual void OnEvent(Event&);
-		virtual void OnUpdate();
-		virtual void OnRender();
+		friend class LevelLayer;
+		friend class Level;
+	public:
+		inline Model* getModel() const { return m_Model; }
 
-		std::vector<Model*> models;
+	private:
+		virtual void onEvent(Event&);
+		virtual void onUpdate();
+		virtual void onRender();
+
+		inline void setModel(Model* model) { m_Model = model; }
+
+		Model* m_Model;
 	};
 }

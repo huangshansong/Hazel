@@ -14,9 +14,10 @@
 
 namespace Hazel {
 
-	Window* Application::m_Window = nullptr;
-	float Application::deltaTime = 0.0f;
-	bool Application::m_WindowClose = false;
+	Window* Application::s_Window = nullptr;
+	float Application::s_DeltaTime = 0.0f;
+	bool Application::s_WindowClose = false;
+	bool Application::s_CanDisplayTest = true;
 
 	Application::Application() {
 
@@ -24,71 +25,73 @@ namespace Hazel {
 		m_Running = true;
 
 		// timing
-		lastFrameTime = 0.0f;
+		m_LastFrameTime = 0.0f;
 
 		//Window
-		WindowLayer* windowLayer = new WindowLayer();
-		PushLayer(windowLayer);
+		WindowLayer* windowLayer = new WindowLayer;
+		pushLayer(windowLayer);
 	
 		//Viewport
-		ViewportLayer* viewportLayer = new ViewportLayer();
-		PushLayer(viewportLayer);
+		ViewportLayer* viewportLayer = new ViewportLayer;
+		pushLayer(viewportLayer);
 
 		//Level, the first level
-		LevelLayer* levelLayer = new LevelLayer();
-		PushLayer(levelLayer);
+		s_CanDisplayTest = false;
+		LevelLayer* levelLayer = new LevelLayer;
+		//if you push a level, it will be the current level
+		pushLayer(levelLayer);
 
 		//GUI
-		ImGuiLayer* imGuiLayer = new ImGuiLayer();
-		PushOverlay(imGuiLayer);
+		ImGuiLayer* imGuiLayer = new ImGuiLayer;
+		pushOverlay(imGuiLayer);
 
 		//bind event function of the application to the window events
-		Application::m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
+		Application::s_Window->setEventCallback(BIND_EVENT_FN(Application::onEvent));
 		
 	}
 
-	void Application::PushLayer(Layer* layer) {
-		m_LayerStack.PushLayer(layer);
-		layer->OnAttach();
+	void Application::pushLayer(Layer* layer) {
+		m_LayerStack.pushLayer(layer);
+		layer->onAttach();
 	}
 
-	void Application::PushOverlay(Layer* layer) {
-		m_LayerStack.PushOverlay(layer);
-		layer->OnAttach();
+	void Application::pushOverlay(Layer* layer) {
+		m_LayerStack.pushOverlay(layer);
+		layer->onAttach();
 	}
 
-	void Application::Run() {
+	void Application::run() {
 
 		while (m_Running) {
 			
 			// per-frame time logic
 			// --------------------
 			float currentFrameTime = glfwGetTime();
-			deltaTime = currentFrameTime - lastFrameTime;
-			lastFrameTime = currentFrameTime;
+			s_DeltaTime = currentFrameTime - m_LastFrameTime;
+			m_LastFrameTime = currentFrameTime;
 
 			//render and update
 			for (Layer* layer : m_LayerStack) {
-				layer->OnUpdate();
+				layer->onUpdate();
 			}
 			
 			//app need to be closed
-			m_Running = !m_WindowClose;
+			m_Running = !s_WindowClose;
 		}
 
 		//backward close all layers
 		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();) {
-			(*--it)->OnDetach();
+			(*--it)->onDetach();
 		}
 	}
 
-	void Application::OnEvent(Event& e) {
+	void Application::onEvent(Event& e) {
 		
 		
 		HZ_CORE_TRACE("{0}", e);
 
 		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();) {
-			(*--it)->OnEvent(e);
+			(*--it)->onEvent(e);
 			if (e.m_Handled)
 				break;
 		}

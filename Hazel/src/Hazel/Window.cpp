@@ -8,7 +8,7 @@
 
 namespace Hazel
 {
-	Window* Window::Create(const WindowProps& props)
+	Window* Window::create(const WindowProps& props)
 	{
 	#ifdef HZ_PLATFORM_WINDOWS
 		return new WindowsWindow(props);
