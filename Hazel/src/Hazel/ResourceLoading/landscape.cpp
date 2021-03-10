@@ -6,15 +6,21 @@
 #include "Hazel/Log.h"
 #include "Hazel/HazelMathLib.h"
 
+#include "LandscapeMesh.h"
 #include "landscape.h"
 
+using namespace std;
 namespace Hazel
 {
-
-	void Landscape::gen_Landscape(const unsigned int width, const unsigned int length)
+	LandscapeModel::LandscapeModel(void* actor, unsigned int width, unsigned int length)
+		: Model(actor), m_Width(width), m_Length(length)
 	{
-		m_Width = width;
-		m_Length = length;
+		m_Directory = "resources/surfaces/landscape/";
+
+		gen_Landscape();
+	}
+	void LandscapeModel::gen_Landscape()
+	{
 		//set the MAXHEIGHT according to the WIDTH and LENGTH
 		m_Maxheight = std::fminf(m_Width, m_Length) / 4.0f;
 
@@ -147,9 +153,12 @@ namespace Hazel
 		}
 
 		mountains2heightMap(mountains);
+
+		LandscapeMesh* landscapeMesh = new LandscapeMesh(this);
+		m_Meshes.emplace_back(landscapeMesh);
 	}
 
-	Landscape::~Landscape()
+	LandscapeModel::~LandscapeModel()
 	{
 		if (m_HeightMap != nullptr)
 		{
@@ -170,7 +179,7 @@ namespace Hazel
 		
 	}
 
-	void Landscape::mountains2heightMap(std::vector<Mountain>& mountains)
+	void LandscapeModel::mountains2heightMap(std::vector<Mountain>& mountains)
 	{
 		for (Mountain mountain : mountains)
 		{
@@ -191,7 +200,7 @@ namespace Hazel
 		
 	}
 
-	void Landscape::setMainpeak(Peak& mainpeak)
+	void LandscapeModel::setMainpeak(Peak& mainpeak)
 	{
 		std::random_device rd;
 		std::default_random_engine random_Generator{ rd() };
@@ -235,7 +244,7 @@ namespace Hazel
 
 	}
 
-	void Landscape::setPeak(Peak& peakCur, Peak& peakPre, Peak& mainpeak)
+	void LandscapeModel::setPeak(Peak& peakCur, Peak& peakPre, Peak& mainpeak)
 	{
 		std::random_device rd;
 		std::default_random_engine random_Generator{ rd() };

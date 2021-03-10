@@ -8,13 +8,13 @@
 #include "Log.h"
 
 
-
 namespace Hazel {
 	
 	void WindowLayer::onAttach()
 	{
 		Window* window = Window::create();
-		Application::WindowSetter::setWindow(window);
+		Application::Interface::setWindow(window);
+		Application::getWindow()->m_WindowClosed = false;
 	}
 
 	void WindowLayer::onDetach()
@@ -59,7 +59,7 @@ namespace Hazel {
 	}
 
 	bool WindowLayer::onWindowClose(WindowCloseEvent& e) {
-		Application::WindowCloseSetter::setWindowClose(true);
+		Application::getWindow()->m_WindowClosed = true;
 		return true;
 	}
 }

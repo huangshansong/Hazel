@@ -7,7 +7,6 @@ namespace Hazel {
 
 	class HAZEL_API LevelLayer :public Layer {
 		friend class Application;
-	public:
 
 	private:
 
@@ -16,7 +15,6 @@ namespace Hazel {
 		virtual void onRender() override;
 		virtual void onEvent(Event& event) override;
 		virtual void onUpdate() override;
-
 
 	protected:
 		std::string m_DebugName = "LevelLayer";

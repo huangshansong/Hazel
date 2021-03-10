@@ -3,7 +3,6 @@
 
 #include "Hazel/Levels/Level.h"
 #include "Hazel/Levels/LevelLayer.h"
-#include "Hazel/Actors/Camera.h"
 
 namespace Hazel {
 	class Viewport
@@ -11,42 +10,24 @@ namespace Hazel {
 		friend class ViewportLayer;
 	public:
 		
-		unsigned int getWidth() const { return m_Width; }
-		unsigned int getHeight() const { return m_Height; }
-		inline Camera* getCamera() const { return m_CurrentCamera; }
-		inline Level* getLevel() const { return m_CurrentLevel; }
-		
-		//these are too often used, so I set these to public
-		bool m_FirstCursor;
-		bool m_CursorCaptured;
-		float m_LastX;
-		float m_LastY;
+		const unsigned int getWidth() const { return m_Width; }
+		const unsigned int getHeight() const { return m_Height; }
+		const bool isFirstCursor() const { return m_FirstCursor; }
+		const bool isCursorCaptured() const { return m_CursorCaptured; }
+		const float getCursorLastX() const { return m_CursorLastX; }
+		const float getCursorLastY() const { return m_CursorLastY; }
+		Level* getLevel() { return m_CurrentLevel; }
 
-		class CameraSetter
-		{
-			friend class Level;
-		private:
-			inline static void setCamera(Viewport* viewport, Camera* camera) { viewport->m_CurrentCamera = camera; }
-		};
-		class LevelSetter
-		{
-			friend class LevelLayer;
-		private:
-			inline static void setLevel(Viewport* viewport, Level* level) { viewport->m_CurrentLevel = level; }
-		};
-
-
-	private:
+	protected:
 		void init();
 		void onRender();
 
-		inline void setCamera(Camera* camera) { m_CurrentCamera = camera; }
-		inline void setLevel(Level* level) { m_CurrentLevel = level; }
-
+		Level* m_CurrentLevel;
 		unsigned int m_Width;
 		unsigned int m_Height;
-
-		Level* m_CurrentLevel = nullptr;
-		Camera* m_CurrentCamera = nullptr;
+		bool m_FirstCursor;
+		bool m_CursorCaptured;
+		float m_CursorLastX;
+		float m_CursorLastY;
 	};
 }

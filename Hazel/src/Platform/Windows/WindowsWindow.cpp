@@ -60,7 +60,7 @@ namespace Hazel {
 			glfwTerminate();
 		}
 		HZ_CORE_INFO("glfwCreateWindow() successfully called.");
-
+		
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		HZ_CORE_ASSERT(status, "Failed to initialize Glad!");
 		HZ_CORE_INFO("gladLoadGLLoader() successfully called.");

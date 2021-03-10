@@ -10,6 +10,9 @@
     <Filter Include="src\Hazel\Actors">
       <UniqueIdentifier>{6B5F0F07-5758-2E59-808A-13DE6CE20D65}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Hazel\Components">
+      <UniqueIdentifier>{05472E03-F1D5-B7CC-9AF4-CBC78662C872}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Hazel\Events">
       <UniqueIdentifier>{D495B311-C08E-D263-E9C0-B7E8D518B26F}</UniqueIdentifier>
     </Filter>
@@ -63,6 +66,9 @@
     <ClInclude Include="src\Hazel\Application.h">
       <Filter>src\Hazel</Filter>
     </ClInclude>
+    <ClInclude Include="src\Hazel\Components\PhysicsComponent.h">
+      <Filter>src\Hazel\Components</Filter>
+    </ClInclude>
     <ClInclude Include="src\Hazel\Core.h">
       <Filter>src\Hazel</Filter>
     </ClInclude>
@@ -80,6 +86,9 @@
     </ClInclude>
     <ClInclude Include="src\Hazel\Events\MouseEvent.h">
       <Filter>src\Hazel\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\HazelMathLib.h">
+      <Filter>src\Hazel</Filter>
     </ClInclude>
     <ClInclude Include="src\Hazel\ImGui\ImGuiLayer.h">
       <Filter>src\Hazel\ImGui</Filter>
@@ -103,6 +112,9 @@
       <Filter>src\Hazel</Filter>
     </ClInclude>
     <ClInclude Include="src\Hazel\ResourceLoading\FileSystem.h">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\ResourceLoading\Material.h">
       <Filter>src\Hazel\ResourceLoading</Filter>
     </ClInclude>
     <ClInclude Include="src\Hazel\ResourceLoading\mesh.h">
@@ -1371,15 +1383,33 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
-    <ClInclude Include="src\Hazel\Actors\landscape.h" />
-    <ClInclude Include="src\Hazel\HazelMathLib.h" />
-    <ClInclude Include="src\Hazel\ResourceLoading\Material.h" />
+    <ClInclude Include="src\Hazel\Components\CollisionBox.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\Geometry.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\SimpleGeometryMesh.h" />
+    <ClInclude Include="src\Platform\Windows\OpenGLTexture.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\LandscapeMesh.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\QuixelModel.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\landscape.h">
+      <Filter>src\Hazel\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\ApplicationInterface.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\QuixelFile.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\SimpleGeometryModel.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Hazel\Actors\Actor.cpp">
       <Filter>src\Hazel\Actors</Filter>
     </ClCompile>
+    <ClCompile Include="src\Hazel\Actors\camera.cpp">
+      <Filter>src\Hazel\Actors</Filter>
+    </ClCompile>
     <ClCompile Include="src\Hazel\Application.cpp">
+      <Filter>src\Hazel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\Components\PhysicsComponent.cpp">
+      <Filter>src\Hazel\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\HazelMathLib.cpp">
       <Filter>src\Hazel</Filter>
     </ClCompile>
     <ClCompile Include="src\Hazel\ImGui\ImGuiLayer.cpp">
@@ -1397,6 +1427,15 @@
     <ClCompile Include="src\Hazel\Log.cpp">
       <Filter>src\Hazel</Filter>
     </ClCompile>
+    <ClCompile Include="src\Hazel\ResourceLoading\mesh.cpp">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\ResourceLoading\model.cpp">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\ResourceLoading\shader.cpp">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClCompile>
     <ClCompile Include="src\Hazel\Viewport.cpp">
       <Filter>src\Hazel</Filter>
     </ClCompile>
@@ -1409,9 +1448,6 @@
     <ClCompile Include="src\Hazel\WindowLayer.cpp">
       <Filter>src\Hazel</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\Windows\OpenGL.cpp">
-      <Filter>src\Platform\Windows</Filter>
-    </ClCompile>
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp">
       <Filter>src\Platform\Windows</Filter>
     </ClCompile>
@@ -1421,11 +1457,17 @@
     <ClCompile Include="src\hzpch.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Hazel\Actors\landscape.cpp" />
-    <ClCompile Include="src\Hazel\HazelMathLib.cpp" />
-    <ClCompile Include="src\Hazel\ResourceLoading\mesh.cpp" />
-    <ClCompile Include="src\Hazel\ResourceLoading\model.cpp" />
-    <ClCompile Include="src\Hazel\ResourceLoading\shader.cpp" />
-    <ClCompile Include="src\Hazel\Actors\camera.cpp" />
+    <ClCompile Include="src\Hazel\Components\CollisionBox.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\SimpleGeometryMesh.cpp" />
+    <ClCompile Include="src\Platform\Windows\OpenGLTexture.cpp">
+      <Filter>src\Platform\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\ResourceLoading\LandscapeMesh.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\landscape.cpp">
+      <Filter>src\Hazel\Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\ResourceLoading\QuixelModel.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\Material.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\SimpleGeometryModel.cpp" />
   </ItemGroup>
 </Project>

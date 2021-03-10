@@ -9,7 +9,7 @@ namespace Hazel {
 
 	class HAZEL_API WindowLayer :public Layer {
 		friend class Application;
-	public:
+		friend class ViewportLayer;
 	private:
 
 		virtual void onAttach() override;
@@ -20,6 +20,10 @@ namespace Hazel {
 
 		void begin();
 		void end();
+
+		static void setEventCallback(Window* window, const std::function<void(Event&)>& EventCallbackFn)
+			{window->setEventCallback(EventCallbackFn);}
+		static void setViewport(Window* window, Viewport* viewport) { window->setViewport(viewport); }
 
 	protected:
 		std::string m_DebugName = "WindowLayer";

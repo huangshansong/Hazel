@@ -5,6 +5,7 @@
 #include "Hazel/Core.h"
 #include "Hazel/Log.h"
 
+#include "FileSystem.h"
 #include "shader.h"
 
 using namespace std;
@@ -12,13 +13,15 @@ namespace Hazel
 {
     // constructor generates the shader on the fly
         // ------------------------------------------------------------------------
-    Shader::Shader(ShaderType shaderType, const char* vertexPath, const char* fragmentPath, const char* geometryPath)
+    Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath)
     {
-        this->m_ShaderType = shaderType;
-        this->m_VertexPath = vertexPath;
-        this->m_FragmentPath = fragmentPath;
-        if(geometryPath != nullptr) this->m_GeometryPath = geometryPath;
-
+        m_VertexPath = vertexPath;
+        m_FragmentPath = fragmentPath;
+        if (geometryPath != nullptr)
+        {
+            m_GeometryPath = geometryPath;
+        } 
+        m_ID = 0;
         // 1. retrieve the vertex/fragment source code from filePath
         std::string vertexCode;
         std::string fragmentCode;
@@ -33,8 +36,8 @@ namespace Hazel
         try
         {
             // open files
-            vShaderFile.open(vertexPath);
-            fShaderFile.open(fragmentPath);
+            vShaderFile.open(FileSystem::getPath(vertexPath));
+            fShaderFile.open(FileSystem::getPath(fragmentPath));
             std::stringstream vShaderStream, fShaderStream;
             // read file's buffer contents into streams
             vShaderStream << vShaderFile.rdbuf();
@@ -48,7 +51,7 @@ namespace Hazel
             // if geometry shader path is present, also load a geometry shader
             if (geometryPath != nullptr)
             {
-                gShaderFile.open(geometryPath);
+                gShaderFile.open(FileSystem::getPath(geometryPath));
                 std::stringstream gShaderStream;
                 gShaderStream << gShaderFile.rdbuf();
                 gShaderFile.close();
@@ -57,8 +60,8 @@ namespace Hazel
         }
         catch (std::ifstream::failure& e)
         {
-            HZ_CORE_ASSERT(false, "shader file not successfully read!");
-
+            HZ_CORE_INFO("shader file not successfully read!");
+            return;
         }
         const char* vShaderCode = vertexCode.c_str();
         const char* fShaderCode = fragmentCode.c_str();

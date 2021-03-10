@@ -5,6 +5,7 @@
 #include "Core.h"
 #include "Log.h"
 
+#include "WindowLayer.h"
 #include "ViewportLayer.h"
 #include "Application.h"
 #include "KeyCode.h"
@@ -12,7 +13,8 @@
 namespace Hazel {
 	void ViewportLayer::onAttach()
 	{
-		Application::getWindow()->setViewport(new Viewport);
+		Viewport* viewport = new Viewport;
+		WindowLayer::setViewport(Application::getWindow(), viewport);
 		Application::getWindow()->getViewport()->init();
 		
 	}
@@ -29,6 +31,7 @@ namespace Hazel {
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<FramebufferResizeEvent>(BIND_EVENT_FN(ViewportLayer::onFramebufferResize));
 		dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(ViewportLayer::onKeyPressed));
+		dispatcher.Dispatch<MouseMovedEvent>(BIND_EVENT_FN(ViewportLayer::onMouseMoved));
 
 	}
 	void ViewportLayer::onUpdate()
@@ -70,6 +73,18 @@ namespace Hazel {
 			break;
 		}
 		}
+		return false;
+	}
+
+	bool ViewportLayer::onMouseMoved(MouseMovedEvent& e)
+	{
+		if (Application::getWindow()->getViewport()->isFirstCursor())
+		{
+			Application::getWindow()->getViewport()->m_FirstCursor = false;
+		}
+		Application::getWindow()->getViewport()->m_CursorLastX = e.getX();
+		Application::getWindow()->getViewport()->m_CursorLastY = e.getY();
+
 		return false;
 	}
 

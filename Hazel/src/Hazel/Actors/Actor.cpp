@@ -1,14 +1,37 @@
 #include "hzpch.h"
 
+#include "Hazel/ResourceLoading/landscape.h"
+#include "Hazel/ResourceLoading/model.h"
+#include "Hazel/ResourceLoading/SimpleGeometryModel.h"
 #include "Hazel/Events/Event.h"
 #include "Hazel/Application.h"
 #include "Hazel/Log.h"
 #include "Hazel/Core.h"
 
+
 #include "Actor.h"
 
+using namespace std;
 namespace Hazel
 {
+	Actor::Actor(string name, glm::vec3 transform)
+		: m_Name(name), m_Transform(transform)
+	{
+		if (name == "Backpack")
+		{
+			m_Model = createModel("resources/objects/backpack/backpack.obj", false);
+			HZ_CORE_INFO("Backpack loaded.");
+		}
+		else if (name == "Landscape")
+		{
+			m_Model = createLandscapeModel();
+			HZ_CORE_INFO("Landscape loaded.");
+		}
+		else if (name == "Sphere")
+		{
+			m_Model = createSimpleGeometryModel(SimpleGeometryType::Sphere);
+		}
+	}
 	void Actor::onEvent(Event& event)
 	{
 		EventDispatcher dispatcher(event);
@@ -16,25 +39,16 @@ namespace Hazel
 
 	void Actor::onUpdate()
 	{
-		
 
 		onRender();
 	}
 	void Actor::onRender()
 	{
-		glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f));	// it's a bit too big for our scene, so scale it down
-			//modelTrans = glm::translate(modelTrans, model->transform); 
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));//should be replaced by actor's transform later!!!
-		for (Mesh* mesh : m_Model->m_Meshes)
+		if (m_Model != nullptr)
 		{
-			mesh->getShader()->use();
-			//HZ_CORE_INFO("shader->use();");
-			mesh->getShader()->setMat4("model", model);
-			//HZ_CORE_INFO("shader->setMat4(model);");
-
+			drawModel(m_Model);
 		}
 		
-		m_Model->draw();
 	}
 }
 

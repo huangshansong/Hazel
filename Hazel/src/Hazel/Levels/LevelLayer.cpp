@@ -5,6 +5,7 @@
 #include "Hazel/Core.h"
 #include "Hazel/Log.h"
 
+#include "Hazel/ViewportLayer.h"
 #include "LevelLayer.h"
 #include "Level.h"
 
@@ -13,32 +14,22 @@ namespace Hazel
     
     void LevelLayer::onEvent(Event& event)
     {
-        for (Actor* actor : Application::getWindow()->getViewport()->getLevel()->m_Actors)
-        {
-            actor->onEvent(event);
-        }
+        Application::getWindow()->getViewport()->getLevel()->onEvent(event);
     }
     
     void LevelLayer::onUpdate()
     {
-        HZ_CORE_ASSERT(Application::getWindow()->getViewport()->getLevel(), "NO CURRENTLEVEL! CHECK IF THERE IS NO LEVEL IN THE STACK!");
+        HZ_CORE_ASSERT(Application::getWindow()->getViewport()->getLevel(), 
+            "NO CURRENTLEVEL! CHECK IF THERE IS NO LEVEL IN THE STACK!");
 
-        onRender();
-
-        //levelLayer manage the actorLayer, 
-        //instead of calling actorLayer->OnUpdate() in the Application.cpp
-        for (Actor* actor : Application::getWindow()->getViewport()->getLevel()->m_Actors)
-        {
-            actor->onUpdate();
-        }
-        
+        Application::getWindow()->getViewport()->getLevel()->onUpdate(); 
     }
 
     void LevelLayer::onAttach()
     {
         Level* level = new Level;
+        ViewportLayer::setLevel(Application::getWindow()->getViewport(), level);
         level->init();
-        Viewport::LevelSetter::setLevel(Application::getWindow()->getViewport(), level);
     }
 
     void LevelLayer::onDetach()
@@ -48,7 +39,6 @@ namespace Hazel
 
     void LevelLayer::onRender()
     {
-        Application::getWindow()->getViewport()->getLevel()->onRender();
     }
 }
 

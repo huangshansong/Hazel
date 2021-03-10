@@ -12,42 +12,36 @@
 #include "Hazel/Events/MouseEvent.h"
 #include "Hazel/Log.h"
 
-#include "Actor.h"
 #include "camera.h"
 
 using namespace std;
 namespace Hazel
 {
-    float Camera::YAW = -90.0f;
-    float Camera::PITCH = 0.0f;
-    float Camera::SPEED = 2.5f;
-    float Camera::SENSITIVITY = 0.1f;
-    float Camera::ZOOM = 45.0f;
+    float Camera::s_YAW = -90.0f;
+    float Camera::s_PITCH = 0.0f;
+    float Camera::s_SPEED = 2.5f;
+    float Camera::s_SENSITIVITY = 0.1f;
+    float Camera::s_ZOOM = 45.0f;
 
     // constructor with vectors
-    Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : m_Front(glm::vec3(0.0f, 0.0f, -1.0f)), m_MovementSpeed(SPEED), m_MouseSensitivity(SENSITIVITY), m_Zoom(ZOOM)
+    Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : m_Front(glm::vec3(0.0f, 0.0f, -1.0f)), m_MovementSpeed(s_SPEED), m_MouseSensitivity(s_SENSITIVITY), m_Zoom(s_ZOOM)
     {
-        m_Position = position;
+        m_Transform = position;
         m_WorldUp = up;
         m_Yaw = yaw;
         m_Pitch = pitch;
         updateCameraVectors();
     }
     // constructor with scalar values
-    Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : m_Front(glm::vec3(0.0f, 0.0f, -1.0f)), m_MovementSpeed(SPEED), m_MouseSensitivity(SENSITIVITY), m_Zoom(ZOOM)
+    Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : m_Front(glm::vec3(0.0f, 0.0f, -1.0f)), m_MovementSpeed(s_SPEED), m_MouseSensitivity(s_SENSITIVITY), m_Zoom(s_ZOOM)
     {
-        m_Position = glm::vec3(posX, posY, posZ);
+        m_Transform = glm::vec3(posX, posY, posZ);
         m_WorldUp = glm::vec3(upX, upY, upZ);
         m_Yaw = yaw;
         m_Pitch = pitch;
         updateCameraVectors();
     }
 
-    // returns the view matrix calculated using Euler Angles and the LookAt Matrix
-    glm::mat4 Camera::getViewMatrix()
-    {
-        return glm::lookAt(m_Position, m_Position + m_Front, m_Up);
-    }
     void Camera::onEvent(Event& event)
     {
         EventDispatcher dispatcher(event);
@@ -58,49 +52,31 @@ namespace Hazel
     }
     void Camera::onUpdate()
     {
-
         float velocity = m_MovementSpeed * Application::getDeltaTime();
-
         if (m_ForwardMove)
-            m_Position += m_Front * velocity;
+            m_Transform += m_Front * velocity;
         //Position += glm::vec3(Front.x, .0f, Front.z) * velocity; //Make the camera move only on a flat surface
         if (m_BackwardMove)
-            m_Position -= m_Front * velocity;
+            m_Transform -= m_Front * velocity;
         //Position -= glm::vec3(Front.x, .0f, Front.z) * velocity; //Make the camera move only on a flat surface
         if (m_LeftMove)
-            m_Position -= m_Right * velocity;
+            m_Transform -= m_Right * velocity;
         if (m_RightMove)
-            m_Position += m_Right * velocity;
-
+            m_Transform += m_Right * velocity;
     }
-    bool Camera::onMouseMoved(MouseMovedEvent& e) {
-
+    bool Camera::onMouseMoved(MouseMovedEvent& e) 
+    {
         //if the cursor is not captured, ignore the MouseMoved events
-        if (!Application::getWindow()->getViewport()->m_CursorCaptured) return false;
+        if (!Application::getWindow()->getViewport()->isCursorCaptured()) return false;
+        if (Application::getWindow()->getViewport()->isFirstCursor()) return false;
 
-
-        if (Application::getWindow()->getViewport()->m_FirstCursor)
-        {
-            Application::getWindow()->getViewport()->m_LastX = e.getX();
-            Application::getWindow()->getViewport()->m_LastY = e.getY();
-            Application::getWindow()->getViewport()->m_FirstCursor = false;
-        }
-
-        float xoffset = e.getX() - Application::getWindow()->getViewport()->m_LastX;
-        float yoffset = Application::getWindow()->getViewport()->m_LastY - e.getY(); // reversed since y-coordinates go from bottom to top
-
-        Application::getWindow()->getViewport()->m_LastX = e.getX();
-        Application::getWindow()->getViewport()->m_LastY = e.getY();
-
+        float xoffset = e.getX() - Application::getWindow()->getViewport()->getCursorLastX();
+        // reversed since y-coordinates go from bottom to top
+        float yoffset = Application::getWindow()->getViewport()->getCursorLastY() - e.getY(); 
         xoffset *= m_MouseSensitivity;
         yoffset *= m_MouseSensitivity;
-
         m_Yaw += xoffset;
         m_Pitch += yoffset;
-
-        //HZ_CORE_INFO(m_Yaw);
-        //HZ_CORE_INFO(m_Pitch);
-
         // make sure that when pitch is out of bounds, screen doesn't get flipped
         if (m_ConstrainPitch)
         {
@@ -109,7 +85,6 @@ namespace Hazel
             if (m_Pitch < -89.0f)
                 m_Pitch = -89.0f;
         }
-
         // update Front, Right and Up Vectors using the updated Euler angles
         updateCameraVectors();
 
@@ -117,9 +92,8 @@ namespace Hazel
     }
     bool Camera::onMouseScrolled(MouseScrolledEvent& e)
     {
-
         //if the cursor is not captured, ignore the MouseScrolled events
-        if (!Application::getWindow()->getViewport()->m_CursorCaptured) return false;
+        if (!Application::getWindow()->getViewport()->isCursorCaptured()) return false;
 
         m_MovementSpeed += (float)e.getYOffset();
         //min speed 1.0f, max speed 100.0f
@@ -129,9 +103,8 @@ namespace Hazel
     }
     bool Camera::onKeyPressed(KeyPressedEvent& e)
     {
-
         //if the cursor is not captured, ignore the WSAD key events
-        if (!Application::getWindow()->getViewport()->m_CursorCaptured) return false;
+        if (!Application::getWindow()->getViewport()->isCursorCaptured()) return false;
 
         switch (e.getKeyCode()) {
         case HZ_KEY_W: {
@@ -158,7 +131,7 @@ namespace Hazel
     {
 
         //if the cursor is not captured, ignore the WSAD key events
-        if (!Application::getWindow()->getViewport()->m_CursorCaptured) return false;
+        if (!Application::getWindow()->getViewport()->isCursorCaptured()) return false;
 
         switch (e.getKeyCode()) {
         case HZ_KEY_W: {

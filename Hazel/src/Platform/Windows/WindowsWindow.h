@@ -17,15 +17,16 @@ namespace Hazel {
 		virtual void* getNativeWindow() const override { return m_Window; }
 		virtual Viewport* getViewport() const override { return m_Viewport; }
 
-		// Window attributes
-		void setEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
-		virtual void setViewport(Viewport* viewport) override { m_Viewport = viewport; }
-
+		
 	private:
 		WindowsWindow(const WindowProps& props);
 		virtual void init(const WindowProps& props);
 		virtual void shutdown();
 		virtual ~WindowsWindow();
+
+		// Window attributes
+		virtual void setEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
+		virtual void setViewport(Viewport* viewport) override { m_Viewport = viewport; }
 
 		virtual void onRender() override;
 
@@ -35,7 +36,6 @@ namespace Hazel {
 
 		
 		GLFWwindow* m_Window;
-		Viewport* m_Viewport;
 		
 		struct WindowData
 		{

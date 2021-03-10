@@ -4,9 +4,13 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 
+#include "Hazel/Actors/camera.h"
+#include "Hazel/Application.h"
 #include "Hazel/Log.h"
 #include "Hazel/Core.h"
 
+#include "model.h"
+#include "QuixelModel.h"
 #include "Material.h"
 #include "shader.h"
 #include "mesh.h"
@@ -14,140 +18,172 @@
 using namespace std;
 namespace Hazel
 {
-    Mesh::Mesh(vector<Vertex>* vertices, vector<unsigned int>* indices, vector<Texture>* textures)
+    void Mesh::init(vector<Vertex>* vertices, vector<unsigned int>* indices, vector<Texture*>& textures, const string& name)
     {
-        this->m_Vertices = vertices;
-        this->m_Indices = indices;
+        m_Vertices = vertices;
+        m_Indices = indices;
+        m_Name = name;
         // now that we have all the required data, set the vertex buffers and its attribute pointers.
-        setupMesh();
+        bindBufferAndAttribute(*vertices, *indices);  
 
-        this->m_Textures = textures;
+        m_Material = createMaterial(textures);
+
+        bindShader();
 
     }
 
     // render the mesh
-    void Mesh::draw()
+    void Mesh::draw() const
     {
-        m_Shader->use();
-        //HZ_CORE_INFO("shader->use();");
+        bindTexture();
 
-        if (m_Shader->m_ShaderType == ShaderType::PBR)
+        setShaderUniforms();
+
+        drawAfterBindTextures();
+    }
+
+    void Mesh::bindTexture() const
+    {
+        Shader::Interface::use(m_Shader);
+        
+        const unsigned int TYPES = sizeof(textureTypes) / sizeof(char*);
+        unsigned int TypeCount[TYPES];
+        for (unsigned int i = 0; i < TYPES; i++) TypeCount[i] = 0;
+        
+        GLint totalCount = 0;
+        const vector<Texture*>& textures = getMaterialTextures(m_Material);
+        for (const Texture * texture : textures)
         {
-            // bind appropriate textures
-            GLint albedoIndices[32];
-            GLint albedoNr = 0;
-            GLint normalIndices[32];
-            GLint normalNr = 0;
-            GLint emmisionIndices[32];
-            GLint emmisionNr = 0;
-            GLint metallicIndices[32];
-            GLint metallicNr = 0;
-            GLint roughnessIndices[32];
-            GLint roughnessNr = 0;
-            GLint aoIndices[32];
-            GLint aoNr = 0;
-            GLint displacementIndices[32];
-            GLint displacementNr = 0;
-            for (unsigned int i = 0; i < (*m_Textures).size(); i++)
-            {
-                glActiveTexture(GL_TEXTURE0 + i);
-                glBindTexture(GL_TEXTURE_2D, (*m_Textures)[i].id);
-
-                string name = (*m_Textures)[i].type;
-                if (name == "texture_albedo")
-                    albedoIndices[albedoNr++] = i;
-                else if (name == "texture_normal")
-                    normalIndices[normalNr++] = i;
-                else if (name == "texture_emmision")
-                    emmisionIndices[emmisionNr++] = i;
-                else if (name == "texture_metallic")
-                    metallicIndices[metallicNr++] = i;
-                else if (name == "texture_roughness")
-                    roughnessIndices[roughnessNr++] = i;
-                else if (name == "texture_ao")
-                    aoIndices[aoNr++] = i;
-                else if (name == "texture_displacement")
-                    displacementIndices[displacementNr++] = i;
-            }
-            glUniform1iv(glGetUniformLocation(m_Shader->m_ID, "texture_albedo"), albedoNr, albedoIndices);
-            glUniform1iv(glGetUniformLocation(m_Shader->m_ID, "texture_normal"), normalNr, normalIndices);
-            glUniform1iv(glGetUniformLocation(m_Shader->m_ID, "texture_emmision"), emmisionNr, emmisionIndices);
-            glUniform1iv(glGetUniformLocation(m_Shader->m_ID, "texture_metallic"), metallicNr, metallicIndices);
-            glUniform1iv(glGetUniformLocation(m_Shader->m_ID, "texture_roughness"), roughnessNr, roughnessIndices);
-            glUniform1iv(glGetUniformLocation(m_Shader->m_ID, "texture_ao"), aoNr, aoIndices);
-            glUniform1iv(glGetUniformLocation(m_Shader->m_ID, "texture_displacement"), displacementNr, displacementIndices);
-            //HZ_CORE_INFO("glUniform1iv();");
-
+            glActiveTexture(GL_TEXTURE0 + totalCount);
+            glBindTexture(GL_TEXTURE_2D, texture->id);
+            string textureName = textureTypes[texture->type];
+            textureName += '[' + to_string(TypeCount[texture->type]) + ']';
+            HZ_CORE_INFO(textureName);
+            Shader::Interface::setInt(m_Shader, textureName, totalCount);
+            TypeCount[texture->type] ++;
+            totalCount++;
         }
-        else if (m_Shader->m_ShaderType == ShaderType::Blinn_Phong)
-        {
-            // bind appropriate textures
-            unsigned int diffuseNr = 1;
-            unsigned int specularNr = 1;
-            unsigned int normalNr = 1;
-            unsigned int ambientLightNr = 1;
-            for (unsigned int i = 0; i < (*m_Textures).size(); i++)
-            {
-                glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
-                glBindTexture(GL_TEXTURE_2D, (*m_Textures)[i].id); // and bind the texture
-                // retrieve texture number (the N in diffuse_textureN)
-                string number;
-                string name = (*m_Textures)[i].type;
-                if (name == "texture_diffuse")
-                    number = std::to_string(diffuseNr++);
-                else if (name == "texture_specular")
-                    number = std::to_string(specularNr++); // transfer unsigned int to stream
-                else if (name == "texture_normal")
-                    number = std::to_string(normalNr++); // transfer unsigned int to stream
-                else if (name == "texture_ambientLight")
-                    number = std::to_string(ambientLightNr++); // transfer unsigned int to stream
-
-                // now set the sampler to the correct texture unit
-                glUniform1i(glGetUniformLocation(m_Shader->m_ID, (name + number).c_str()), i);
-                //HZ_CORE_INFO("glUniform1i();"); 
-                
-            }
-        }
-
-        // draw mesh
-        glBindVertexArray(VAO);
-        //HZ_CORE_INFO("glBindVertexArray(VAO);");
-        if (!(*m_Indices).empty())
-        {
-            glDrawElements(GL_TRIANGLES, (*m_Indices).size(), GL_UNSIGNED_INT, 0);
-            //HZ_CORE_INFO("glDrawElements(GL_TRIANGLES, (*m_Indices).size(), GL_UNSIGNED_INT, 0);");
-        }
-        else
-        {
-            glDrawArrays(GL_TRIANGLES, 0, (*m_Vertices).size());
-            //HZ_CORE_INFO("glDrawArrays(GL_TRIANGLES, 0, (*m_Vertices).size());");
-        }
-        glBindVertexArray(0);
 
         // always good practice to set everything back to defaults once configured.
         glActiveTexture(GL_TEXTURE0);
     }
 
+    void Mesh::bindShader()
+    {
+        Model* model = (Model*)m_OfModel;
+        string directory = model->getDirectory();
+        const vector<Shader*>& shadersLoaded = Model::InterfaceDown::getShadersLoaded(model);
+
+        bool meshHasUniqueShader = false;
+        string shaderPath;
+        for (int i = 0; i <= 1; i++)
+        {
+            if (i == 0)
+            {
+                shaderPath = directory + m_Name;
+            }
+            else
+            {
+                shaderPath = directory + "Universal";
+            }
+            bool skip = false;
+            for (Shader* shader : shadersLoaded)
+            {
+                if (Shader::Interface::getVertexShaderPath(shader) == shaderPath + ".vs")
+                {
+                    m_Shader = shader;
+                    skip = true;
+                    break;
+                }
+            }
+            if (!skip)
+            {
+                string vertexShaderPath = shaderPath + ".vs";
+                string fragmentShaderPath = shaderPath + ".fs";
+                string geometryShaderPath;
+                Shader* shader = Shader::Interface::create(vertexShaderPath.c_str(), fragmentShaderPath.c_str());
+                if (Shader::Interface::getID(shader) != 0)
+                {
+                    m_Shader = shader;
+                    break;//if the mesh has its unique shader, no need to load the Universal shader 
+                }
+            }
+        } 
+    }
+
+    void Mesh::setShaderUniforms() const
+    {
+        Shader::Interface::use(m_Shader);
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), ((Model*)m_OfModel)->getOfActorTransform());
+        Shader::Interface::setMat4(m_Shader, "model", model);
+        glm::mat4 view = Application::getWindow()->getViewport()->getLevel()->getCamera()->getViewMatrix();
+        Shader::Interface::setMat4(m_Shader, "view", view);
+        glm::mat4 projection = glm::perspective(
+            glm::radians(Application::getWindow()->getViewport()->getLevel()->getCamera()->getZoom()), 
+            (float)Application::getWindow()->getViewport()->getWidth() / (float)Application::getWindow()->getViewport()->getHeight(), 
+            0.1f, 100.0f);
+        Shader::Interface::setMat4(m_Shader, "projection", projection);
+        glm::vec3 cameraTransform = Application::getWindow()->getViewport()->getLevel()->getCamera()->getTransform();
+        
+        Shader::Interface::setVec3(m_Shader, "camPos", cameraTransform);
+        glm::vec3 lightDirection = glm::vec3(1.0f, 1.0f, 1.0f);
+        Shader::Interface::setVec3(m_Shader, "lightDirection", lightDirection);
+        glm::vec3 lightColor = glm::vec3(100.0f, 100.0f, 100.0f);
+        Shader::Interface::setVec3(m_Shader, "lightColor", lightColor);
+        float heightScale = 1.0f;
+        Shader::Interface::setFloat(m_Shader, "heightScale", heightScale);
+
+
+    }
+
+    std::vector<Texture*>& Mesh::getModelTexturesLoaded()
+    {
+        return Model::InterfaceDown::getTexturesLoaded((Model*)m_OfModel);
+    }
+
+    std::vector<Shader*>& Mesh::getModelShadersLoaded()
+    {
+        return Model::InterfaceDown::getShadersLoaded((Model*)m_OfModel);
+    }
+
+    void Mesh::drawAfterBindTextures() const
+    {
+        // draw mesh
+        glBindVertexArray(m_VAO);
+        //HZ_CORE_INFO("glBindVertexArray(VAO);");
+
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        //ONLY MESH WITH INDICES CAN BE DRAW IN CLASS:Mesh!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        glDrawElements(GL_TRIANGLES, m_Indices->size(), GL_UNSIGNED_INT, 0);
+        //HZ_CORE_INFO("glDrawElements(GL_TRIANGLES, (*m_Indices).size(), GL_UNSIGNED_INT, 0);");
+        //ONLY MESH WITH INDICES CAN BE DRAW IN CLASS:Mesh!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+        
+        glBindVertexArray(0);
+
+    }
+
     // initializes all the buffer objects/arrays
-    void Mesh::setupMesh()
+    void Mesh::bindBufferAndAttribute(vector<Vertex>& vertices, vector<unsigned int>& indices)
     {
         // create buffers/arrays
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
+        glGenVertexArrays(1, &m_VAO);
+        glGenBuffers(1, &m_VBO);
 
-        glBindVertexArray(VAO);
+        glBindVertexArray(m_VAO);
         // load data into vertex buffers
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
         // A great thing about structs is that their memory layout is sequential for all its items.
         // The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
         // again translates to 3/2 floats which translates to a byte array.
-        glBufferData(GL_ARRAY_BUFFER, (*m_Vertices).size() * sizeof(Vertex), &((*m_Vertices)[0]), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
-        if (!(*m_Indices).empty())
+        if (!indices.empty())
         {
-            glGenBuffers(1, &EBO);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, (*m_Indices).size() * sizeof(unsigned int), &((*m_Indices)[0]), GL_STATIC_DRAW);
+            glGenBuffers(1, &m_EBO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
         }
 
         // set the vertex attribute pointers
@@ -170,4 +206,6 @@ namespace Hazel
         */
         glBindVertexArray(0);
     }
+
+
 }

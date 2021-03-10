@@ -9,7 +9,6 @@
 #include "Log.h"
 
 
-
 namespace Hazel {
     
 	void Viewport::init()
