@@ -9,14 +9,18 @@
 #include <GLFW/glfw3.h>
 #include <Glad/glad.h>
 
-#include "Hazel/Application.h"
+#include "Hazel/Window.h"
+#include "Hazel/Editor/Editor.h"
 
-#include "ImGuiLayer.h"
+#include "MyImGui.h"
 
 namespace Hazel {
 
-	void ImGuiLayer::OnAttach()
+	MyImGui::MyImGui(void* window)
+		: m_OfWindow(window)
 	{
+		((Window*)window)->m_ImGui = std::unique_ptr<MyImGui>(this);
+
 		// Setup Dear ImGui context
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -24,7 +28,9 @@ namespace Hazel {
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
 		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+
 		//io.ConfigViewportsNoAutoMerge = true;
 		//io.ConfigViewportsNoTaskBarIcon = true;
 
@@ -41,12 +47,12 @@ namespace Hazel {
 		}
 
 		// Setup Platform/Renderer bindings
-		ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(Application::m_Window->GetNativeWindow()), true);
+		ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)(((Window*)m_OfWindow)->getNativeWindow()), true);
 		ImGui_ImplOpenGL3_Init("#version 330");
 
 	}
 
-	void ImGuiLayer::OnDetach()
+	MyImGui::~MyImGui()
 	{
 		// Cleanup
 		ImGui_ImplOpenGL3_Shutdown();
@@ -56,50 +62,42 @@ namespace Hazel {
 
 	void showDemo2() {
 
-		ImGui::SetNextWindowSize({400, 170});
+		ImGui::SetNextWindowSize({220, 100});
 
-		ImGui::Begin("Shader Selection");                          // Create a window called "Hello, world!" and append into it.
+		ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
 		ImGui::SetWindowFontScale(2.0f);
 
-		ImGui::Text("Click to select the shader.");               // Display some text (you can use a format strings too)
-
-		for (Shader* shader : Application::m_Window->m_Viewport->m_Shaders) 
-			if (ImGui::Button(shader->name.c_str())) 
-				Application::m_Window->m_Viewport->currentShader = shader;
-
-		ImGui::SameLine();
 		ImGui::Text("\n(%.1f FPS)", ImGui::GetIO().Framerate);
 
 		ImGui::End();
 		
 	}
 
-	void ImGuiLayer::OnRender()
+	void MyImGui::onRender()
 	{
-		static bool show_demo_window = true;
-		//ImGui::ShowDemoWindow(&show_demo_window);
+
 		showDemo2();
 	}
 
-	void ImGuiLayer::OnUpdate()
+	void MyImGui::onUpdate()
 	{
-		Begin();
-		OnRender();
-		End();
+		begin();
+		onRender();
+		end();
 	}
 
-	void ImGuiLayer::Begin()
+	void MyImGui::begin()
 	{
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 	}
 
-	void ImGuiLayer::End()
+	void MyImGui::end()
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		io.DisplaySize = ImVec2(Application::m_Window->GetWidth(), Application::m_Window->GetHeight());
+		io.DisplaySize = ImVec2(((Window*)m_OfWindow)->getWidth(), ((Window*)m_OfWindow)->getHeight());
 
 		// Rendering
 		ImGui::Render();

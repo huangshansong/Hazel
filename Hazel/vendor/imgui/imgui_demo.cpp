@@ -558,7 +558,7 @@ static void ShowDemoWindowWidgets()
         ImGui::RadioButton("radio b", &e, 1); ImGui::SameLine();
         ImGui::RadioButton("radio c", &e, 2);
 
-        // Color buttons, demonstrate using PushID() to add unique identifier in the ID stack, and changing style.
+        // Color buttons, demonstrate using PushID() to add unique identifier in the m_ID stack, and changing style.
         for (int i = 0; i < 7; i++)
         {
             if (i > 0)
@@ -2930,7 +2930,7 @@ static void ShowDemoWindowPopups()
         static bool toggles[] = { true, false, false, false, false };
 
         // Simple selection popup (if you want to show the current selection inside the Button itself,
-        // you may want to build a string using the "###" operator to preserve a constant ID with a variable label)
+        // you may want to build a string using the "###" operator to preserve a constant m_ID with a variable label)
         if (ImGui::Button("Select.."))
             ImGui::OpenPopup("my_select_popup");
         ImGui::SameLine();
@@ -3023,13 +3023,13 @@ static void ShowDemoWindowPopups()
         ImGui::Text("(You can also right-click me to open the same popup as above.)");
         ImGui::OpenPopupContextItem("item context menu", 1);
 
-        // When used after an item that has an ID (e.g.Button), we can skip providing an ID to BeginPopupContextItem().
-        // BeginPopupContextItem() will use the last item ID as the popup ID.
+        // When used after an item that has an m_ID (e.g.Button), we can skip providing an m_ID to BeginPopupContextItem().
+        // BeginPopupContextItem() will use the last item m_ID as the popup m_ID.
         // In addition here, we want to include your editable label inside the button label.
-        // We use the ### operator to override the ID (read FAQ about ID for details)
+        // We use the ### operator to override the m_ID (read FAQ about m_ID for details)
         static char name[32] = "Label1";
         char buf[64];
-        sprintf(buf, "Button: %s###Button", name); // ### operator override ID ignoring the preceding label
+        sprintf(buf, "Button: %s###Button", name); // ### operator override m_ID ignoring the preceding label
         ImGui::Button(buf);
         if (ImGui::BeginPopupContextItem())
         {
@@ -3290,7 +3290,7 @@ static void ShowDemoWindowColumns()
     {
         ImGui::BeginChild("##header", ImVec2(0, ImGui::GetTextLineHeightWithSpacing()+ImGui::GetStyle().ItemSpacing.y));
         ImGui::Columns(3);
-        ImGui::Text("ID"); ImGui::NextColumn();
+        ImGui::Text("m_ID"); ImGui::NextColumn();
         ImGui::Text("Name"); ImGui::NextColumn();
         ImGui::Text("Path"); ImGui::NextColumn();
         ImGui::Columns(1);
@@ -4775,7 +4775,7 @@ static void ShowExampleAppLayout(bool* p_open)
 
 static void ShowPlaceholderObject(const char* prefix, int uid)
 {
-    // Use object uid as identifier. Most commonly you could also use the object pointer as a base ID.
+    // Use object uid as identifier. Most commonly you could also use the object pointer as a base m_ID.
     ImGui::PushID(uid);
     ImGui::AlignTextToFramePadding();   // Text and Tree nodes are less high than framed widgets, here we add vertical spacing to make the tree lines equal high.
     bool node_open = ImGui::TreeNode("Object", "%s_%u", prefix, uid);
@@ -5036,13 +5036,13 @@ static void ShowExampleAppSimpleOverlay(bool* p_open)
 // [SECTION] Example App: Manipulating Window Titles / ShowExampleAppWindowTitles()
 //-----------------------------------------------------------------------------
 
-// Demonstrate using "##" and "###" in identifiers to manipulate ID generation.
+// Demonstrate using "##" and "###" in identifiers to manipulate m_ID generation.
 // This apply to all regular items as well.
 // Read FAQ section "How can I have multiple widgets with the same label?" for details.
 static void ShowExampleAppWindowTitles(bool*)
 {
     // By default, Windows are uniquely identified by their title.
-    // You can use the "##" and "###" markers to manipulate the display/ID.
+    // You can use the "##" and "###" markers to manipulate the display/m_ID.
 
     // Using "##" to display same title but have unique identifier.
     ImGui::SetNextWindowPos(ImVec2(100, 100), ImGuiCond_FirstUseEver);

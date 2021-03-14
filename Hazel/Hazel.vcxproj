@@ -95,7 +95,8 @@
     </Link>
     <PostBuildEvent>
       <Command>IF EXIST ..\bin\Debug-windows-x86_64\Hazel\Hazel.dll\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\Hazel\Hazel.dll ..\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\Hazel\Hazel.dll ..\bin\Debug-windows-x86_64\Sandbox &gt; nul)
-IF EXIST ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll\ (xcopy /Q /E /Y /I ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll ..\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll ..\bin\Debug-windows-x86_64\Sandbox &gt; nul)</Command>
+IF EXIST ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll\ (xcopy /Q /E /Y /I ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll ..\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll ..\bin\Debug-windows-x86_64\Sandbox &gt; nul)
+IF EXIST ..\bin\Debug-windows-x86_64\Hazel\Hazel.dll\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\Hazel\Hazel.dll ..\bin\Debug-windows-x86_64\GUI &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\Hazel\Hazel.dll ..\bin\Debug-windows-x86_64\GUI &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -123,7 +124,8 @@ IF EXIST ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll\ (xcopy /Q /E /Y /I
     </Link>
     <PostBuildEvent>
       <Command>IF EXIST ..\bin\Release-windows-x86_64\Hazel\Hazel.dll\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\Hazel\Hazel.dll ..\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\Hazel\Hazel.dll ..\bin\Release-windows-x86_64\Sandbox &gt; nul)
-IF EXIST ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll\ (xcopy /Q /E /Y /I ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll ..\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll ..\bin\Release-windows-x86_64\Sandbox &gt; nul)</Command>
+IF EXIST ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll\ (xcopy /Q /E /Y /I ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll ..\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll ..\bin\Release-windows-x86_64\Sandbox &gt; nul)
+IF EXIST ..\bin\Release-windows-x86_64\Hazel\Hazel.dll\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\Hazel\Hazel.dll ..\bin\Release-windows-x86_64\GUI &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\Hazel\Hazel.dll ..\bin\Release-windows-x86_64\GUI &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
@@ -151,7 +153,8 @@ IF EXIST ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll\ (xcopy /Q /E /Y /I
     </Link>
     <PostBuildEvent>
       <Command>IF EXIST ..\bin\Dist-windows-x86_64\Hazel\Hazel.dll\ (xcopy /Q /E /Y /I ..\bin\Dist-windows-x86_64\Hazel\Hazel.dll ..\bin\Dist-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Dist-windows-x86_64\Hazel\Hazel.dll ..\bin\Dist-windows-x86_64\Sandbox &gt; nul)
-IF EXIST ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll\ (xcopy /Q /E /Y /I ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll ..\bin\Dist-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll ..\bin\Dist-windows-x86_64\Sandbox &gt; nul)</Command>
+IF EXIST ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll\ (xcopy /Q /E /Y /I ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll ..\bin\Dist-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll ..\bin\Dist-windows-x86_64\Sandbox &gt; nul)
+IF EXIST ..\bin\Dist-windows-x86_64\Hazel\Hazel.dll\ (xcopy /Q /E /Y /I ..\bin\Dist-windows-x86_64\Hazel\Hazel.dll ..\bin\Dist-windows-x86_64\GUI &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Dist-windows-x86_64\Hazel\Hazel.dll ..\bin\Dist-windows-x86_64\GUI &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -159,29 +162,40 @@ IF EXIST ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll\ (xcopy /Q /E /Y /I
     <ClInclude Include="src\Hazel\Actors\Actor.h" />
     <ClInclude Include="src\Hazel\Actors\camera.h" />
     <ClInclude Include="src\Hazel\Application.h" />
+    <ClInclude Include="src\Hazel\badAllocHandler.h" />
+    <ClInclude Include="src\Hazel\Components\CollisionBox.h" />
+    <ClInclude Include="src\Hazel\Components\PhysicsComponent.h" />
     <ClInclude Include="src\Hazel\Core.h" />
+    <ClInclude Include="src\Hazel\Editor\Editor.h" />
     <ClInclude Include="src\Hazel\EntryPoint.h" />
     <ClInclude Include="src\Hazel\Events\ApplicationEvent.h" />
     <ClInclude Include="src\Hazel\Events\Event.h" />
     <ClInclude Include="src\Hazel\Events\KeyEvent.h" />
     <ClInclude Include="src\Hazel\Events\MouseEvent.h" />
-    <ClInclude Include="src\Hazel\ImGui\ImGuiLayer.h" />
+    <ClInclude Include="src\Hazel\HObject.h" />
+    <ClInclude Include="src\Hazel\HazelMathLib.h" />
+    <ClInclude Include="src\Hazel\ImGui\MyImGui.h" />
     <ClInclude Include="src\Hazel\KeyCode.h" />
-    <ClInclude Include="src\Hazel\Layer.h" />
-    <ClInclude Include="src\Hazel\LayerStack.h" />
     <ClInclude Include="src\Hazel\Levels\Level.h" />
-    <ClInclude Include="src\Hazel\Levels\LevelLayer.h" />
+    <ClInclude Include="src\Hazel\Levels\PlantsLevel.h" />
     <ClInclude Include="src\Hazel\Log.h" />
     <ClInclude Include="src\Hazel\ResourceLoading\FileSystem.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\FromResourceModel.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\Geometry.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\LearnOpenGLModel.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\Material.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\ProceduralModel.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\QuixelFile.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\QuixelModel.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\SimpleGeometry.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\_ResourceLoading.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\landscape.h" />
     <ClInclude Include="src\Hazel\ResourceLoading\mesh.h" />
     <ClInclude Include="src\Hazel\ResourceLoading\model.h" />
     <ClInclude Include="src\Hazel\ResourceLoading\shader.h" />
-    <ClInclude Include="src\Hazel\ResourceLoading\shader_m.h" />
-    <ClInclude Include="src\Hazel\ResourceLoading\shader_s.h" />
     <ClInclude Include="src\Hazel\Viewport.h" />
-    <ClInclude Include="src\Hazel\ViewportLayer.h" />
     <ClInclude Include="src\Hazel\Window.h" />
-    <ClInclude Include="src\Hazel\WindowLayer.h" />
+    <ClInclude Include="src\Platform\Windows\OpenGLTexture.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\hzpch.h" />
     <ClInclude Include="vendor\glm\glm\common.hpp" />
@@ -600,17 +614,31 @@ IF EXIST ..\Hazel\vendor\assimp\include\assimp-vc142-mtd.dll\ (xcopy /Q /E /Y /I
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Hazel\Actors\Actor.cpp" />
+    <ClCompile Include="src\Hazel\Actors\camera.cpp" />
     <ClCompile Include="src\Hazel\Application.cpp" />
-    <ClCompile Include="src\Hazel\ImGui\ImGuiLayer.cpp" />
-    <ClCompile Include="src\Hazel\LayerStack.cpp" />
+    <ClCompile Include="src\Hazel\badAllocHandler.cpp" />
+    <ClCompile Include="src\Hazel\Components\CollisionBox.cpp" />
+    <ClCompile Include="src\Hazel\Components\PhysicsComponent.cpp" />
+    <ClCompile Include="src\Hazel\Editor\Editor.cpp" />
+    <ClCompile Include="src\Hazel\HObject.cpp" />
+    <ClCompile Include="src\Hazel\HazelMathLib.cpp" />
+    <ClCompile Include="src\Hazel\ImGui\MyImGui.cpp" />
     <ClCompile Include="src\Hazel\Levels\Level.cpp" />
-    <ClCompile Include="src\Hazel\Levels\LevelLayer.cpp" />
+    <ClCompile Include="src\Hazel\Levels\PlantsLevel.cpp" />
     <ClCompile Include="src\Hazel\Log.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\FromResourceModel.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\LearnOpenGLModel.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\Material.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\ProceduralModel.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\QuixelModel.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\SimpleGeometry.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\landscape.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\mesh.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\model.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\shader.cpp" />
     <ClCompile Include="src\Hazel\Viewport.cpp" />
-    <ClCompile Include="src\Hazel\ViewportLayer.cpp" />
     <ClCompile Include="src\Hazel\Window.cpp" />
-    <ClCompile Include="src\Hazel\WindowLayer.cpp" />
-    <ClCompile Include="src\Platform\Windows\OpenGL.cpp" />
+    <ClCompile Include="src\Platform\Windows\OpenGLTexture.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\VenderSetting.cpp" />
     <ClCompile Include="src\hzpch.cpp">

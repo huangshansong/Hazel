@@ -1,36 +1,38 @@
 #pragma once
 #include "hzpch.h"
 
-#include "Core.h"
+#include "Editor/Editor.h"
+
 #include "Window.h"
-#include "LayerStack.h"
+#include "HObject.h"
+#include "Core.h"
 
 
 namespace Hazel {
-	class HAZEL_API Application
+	class HAZEL_API Application : public HObject
 	{
 	public:
 		Application();
-		virtual ~Application() {};
-		void Run();
-		void OnEvent(Event& e);
-		void PushLayer(Layer* layer);
-		void PushOverlay(Layer* layer);
 
-		static Window* m_Window;
+		virtual ~Application() = default;
 
-		
-		static float deltaTime;
+		virtual void run();
 
-		static bool m_WindowClose;
+		static float getDeltaTime() { return s_DeltaTime; }
 
-	private:
+		virtual void onPlayerInputEvent(Event& e);
+
+		std::vector<std::shared_ptr<Window>> m_Windows;
+
+		std::unique_ptr<Editor> m_Editor;
+
+	protected:
 		bool m_Running;
-		float lastFrameTime;
-		LayerStack m_LayerStack;
+		static float s_DeltaTime;
+		static float s_LastFrameTime;
+		
 	};
-
-	//to be defined in CLIENT
-	Application* CreateApplication();
+	
+	Application* createApplication();
 }
 

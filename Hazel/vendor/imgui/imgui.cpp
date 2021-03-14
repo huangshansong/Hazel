@@ -187,7 +187,7 @@ CODE
  EXHIBIT 1: USING THE EXAMPLE BINDINGS (= imgui_impl_XXX.cpp files from the examples/ folder).
  The sub-folders in examples/ contains examples applications following this structure.
 
-     // Application init: create a dear imgui context, setup some options, load fonts
+     // Application readFile: create a dear imgui context, setup some options, load fonts
      ImGui::CreateContext();
      ImGuiIO& io = ImGui::GetIO();
      // TODO: Set optional io.ConfigFlags values, e.g. 'io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard' to enable keyboard controls.
@@ -222,7 +222,7 @@ CODE
 
  EXHIBIT 2: IMPLEMENTING CUSTOM BINDING / CUSTOM ENGINE
 
-     // Application init: create a dear imgui context, setup some options, load fonts
+     // Application readFile: create a dear imgui context, setup some options, load fonts
      ImGui::CreateContext();
      ImGuiIO& io = ImGui::GetIO();
      // TODO: Set optional io.ConfigFlags values, e.g. 'io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard' to enable keyboard controls.
@@ -395,7 +395,7 @@ CODE
  - 2020/06/23 (1.77) - removed BeginPopupContextWindow(const char*, int mouse_button, bool also_over_items) in favor of BeginPopupContextWindow(const char*, ImGuiPopupFlags flags) with ImGuiPopupFlags_NoOverItems.
  - 2020/06/15 (1.77) - renamed OpenPopupOnItemClick() to OpenPopupContextItem(). Kept inline redirection function (will obsolete).
  - 2020/06/15 (1.77) - removed CalcItemRectClosestPoint() entry point which was made obsolete and asserting in December 2017.
- - 2020/04/23 (1.77) - removed unnecessary ID (first arg) of ImFontAtlas::AddCustomRectRegular().
+ - 2020/04/23 (1.77) - removed unnecessary m_ID (first arg) of ImFontAtlas::AddCustomRectRegular().
  - 2020/01/22 (1.75) - ImDrawList::AddCircle()/AddCircleFilled() functions don't accept negative radius any more.
  - 2019/12/17 (1.75) - [undid this change in 1.76] made Columns() limited to 64 columns by asserting above that limit. While the current code technically supports it, future code may not so we're putting the restriction ahead.
  - 2019/12/13 (1.75) - [imgui_internal.h] changed ImRect() default constructor initializes all fields to 0.0f instead of (FLT_MAX,FLT_MAX,-FLT_MAX,-FLT_MAX). If you used ImRect::Add() to create bounding boxes by adding multiple points into it, you may need to fix your initial value.
@@ -411,7 +411,7 @@ CODE
                        - IMGUI_DISABLE_TEST_WINDOWS          -> use IMGUI_DISABLE_DEMO_WINDOWS
  - 2019/12/08 (1.75) - obsoleted calling ImDrawList::PrimReserve() with a negative count (which was the vaguely documented and rarely if ever used). Instead we added an explicit PrimUnreserve() API.
  - 2019/12/06 (1.75) - removed implicit default parameter to IsMouseDragging(int button = 0) to be consistent with other mouse functions (none of the other functions have it).
- - 2019/11/21 (1.74) - ImFontAtlas::AddCustomRectRegular() now requires an ID larger than 0x110000 (instead of 0x10000) to conform with supporting Unicode planes 1-16 in a future update. ID below 0x110000 will now assert.
+ - 2019/11/21 (1.74) - ImFontAtlas::AddCustomRectRegular() now requires an m_ID larger than 0x110000 (instead of 0x10000) to conform with supporting Unicode planes 1-16 in a future update. m_ID below 0x110000 will now assert.
  - 2019/11/19 (1.74) - renamed IMGUI_DISABLE_FORMAT_STRING_FUNCTIONS to IMGUI_DISABLE_DEFAULT_FORMAT_FUNCTIONS for consistency.
  - 2019/11/19 (1.74) - renamed IMGUI_DISABLE_MATH_FUNCTIONS to IMGUI_DISABLE_DEFAULT_MATH_FUNCTIONS for consistency.
  - 2019/10/22 (1.74) - removed redirecting functions/enums that were marked obsolete in 1.52 (October 2017):
@@ -1874,7 +1874,7 @@ void ImGuiStorage::BuildSortByKey()
     {
         static int IMGUI_CDECL PairCompareByID(const void* lhs, const void* rhs)
         {
-            // We can't just do a subtraction because qsort uses signed integers and subtracting our ID doesn't play well with that.
+            // We can't just do a subtraction because qsort uses signed integers and subtracting our m_ID doesn't play well with that.
             if (((const ImGuiStoragePair*)lhs)->key > ((const ImGuiStoragePair*)rhs)->key) return +1;
             if (((const ImGuiStoragePair*)lhs)->key < ((const ImGuiStoragePair*)rhs)->key) return -1;
             return 0;
@@ -2925,7 +2925,7 @@ ImGuiID ImGuiWindow::GetIDNoKeepAlive(int n)
     return id;
 }
 
-// This is only used in rare/specific situations to manufacture an ID out of nowhere.
+// This is only used in rare/specific situations to manufacture an m_ID out of nowhere.
 ImGuiID ImGuiWindow::GetIDFromRectangle(const ImRect& r_abs)
 {
     ImGuiID seed = IDStack.back();
@@ -3075,7 +3075,7 @@ static inline bool IsWindowContentHoverable(ImGuiWindow* window, ImGuiHoveredFla
 
 // This is roughly matching the behavior of internal-facing ItemHoverable()
 // - we allow hovering to be true when ActiveId==window->MoveID, so that clicking on non-interactive items such as a Text() item still returns true with IsItemHovered()
-// - this should work even for non-interactive items that have no ID, so we cannot use LastItemId
+// - this should work even for non-interactive items that have no m_ID, so we cannot use LastItemId
 bool ImGui::IsItemHovered(ImGuiHoveredFlags flags)
 {
     ImGuiContext& g = *GImGui;
@@ -3915,7 +3915,7 @@ void ImGui::NewFrame()
         viewport->DrawDataP.Clear();
     }
 
-    // Drag and drop keep the source ID alive so even if the source disappear our state is consistent
+    // Drag and drop keep the source m_ID alive so even if the source disappear our state is consistent
     if (g.DragDropActive && g.DragDropPayload.SourceId == g.ActiveId)
         KeepAliveID(g.DragDropPayload.SourceId);
 
@@ -5041,7 +5041,7 @@ bool ImGui::BeginChildEx(const char* name, ImGuiID id, const ImVec2& size_arg, b
         size.y = ImMax(content_avail.y + size.y, 4.0f);
     SetNextWindowSize(size);
 
-    // Build up name. If you need to append to a same child from multiple location in the ID stack, use BeginChild(ImGuiID id) with a stable value.
+    // Build up name. If you need to append to a same child from multiple location in the m_ID stack, use BeginChild(ImGuiID id) with a stable value.
     char title[256];
     if (name)
         ImFormatString(title, IM_ARRAYSIZE(title), "%s/%s_%08X", parent_window->Name, name, id);
@@ -5759,7 +5759,7 @@ void ImGui::RenderWindowTitleBarContents(ImGuiWindow* window, const ImRect& titl
         pad_l += button_sz;
     }
 
-    // Collapse button (submitting first so it gets priority when choosing a navigation init fallback)
+    // Collapse button (submitting first so it gets priority when choosing a navigation readFile fallback)
     if (has_collapse_button)
         if (CollapseButton(window->GetID("#COLLAPSE"), collapse_button_pos, NULL))
             window->WantCollapseToggle = true; // Defer actual collapsing to next frame as we are too far in the Begin() function
@@ -6001,7 +6001,7 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
         if (window->MemoryCompacted)
             GcAwakeTransientWindowBuffers(window);
 
-        // Update stored window name when it changes (which can _only_ happen with the "###" operator, so the ID would stay unchanged).
+        // Update stored window name when it changes (which can _only_ happen with the "###" operator, so the m_ID would stay unchanged).
         // The title bar always display the 'name' parameter, so we only update the string storage if it needs to be visible to the end-user elsewhere.
         bool window_title_visible_elsewhere = false;
         if ((window->Viewport && window->Viewport->Window == window) || (window->DockIsActive))
@@ -7402,7 +7402,7 @@ void ImGui::PushID(int int_id)
     window->IDStack.push_back(id);
 }
 
-// Push a given id value ignoring the ID stack as a seed.
+// Push a given id value ignoring the m_ID stack as a seed.
 void ImGui::PushOverrideID(ImGuiID id)
 {
     ImGuiContext& g = *GImGui;
@@ -8048,7 +8048,7 @@ void ImGui::EndGroup()
     // If the current ActiveId was declared within the boundary of our group, we copy it to LastItemId so IsItemActive(), IsItemDeactivated() etc. will be functional on the entire group.
     // It would be be neater if we replaced window.DC.LastItemId by e.g. 'bool LastItemIsActive', but would put a little more burden on individual widgets.
     // Also if you grep for LastItemId you'll notice it is only used in that context.
-    // (The tests not symmetrical because ActiveIdIsAlive is an ID itself, in order to be able to handle ActiveId being overwritten during the frame.)
+    // (The tests not symmetrical because ActiveIdIsAlive is an m_ID itself, in order to be able to handle ActiveId being overwritten during the frame.)
     const bool group_contains_curr_active_id = (group_data.BackupActiveIdIsAlive != g.ActiveId) && (g.ActiveIdIsAlive == g.ActiveId) && g.ActiveId;
     const bool group_contains_prev_active_id = !group_data.BackupActiveIdPreviousFrameIsAlive && g.ActiveIdPreviousFrameIsAlive;
     if (group_contains_curr_active_id)
@@ -8382,7 +8382,7 @@ void ImGui::OpenPopup(const char* str_id, ImGuiPopupFlags popup_flags)
 
 // Mark popup as open (toggle toward open state).
 // Popups are closed when user click outside, or activate a pressable item, or CloseCurrentPopup() is called within a BeginPopup()/EndPopup() block.
-// Popup identifiers are relative to the current ID-stack (so OpenPopup and BeginPopup needs to be at the same level).
+// Popup identifiers are relative to the current m_ID-stack (so OpenPopup and BeginPopup needs to be at the same level).
 // One open popup per level of the popup hierarchy (NB: when assigning we reset the Window member of ImGuiPopupRef to NULL)
 void ImGui::OpenPopupEx(ImGuiID id, ImGuiPopupFlags popup_flags)
 {
@@ -8631,7 +8631,7 @@ bool ImGui::OpenPopupContextItem(const char* str_id, ImGuiPopupFlags popup_flags
     int mouse_button = (popup_flags & ImGuiPopupFlags_MouseButtonMask_);
     if (IsMouseReleased(mouse_button) && IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup))
     {
-        ImGuiID id = str_id ? window->GetID(str_id) : window->DC.LastItemId; // If user hasn't passed an ID, we can use the LastItemID. Using LastItemID as a Popup ID won't conflict!
+        ImGuiID id = str_id ? window->GetID(str_id) : window->DC.LastItemId; // If user hasn't passed an m_ID, we can use the LastItemID. Using LastItemID as a Popup m_ID won't conflict!
         IM_ASSERT(id != 0);                                                  // You cannot pass a NULL str_id if the last item has no identifier (e.g. a Text() item)
         OpenPopupEx(id, popup_flags);
         return true;
@@ -8643,13 +8643,13 @@ bool ImGui::OpenPopupContextItem(const char* str_id, ImGuiPopupFlags popup_flags
 // - You can pass a NULL str_id to use the identifier of the last item.
 // - You may want to handle this on user side if you have specific needs (e.g. tweaking IsItemHovered() parameters).
 // - This is essentially the same as calling OpenPopupContextItem() + BeginPopup() but written to avoid
-//   computing the ID twice because BeginPopupContextXXX functions are called very frequently.
+//   computing the m_ID twice because BeginPopupContextXXX functions are called very frequently.
 bool ImGui::BeginPopupContextItem(const char* str_id, ImGuiPopupFlags popup_flags)
 {
     ImGuiWindow* window = GImGui->CurrentWindow;
     if (window->SkipItems)
         return false;
-    ImGuiID id = str_id ? window->GetID(str_id) : window->DC.LastItemId; // If user hasn't passed an ID, we can use the LastItemID. Using LastItemID as a Popup ID won't conflict!
+    ImGuiID id = str_id ? window->GetID(str_id) : window->DC.LastItemId; // If user hasn't passed an m_ID, we can use the LastItemID. Using LastItemID as a Popup m_ID won't conflict!
     IM_ASSERT(id != 0);                                                  // You cannot pass a NULL str_id if the last item has no identifier (e.g. a Text() item)
     int mouse_button = (popup_flags & ImGuiPopupFlags_MouseButtonMask_);
     if (IsMouseReleased(mouse_button) && IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup))
@@ -9296,11 +9296,11 @@ static void ImGui::NavUpdate()
     for (int i = 0; i < IM_ARRAYSIZE(g.IO.NavInputs); i++)
         g.IO.NavInputsDownDuration[i] = (g.IO.NavInputs[i] > 0.0f) ? (g.IO.NavInputsDownDuration[i] < 0.0f ? 0.0f : g.IO.NavInputsDownDuration[i] + g.IO.DeltaTime) : -1.0f;
 
-    // Process navigation init request (select first/default focus)
-    // In very rare cases g.NavWindow may be null (e.g. clearing focus after requesting an init request, which does happen when releasing Alt while clicking on void)
+    // Process navigation readFile request (select first/default focus)
+    // In very rare cases g.NavWindow may be null (e.g. clearing focus after requesting an readFile request, which does happen when releasing Alt while clicking on void)
     if (g.NavInitResultId != 0 && (!g.NavDisableHighlight || g.NavInitRequestFromMove) && g.NavWindow)
     {
-        // Apply result from previous navigation init request (will typically select the first item, unless SetItemDefaultFocus() has been called)
+        // Apply result from previous navigation readFile request (will typically select the first item, unless SetItemDefaultFocus() has been called)
         //IMGUI_DEBUG_LOG("[Nav] Apply NavInitRequest result: 0x%08X Layer %d in \"%s\"\n", g.NavInitResultId, g.NavLayer, g.NavWindow->Name);
         if (g.NavInitRequestFromMove)
             SetNavIDWithRectRel(g.NavInitResultId, g.NavLayer, 0, g.NavInitResultRectRel);
@@ -9914,7 +9914,7 @@ static void ImGui::NavUpdateWindowing()
         g.NavDisableHighlight = false;
         g.NavDisableMouseHover = true;
 
-        // When entering a regular menu bar with the Alt key, we always reinitialize the navigation ID. It however persist on docking tab tabs.
+        // When entering a regular menu bar with the Alt key, we always reinitialize the navigation m_ID. It however persist on docking tab tabs.
         const ImGuiNavLayer new_nav_layer = (g.NavWindow->DC.NavLayerActiveMask & (1 << ImGuiNavLayer_Menu)) ? (ImGuiNavLayer)((int)g.NavLayer ^ 1) : ImGuiNavLayer_Main;
         const bool preserve_layer_1_nav_id = (new_nav_window->DockNodeAsHost != NULL);
         if (new_nav_layer == ImGuiNavLayer_Menu && !preserve_layer_1_nav_id)
@@ -9984,7 +9984,7 @@ void ImGui::ClearDragDrop()
     memset(&g.DragDropPayloadBufLocal, 0, sizeof(g.DragDropPayloadBufLocal));
 }
 
-// Call when current ID is active.
+// Call when current m_ID is active.
 // When this returns true you need to: a) call SetDragDropPayload() exactly once, b) you may render the payload visual/description, c) call EndDragDropSource()
 bool ImGui::BeginDragDropSource(ImGuiDragDropFlags flags)
 {
@@ -10017,8 +10017,8 @@ bool ImGui::BeginDragDropSource(ImGuiDragDropFlags flags)
             if ((window->DC.LastItemStatusFlags & ImGuiItemStatusFlags_HoveredRect) == 0 && (g.ActiveId == 0 || g.ActiveIdWindow != window))
                 return false;
 
-            // Magic fallback (=somehow reprehensible) to handle items with no assigned ID, e.g. Text(), Image()
-            // We build a throwaway ID based on current ID stack + relative AABB of items in window.
+            // Magic fallback (=somehow reprehensible) to handle items with no assigned m_ID, e.g. Text(), Image()
+            // We build a throwaway m_ID based on current m_ID stack + relative AABB of items in window.
             // THE IDENTIFIER WON'T SURVIVE ANY REPOSITIONING OF THE WIDGET, so if your widget moves your dragging operation will be canceled.
             // We don't need to maintain/call ClearActiveID() as releasing the button will early out this function and trigger !ActiveIdIsAlive.
             source_id = window->DC.LastItemId = window->GetIDFromRectangle(window->DC.LastItemRect);
@@ -10219,7 +10219,7 @@ const ImGuiPayload* ImGui::AcceptDragDropPayload(const char* type, ImGuiDragDrop
         return NULL;
 
     // Accept smallest drag target bounding box, this allows us to nest drag targets conveniently without ordering constraints.
-    // NB: We currently accept NULL id as target. However, overlapping targets requires a unique ID to function!
+    // NB: We currently accept NULL id as target. However, overlapping targets requires a unique m_ID to function!
     const bool was_accepted_previously = (g.DragDropAcceptIdPrev == g.DragDropTargetId);
     ImRect r = g.DragDropTargetRect;
     float r_surface = r.GetWidth() * r.GetHeight();
@@ -10881,7 +10881,7 @@ void ImGui::SetCurrentViewport(ImGuiWindow* current_window, ImGuiViewportP* view
         return;
     g.CurrentDpiScale = viewport ? viewport->DpiScale : 1.0f;
     g.CurrentViewport = viewport;
-    //IMGUI_DEBUG_LOG_VIEWPORT("SetCurrentViewport changed '%s' 0x%08X\n", current_window ? current_window->Name : NULL, viewport ? viewport->ID : 0);
+    //IMGUI_DEBUG_LOG_VIEWPORT("SetCurrentViewport changed '%s' 0x%08X\n", current_window ? current_window->Name : NULL, viewport ? viewport->m_ID : 0);
 
     // Notify platform layer of viewport changes
     // FIXME-DPI: This is only currently used for experimenting with handling of multiple DPI
@@ -11309,7 +11309,7 @@ static void ImGui::UpdateSelectWindowViewport(ImGuiWindow* window)
     {
         // Code explicitly request a viewport
         window->Viewport = (ImGuiViewportP*)FindViewportByID(g.NextWindowData.ViewportId);
-        window->ViewportId = g.NextWindowData.ViewportId; // Store ID even if Viewport isn't resolved yet.
+        window->ViewportId = g.NextWindowData.ViewportId; // Store m_ID even if Viewport isn't resolved yet.
         lock_viewport = true;
     }
     else if ((flags & ImGuiWindowFlags_ChildWindow) || (flags & ImGuiWindowFlags_ChildMenu))
@@ -11931,7 +11931,7 @@ void ImGui::DockContextUpdateDocking(ImGuiContext* ctx)
     dc->Requests.resize(0);
 
     // Create windows for each automatic docking nodes
-    // We can have NULL pointers when we delete nodes, but because ID are recycled this should amortize nicely (and our node count will never be very high)
+    // We can have NULL pointers when we delete nodes, but because m_ID are recycled this should amortize nicely (and our node count will never be very high)
     for (int n = 0; n < dc->Nodes.Data.Size; n++)
         if (ImGuiDockNode* node = (ImGuiDockNode*)dc->Nodes.Data[n].val_p)
             if (node->IsFloatingNode())
@@ -11945,8 +11945,8 @@ static ImGuiDockNode* ImGui::DockContextFindNodeByID(ImGuiContext* ctx, ImGuiID 
 
 ImGuiID ImGui::DockContextGenNodeID(ImGuiContext* ctx)
 {
-    // Generate an ID for new node (the exact ID value doesn't matter as long as it is not already used)
-    // FIXME-OPT FIXME-DOCK: This is suboptimal, even if the node count is small enough not to be a worry. We should poke in ctx->Nodes to find a suitable ID faster.
+    // Generate an m_ID for new node (the exact m_ID value doesn't matter as long as it is not already used)
+    // FIXME-OPT FIXME-DOCK: This is suboptimal, even if the node count is small enough not to be a worry. We should poke in ctx->Nodes to find a suitable m_ID faster.
     ImGuiID id = 0x0001;
     while (DockContextFindNodeByID(ctx, id) != NULL)
         id++;
@@ -11955,7 +11955,7 @@ ImGuiID ImGui::DockContextGenNodeID(ImGuiContext* ctx)
 
 static ImGuiDockNode* ImGui::DockContextAddNode(ImGuiContext* ctx, ImGuiID id)
 {
-    // Generate an ID for the new node (the exact ID value doesn't matter as long as it is not already used) and add the first window.
+    // Generate an m_ID for the new node (the exact m_ID value doesn't matter as long as it is not already used) and add the first window.
     if (id == 0)
         id = DockContextGenNodeID(ctx);
     else
@@ -12014,7 +12014,7 @@ struct ImGuiDockContextPruneNodeData
     ImGuiDockContextPruneNodeData() { CountWindows = CountChildWindows = CountChildNodes = 0; RootId = 0; }
 };
 
-// Garbage collect unused nodes (run once at init time)
+// Garbage collect unused nodes (run once at readFile time)
 static void ImGui::DockContextPruneUnusedSettingsNodes(ImGuiContext* ctx)
 {
     ImGuiContext& g = *ctx;
@@ -12208,7 +12208,7 @@ void ImGui::DockContextProcessDock(ImGuiContext* ctx, ImGuiDockRequest* req)
             next_selected_id = payload_window->ID;
     }
 
-    // FIXME-DOCK: When we are trying to dock an existing single-window node into a loose window, transfer Node ID as well
+    // FIXME-DOCK: When we are trying to dock an existing single-window node into a loose window, transfer Node m_ID as well
     // When processing an interactive split, usually LastFrameAlive will be < g.FrameCount. But DockBuilder operations can make it ==.
     if (node)
         IM_ASSERT(node->LastFrameAlive <= g.FrameCount);
@@ -12478,7 +12478,7 @@ static void ImGui::DockNodeAddWindow(ImGuiDockNode* node, ImGuiWindow* window, b
     }
 
     // When reactivating a node with one or two loose window, the window pos/size/viewport are authoritative over the node storage.
-    // In particular it is important we init the viewport from the first window so we don't create two viewports and drop one.
+    // In particular it is important we readFile the viewport from the first window so we don't create two viewports and drop one.
     if (node->HostWindow == NULL && node->IsFloatingNode())
     {
         if (node->AuthorityForPos == ImGuiDataAuthority_Auto)
@@ -13178,9 +13178,9 @@ static void ImGui::DockNodeUpdateTabBar(ImGuiDockNode* node, ImGuiWindow* host_w
         host_window->DC.NavLayerCurrentMask = (1 << ImGuiNavLayer_Menu);
     }
 
-    // Use PushOverrideID() instead of PushID() to use the node id _without_ the host window ID.
-    // This is to facilitate computing those ID from the outside, and will affect more or less only the ID of the collapse button, popup and tabs,
-    // as docked windows themselves will override the stack with their own root ID.
+    // Use PushOverrideID() instead of PushID() to use the node id _without_ the host window m_ID.
+    // This is to facilitate computing those m_ID from the outside, and will affect more or less only the m_ID of the collapse button, popup and tabs,
+    // as docked windows themselves will override the stack with their own root m_ID.
     PushOverrideID(node->ID);
     ImGuiTabBar* tab_bar = node->TabBar;
     bool tab_bar_is_recreated = (tab_bar == NULL); // Tab bar are automatically destroyed when a node gets hidden
@@ -13254,7 +13254,7 @@ static void ImGui::DockNodeUpdateTabBar(ImGuiDockNode* node, ImGuiWindow* host_w
         ImQsort(tab_bar->Tabs.Data + tabs_unsorted_start, tab_bar->Tabs.Size - tabs_unsorted_start, sizeof(ImGuiTabItem), TabItemComparerByDockOrder);
     }
 
-    // Selected newly added tabs, or persistent tab ID if the tab bar was just recreated
+    // Selected newly added tabs, or persistent tab m_ID if the tab bar was just recreated
     if (tab_bar_is_recreated && TabBarFindTabByID(tab_bar, node->SelectedTabId) != NULL)
         tab_bar->SelectedTabId = tab_bar->NextSelectedTabId = node->SelectedTabId;
     else if (tab_bar->Tabs.Size > tabs_count_old)
@@ -13294,7 +13294,7 @@ static void ImGui::DockNodeUpdateTabBar(ImGuiDockNode* node, ImGuiWindow* host_w
             window->DockTabItemStatusFlags = host_window->DC.LastItemStatusFlags;
             window->DockTabItemRect = host_window->DC.LastItemRect;
 
-            // Update navigation ID on menu layer
+            // Update navigation m_ID on menu layer
             if (g.NavWindow && g.NavWindow->RootWindowDockStop == window && (window->DC.NavLayerActiveMask & (1 << ImGuiNavLayer_Menu)) == 0)
                 host_window->NavLastIds[1] = window->ID;
         }
@@ -13306,7 +13306,7 @@ static void ImGui::DockNodeUpdateTabBar(ImGuiDockNode* node, ImGuiWindow* host_w
             root_node->VisibleWindow = node->VisibleWindow;
 
     // Close button (after VisibleWindow was updated)
-    // Note that VisibleWindow may have been overrided by CTRL+Tabbing, so VisibleWindow->ID may be != from tab_bar->SelectedTabId
+    // Note that VisibleWindow may have been overrided by CTRL+Tabbing, so VisibleWindow->m_ID may be != from tab_bar->SelectedTabId
     if (has_close_button && node->VisibleWindow)
     {
         if (!node->VisibleWindow->HasCloseButton)
@@ -14475,8 +14475,8 @@ void ImGui::DockBuilderRemoveNodeDockedWindows(ImGuiID root_id, bool clear_setti
     }
 }
 
-// If 'out_id_at_dir' or 'out_id_at_opposite_dir' are non NULL, the function will write out the ID of the two new nodes created.
-// Return value is ID of the node at the specified direction, so same as (*out_id_at_dir) if that pointer is set.
+// If 'out_id_at_dir' or 'out_id_at_opposite_dir' are non NULL, the function will write out the m_ID of the two new nodes created.
+// Return value is m_ID of the node at the specified direction, so same as (*out_id_at_dir) if that pointer is set.
 // FIXME-DOCK: We are not exposing nor using split_outer.
 ImGuiID ImGui::DockBuilderSplitNode(ImGuiID id, ImGuiDir split_dir, float size_ratio_for_node_at_dir, ImGuiID* out_id_at_dir, ImGuiID* out_id_at_opposite_dir)
 {
@@ -15041,8 +15041,8 @@ static void ImGui::DockSettingsHandler_ReadLine(ImGuiContext* ctx, ImGuiSettings
     int r = 0;
 
     // Parsing, e.g.
-    // " DockNode   ID=0x00000001 Pos=383,193 Size=201,322 Split=Y,0.506 "
-    // "   DockNode ID=0x00000002 Parent=0x00000001 "
+    // " DockNode   m_ID=0x00000001 Pos=383,193 Size=201,322 Split=Y,0.506 "
+    // "   DockNode m_ID=0x00000002 Parent=0x00000001 "
     // Important: this code expect currently fields in a fixed order.
     ImGuiDockNodeSettings node;
     line = ImStrSkipBlank(line);

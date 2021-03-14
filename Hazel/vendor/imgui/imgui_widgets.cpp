@@ -549,7 +549,7 @@ bool ImGui::ButtonBehavior(const ImRect& bb, ImGuiID id, bool* out_hovered, bool
                     if (flags & ImGuiButtonFlags_NoHoldingActiveId)
                         ClearActiveID();
                     else
-                        SetActiveID(id, window); // Hold on ID
+                        SetActiveID(id, window); // Hold on m_ID
                     g.ActiveIdMouseButton = mouse_button_clicked;
                     FocusWindow(window);
                 }
@@ -699,7 +699,7 @@ bool ImGui::SmallButton(const char* label)
     return pressed;
 }
 
-// Tip: use ImGui::PushID()/PopID() to push indices or pointers in the ID stack.
+// Tip: use ImGui::PushID()/PopID() to push indices or pointers in the m_ID stack.
 // Then you can keep 'str_id' empty or the same for all your buttons (instead of creating a string based on a non-string id)
 bool ImGui::InvisibleButton(const char* str_id, const ImVec2& size_arg, ImGuiButtonFlags flags)
 {
@@ -1029,7 +1029,7 @@ bool ImGui::ImageButton(ImTextureID user_texture_id, const ImVec2& size, const I
     if (window->SkipItems)
         return false;
 
-    // Default to using texture ID as ID. User can still push string/integer prefixes.
+    // Default to using texture m_ID as m_ID. User can still push string/integer prefixes.
     PushID((void*)(intptr_t)user_texture_id);
     const ImGuiID id = window->GetID("#image");
     PopID();
@@ -3234,7 +3234,7 @@ bool ImGui::InputScalar(const char* label, ImGuiDataType data_type, void* p_data
         BeginGroup(); // The only purpose of the group here is to allow the caller to query item data e.g. IsItemActive()
         PushID(label);
         SetNextItemWidth(ImMax(1.0f, CalcItemWidth() - (button_size + style.ItemInnerSpacing.x) * 2));
-        if (InputText("", buf, IM_ARRAYSIZE(buf), flags)) // PushId(label) + "" gives us the expected ID from outside point of view
+        if (InputText("", buf, IM_ARRAYSIZE(buf), flags)) // PushId(label) + "" gives us the expected m_ID from outside point of view
             value_changed = DataTypeApplyOpFromText(buf, g.InputTextState.InitialTextA.Data, data_type, p_data, format);
 
         // Step buttons
@@ -4309,7 +4309,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
         state->UserCallbackData = NULL;
     }
 
-    // Release active ID at the end of the function (so e.g. pressing Return still does a final application of the value)
+    // Release active m_ID at the end of the function (so e.g. pressing Return still does a final application of the value)
     if (clear_active_id && g.ActiveId == id)
         ClearActiveID();
 
@@ -5837,7 +5837,7 @@ void ImGui::SetNextItemOpen(bool is_open, ImGuiCond cond)
     g.NextItemData.OpenCond = cond ? cond : ImGuiCond_Always;
 }
 
-// CollapsingHeader returns true when opened but do not indent nor push into the ID stack (because of the ImGuiTreeNodeFlags_NoTreePushOnOpen flag).
+// CollapsingHeader returns true when opened but do not indent nor push into the m_ID stack (because of the ImGuiTreeNodeFlags_NoTreePushOnOpen flag).
 // This is basically the same as calling TreeNodeEx(label, ImGuiTreeNodeFlags_CollapsingHeader). You can remove the _NoTreePushOnOpen flag if you want behavior closer to normal TreeNode().
 bool ImGui::CollapsingHeader(const char* label, ImGuiTreeNodeFlags flags)
 {
@@ -5887,7 +5887,7 @@ bool ImGui::CollapsingHeader(const char* label, bool* p_open, ImGuiTreeNodeFlags
 //-------------------------------------------------------------------------
 
 // Tip: pass a non-visible label (e.g. "##hello") then you can use the space to draw other text or image.
-// But you need to make sure the ID is unique, e.g. enclose calls in PushID/PopID or use ##unique_id.
+// But you need to make sure the m_ID is unique, e.g. enclose calls in PushID/PopID or use ##unique_id.
 // With this scheme, ImGuiSelectableFlags_SpanAllColumns and ImGuiSelectableFlags_AllowItemOverlap are also frequently used flags.
 // FIXME: Selectable() with (size.x == 0.0f) and (SelectableTextAlign.x > 0.0f) followed by SameLine() is currently not supported.
 bool ImGui::Selectable(const char* label, bool selected, ImGuiSelectableFlags flags, const ImVec2& size_arg)
@@ -6548,7 +6548,7 @@ bool ImGui::BeginMenu(const char* label, bool enabled)
     if (window->Flags & (ImGuiWindowFlags_Popup | ImGuiWindowFlags_ChildMenu))
         flags |= ImGuiWindowFlags_ChildWindow;
 
-    // If a menu with same the ID was already submitted, we will append to it, matching the behavior of Begin().
+    // If a menu with same the m_ID was already submitted, we will append to it, matching the behavior of Begin().
     // We are relying on a O(N) search - so O(N log N) over the frame - which seems like the most efficient for the expected small amount of BeginMenu() calls per frame.
     // If somehow this is ever becoming a problem we can switch to use e.g. a ImGuiStorager mapping key to last frame used.
     if (g.MenusIdSubmittedThisFrame.contains(id))
@@ -6560,7 +6560,7 @@ bool ImGui::BeginMenu(const char* label, bool enabled)
         return menu_is_open;
     }
 
-    // Tag menu as used. Next time BeginMenu() with same ID is called it will append to existing menu
+    // Tag menu as used. Next time BeginMenu() with same m_ID is called it will append to existing menu
     g.MenusIdSubmittedThisFrame.push_back(id);
 
     ImVec2 label_size = CalcTextSize(label, NULL, true);
@@ -7124,7 +7124,7 @@ static void ImGui::TabBarLayout(ImGuiTabBar* tab_bar)
     ItemSize(ImVec2(tab_bar->OffsetMaxIdeal, tab_bar->BarRect.GetHeight()), tab_bar->FramePadding.y);
 }
 
-// Dockables uses Name/ID in the global namespace. Non-dockable items use the ID stack.
+// Dockables uses Name/m_ID in the global namespace. Non-dockable items use the m_ID stack.
 static ImU32   ImGui::TabBarCalcTabID(ImGuiTabBar* tab_bar, const char* label)
 {
     if (tab_bar->Flags & ImGuiTabBarFlags_DockNode)
@@ -7366,7 +7366,7 @@ bool    ImGui::BeginTabItem(const char* label, bool* p_open, ImGuiTabItemFlags f
     if (ret && !(flags & ImGuiTabItemFlags_NoPushId))
     {
         ImGuiTabItem* tab = &tab_bar->Tabs[tab_bar->LastTabItemIdx];
-        PushOverrideID(tab->ID); // We already hashed 'label' so push into the ID stack directly instead of doing another hash through PushID(label)
+        PushOverrideID(tab->ID); // We already hashed 'label' so push into the m_ID stack directly instead of doing another hash through PushID(label)
     }
     return ret;
 }
@@ -7405,7 +7405,7 @@ bool    ImGui::TabItemEx(ImGuiTabBar* tab_bar, const char* label, bool* p_open, 
     const ImGuiID id = TabBarCalcTabID(tab_bar, label);
 
     // If the user called us with *p_open == false, we early out and don't render.
-    // We make a call to ItemAdd() so that attempts to use a contextual popup menu with an implicit ID won't use an older ID.
+    // We make a call to ItemAdd() so that attempts to use a contextual popup menu with an implicit m_ID won't use an older m_ID.
     IMGUI_TEST_ENGINE_ITEM_INFO(id, label, window->DC.LastItemStatusFlags);
     if (p_open && !*p_open)
     {
@@ -7987,7 +7987,7 @@ ImGuiID ImGui::GetColumnsID(const char* str_id, int columns_count)
 {
     ImGuiWindow* window = GetCurrentWindow();
 
-    // Differentiate column ID with an arbitrary prefix for cases where users name their columns set the same as another widget.
+    // Differentiate column m_ID with an arbitrary prefix for cases where users name their columns set the same as another widget.
     // In addition, when an identifier isn't explicitly provided we include the number of columns in the hash to make it uniquer.
     PushID(0x11223347 + (str_id ? 0 : columns_count));
     ImGuiID id = window->GetID(str_id ? str_id : "columns");

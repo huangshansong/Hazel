@@ -146,7 +146,7 @@
 //         some glyph)
 //
 //      Glyph index
-//         A font-specific integer ID representing a glyph
+//         A font-specific integer m_ID representing a glyph
 //
 //      Baseline
 //         Glyph shapes are defined relative to a baseline, which is the

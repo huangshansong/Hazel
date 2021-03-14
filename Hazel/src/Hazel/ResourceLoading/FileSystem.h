@@ -1,9 +1,12 @@
 #pragma once
 #include "hzpch.h"
 
+#include "Hazel/HObject.h"
+
 namespace Hazel {
 
-	class FileSystem {
+	class HAZEL_API FileSystem : public HObject
+	{
 	public:
 		static inline std::string getPath(std::string relativePath) {
 

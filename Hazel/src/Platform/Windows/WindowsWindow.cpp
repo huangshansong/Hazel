@@ -7,10 +7,11 @@
 #include "Hazel/Events/KeyEvent.h"
 #include "Hazel/Events/MouseEvent.h"
 #include "Hazel/Log.h"
+#include "Hazel/Application.h"
 
 #include "WindowsWindow.h"
 
-
+using namespace std;
 namespace Hazel {
 	
 	static bool s_GLFWInitialized = false;
@@ -19,17 +20,24 @@ namespace Hazel {
 		HZ_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
 	}
 
-	WindowsWindow::WindowsWindow(const WindowProps& props)
+	WindowsWindow::WindowsWindow(void* application, const WindowProps& props)
 	{
-		Init(props);
+		m_OfApplication = application;
+		((Application*)application)->m_Windows.emplace_back(shared_ptr<Window>(this));
+		init(props);
+		m_WindowClosed = false;
+
+		//GUI
+		MyImGui* imGui = new MyImGui(this);
+
 	}
 
 	WindowsWindow::~WindowsWindow()
 	{
-		Shutdown();
+		shutdown();
 	}
 
-	void WindowsWindow::Init(const WindowProps& props)
+	void WindowsWindow::init(const WindowProps& props)
 	{
 		m_Data.Title = props.Title;
 		m_Data.Width = props.Width;
@@ -42,6 +50,7 @@ namespace Hazel {
 		{
 			int success = glfwInit();
 			HZ_CORE_ASSERT(success, "Could not initialize GLFW!");
+			HZ_CORE_INFO("glfwInit() successfully called.");
 
 			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -53,16 +62,22 @@ namespace Hazel {
 
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		glfwMakeContextCurrent(m_Window);
-		if (m_Window == nullptr)
+		if (m_Window == NULL)
 		{
-			HZ_CORE_ASSERT(1, "Failed to create GLFW window");
 			glfwTerminate();
+			HZ_CORE_ASSERT(1, "Failed to create GLFW window");	
+		}
+		else
+		{
+			HZ_CORE_INFO("glfwCreateWindow() successfully called.");
 		}
 
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		HZ_CORE_ASSERT(status, "Failed to initialize Glad!");
+		HZ_CORE_INFO("gladLoadGLLoader() successfully called.");
+
 		glfwSetWindowUserPointer(m_Window, &m_Data);
-		SetVSync(true);
+		setVSync(true);
 
 		
 		// Set GLFW callbacks
@@ -79,7 +94,7 @@ namespace Hazel {
 		glfwSetFramebufferSizeCallback(m_Window, [](GLFWwindow * window, int width, int height)
 		{
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-			WindowCloseEvent event;
+			FramebufferResizeEvent event(width, height);
 			data.EventCallback(event);
 		});
 
@@ -164,19 +179,43 @@ namespace Hazel {
 		
 	}
 
-	void WindowsWindow::Shutdown()
+	void WindowsWindow::shutdown()
 	{
+		m_ImGui = nullptr;
+
 		glfwDestroyWindow(m_Window);
-		
+
+		//when the deconstructor is called, the vector still has this element, so here is 1, not 0
+		if (((Application*)m_OfApplication)->m_Windows.size() == 1)
+		{
+			glfwTerminate();
+		}
 	}
 
 
-	void WindowsWindow::OnRender()
+	void WindowsWindow::onRender()
 	{
 		
 	}
 
-	void WindowsWindow::SetVSync(bool enabled)
+	void WindowsWindow::onPlayerInputEvent(Event& event)
+	{
+		for (shared_ptr<Viewport> viewport : m_Viewports)
+		{
+			viewport->onPlayerInputEvent(event);
+		}
+		EventDispatcher dispatcher(event);
+		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(WindowsWindow::onWindowClose));
+
+	}
+
+	bool WindowsWindow::onWindowClose(WindowCloseEvent& event)
+	{
+		m_WindowClosed = true;
+		return true;
+	}
+
+	void WindowsWindow::setVSync(bool enabled)
 	{
 		if (enabled)
 			glfwSwapInterval(1);
@@ -186,9 +225,28 @@ namespace Hazel {
 		m_Data.VSync = enabled;
 	}
 
-	bool WindowsWindow::IsVSync() const
+	bool WindowsWindow::isVSync() const
 	{
 		return m_Data.VSync;
+	}
+
+	void WindowsWindow::onUpdate()
+	{
+		
+		glfwMakeContextCurrent(m_Window);
+		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		HZ_CORE_ASSERT(status, "Failed to initialize Glad!");
+		
+		for (shared_ptr<Viewport> viewport : m_Viewports)
+		{
+			viewport->onUpdate();
+		}
+
+		m_ImGui->onUpdate();//this will probably edit something
+
+		glfwSwapBuffers(m_Window);
+		glfwPollEvents();//contains player inputs and Gui inputs in this window
+		
 	}
 
 }

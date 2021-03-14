@@ -10,6 +10,12 @@
     <Filter Include="src\Hazel\Actors">
       <UniqueIdentifier>{6B5F0F07-5758-2E59-808A-13DE6CE20D65}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Hazel\Components">
+      <UniqueIdentifier>{05472E03-F1D5-B7CC-9AF4-CBC78662C872}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Hazel\Editor">
+      <UniqueIdentifier>{26277010-1220-8F62-3B52-74E727AA6E6E}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Hazel\Events">
       <UniqueIdentifier>{D495B311-C08E-D263-E9C0-B7E8D518B26F}</UniqueIdentifier>
     </Filter>
@@ -63,8 +69,17 @@
     <ClInclude Include="src\Hazel\Application.h">
       <Filter>src\Hazel</Filter>
     </ClInclude>
+    <ClInclude Include="src\Hazel\Components\CollisionBox.h">
+      <Filter>src\Hazel\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\Components\PhysicsComponent.h">
+      <Filter>src\Hazel\Components</Filter>
+    </ClInclude>
     <ClInclude Include="src\Hazel\Core.h">
       <Filter>src\Hazel</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\Editor\Editor.h">
+      <Filter>src\Hazel\Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Hazel\EntryPoint.h">
       <Filter>src\Hazel</Filter>
@@ -81,28 +96,58 @@
     <ClInclude Include="src\Hazel\Events\MouseEvent.h">
       <Filter>src\Hazel\Events</Filter>
     </ClInclude>
-    <ClInclude Include="src\Hazel\ImGui\ImGuiLayer.h">
+    <ClInclude Include="src\Hazel\HObject.h">
+      <Filter>src\Hazel</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\HazelMathLib.h">
+      <Filter>src\Hazel</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\ImGui\MyImGui.h">
       <Filter>src\Hazel\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="src\Hazel\KeyCode.h">
       <Filter>src\Hazel</Filter>
     </ClInclude>
-    <ClInclude Include="src\Hazel\Layer.h">
-      <Filter>src\Hazel</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Hazel\LayerStack.h">
-      <Filter>src\Hazel</Filter>
-    </ClInclude>
     <ClInclude Include="src\Hazel\Levels\Level.h">
       <Filter>src\Hazel\Levels</Filter>
     </ClInclude>
-    <ClInclude Include="src\Hazel\Levels\LevelLayer.h">
+    <ClInclude Include="src\Hazel\Levels\PlantsLevel.h">
       <Filter>src\Hazel\Levels</Filter>
     </ClInclude>
     <ClInclude Include="src\Hazel\Log.h">
       <Filter>src\Hazel</Filter>
     </ClInclude>
     <ClInclude Include="src\Hazel\ResourceLoading\FileSystem.h">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\ResourceLoading\FromResourceModel.h">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\ResourceLoading\Geometry.h">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\ResourceLoading\LearnOpenGLModel.h">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\ResourceLoading\Material.h">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\ResourceLoading\ProceduralModel.h">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\ResourceLoading\QuixelFile.h">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\ResourceLoading\QuixelModel.h">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\ResourceLoading\SimpleGeometry.h">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\ResourceLoading\_ResourceLoading.h">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\ResourceLoading\landscape.h">
       <Filter>src\Hazel\ResourceLoading</Filter>
     </ClInclude>
     <ClInclude Include="src\Hazel\ResourceLoading\mesh.h">
@@ -114,23 +159,14 @@
     <ClInclude Include="src\Hazel\ResourceLoading\shader.h">
       <Filter>src\Hazel\ResourceLoading</Filter>
     </ClInclude>
-    <ClInclude Include="src\Hazel\ResourceLoading\shader_m.h">
-      <Filter>src\Hazel\ResourceLoading</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Hazel\ResourceLoading\shader_s.h">
-      <Filter>src\Hazel\ResourceLoading</Filter>
-    </ClInclude>
     <ClInclude Include="src\Hazel\Viewport.h">
-      <Filter>src\Hazel</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Hazel\ViewportLayer.h">
       <Filter>src\Hazel</Filter>
     </ClInclude>
     <ClInclude Include="src\Hazel\Window.h">
       <Filter>src\Hazel</Filter>
     </ClInclude>
-    <ClInclude Include="src\Hazel\WindowLayer.h">
-      <Filter>src\Hazel</Filter>
+    <ClInclude Include="src\Platform\Windows\OpenGLTexture.h">
+      <Filter>src\Platform\Windows</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h">
       <Filter>src\Platform\Windows</Filter>
@@ -1377,40 +1413,83 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
+    <ClInclude Include="src\Hazel\badAllocHandler.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Hazel\Actors\Actor.cpp">
       <Filter>src\Hazel\Actors</Filter>
     </ClCompile>
+    <ClCompile Include="src\Hazel\Actors\camera.cpp">
+      <Filter>src\Hazel\Actors</Filter>
+    </ClCompile>
     <ClCompile Include="src\Hazel\Application.cpp">
       <Filter>src\Hazel</Filter>
     </ClCompile>
-    <ClCompile Include="src\Hazel\ImGui\ImGuiLayer.cpp">
-      <Filter>src\Hazel\ImGui</Filter>
+    <ClCompile Include="src\Hazel\Components\CollisionBox.cpp">
+      <Filter>src\Hazel\Components</Filter>
     </ClCompile>
-    <ClCompile Include="src\Hazel\LayerStack.cpp">
+    <ClCompile Include="src\Hazel\Components\PhysicsComponent.cpp">
+      <Filter>src\Hazel\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\Editor\Editor.cpp">
+      <Filter>src\Hazel\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\HObject.cpp">
       <Filter>src\Hazel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\HazelMathLib.cpp">
+      <Filter>src\Hazel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\ImGui\MyImGui.cpp">
+      <Filter>src\Hazel\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="src\Hazel\Levels\Level.cpp">
       <Filter>src\Hazel\Levels</Filter>
     </ClCompile>
-    <ClCompile Include="src\Hazel\Levels\LevelLayer.cpp">
+    <ClCompile Include="src\Hazel\Levels\PlantsLevel.cpp">
       <Filter>src\Hazel\Levels</Filter>
     </ClCompile>
     <ClCompile Include="src\Hazel\Log.cpp">
       <Filter>src\Hazel</Filter>
     </ClCompile>
-    <ClCompile Include="src\Hazel\Viewport.cpp">
-      <Filter>src\Hazel</Filter>
+    <ClCompile Include="src\Hazel\ResourceLoading\FromResourceModel.cpp">
+      <Filter>src\Hazel\ResourceLoading</Filter>
     </ClCompile>
-    <ClCompile Include="src\Hazel\ViewportLayer.cpp">
+    <ClCompile Include="src\Hazel\ResourceLoading\LearnOpenGLModel.cpp">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\ResourceLoading\Material.cpp">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\ResourceLoading\ProceduralModel.cpp">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\ResourceLoading\QuixelModel.cpp">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\ResourceLoading\SimpleGeometry.cpp">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\ResourceLoading\landscape.cpp">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\ResourceLoading\mesh.cpp">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\ResourceLoading\model.cpp">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\ResourceLoading\shader.cpp">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\Viewport.cpp">
       <Filter>src\Hazel</Filter>
     </ClCompile>
     <ClCompile Include="src\Hazel\Window.cpp">
       <Filter>src\Hazel</Filter>
     </ClCompile>
-    <ClCompile Include="src\Hazel\WindowLayer.cpp">
-      <Filter>src\Hazel</Filter>
+    <ClCompile Include="src\Platform\Windows\OpenGLTexture.cpp">
+      <Filter>src\Platform\Windows</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp">
       <Filter>src\Platform\Windows</Filter>
@@ -1421,6 +1500,6 @@
     <ClCompile Include="src\hzpch.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\Windows\OpenGL.cpp" />
+    <ClCompile Include="src\Hazel\badAllocHandler.cpp" />
   </ItemGroup>
 </Project>
