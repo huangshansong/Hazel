@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Hazel/HObject.h"
+
 namespace Hazel
 {
 	enum class SimpleGeometryType
@@ -7,10 +9,10 @@ namespace Hazel
 		Sphere = 0
 	};
 
-	struct Sphere
+	struct HAZEL_API Sphere : public HObject
 	{
 		float radius;
-		Sphere(float radius = 0.0f) : radius(radius){}
+		Sphere(float radius = 1.0f) : radius(radius){}
 	};
 
 }

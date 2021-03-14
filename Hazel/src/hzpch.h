@@ -15,7 +15,6 @@
 #include <unordered_set>
 #include <random>
 
-
 #ifdef HZ_PLATFORM_WINDOWS	
 	#include <Windows.h>
 #endif

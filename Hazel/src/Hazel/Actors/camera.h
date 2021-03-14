@@ -12,37 +12,42 @@
 namespace Hazel {
 
     // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
-    class Camera : public Actor 
+    class HAZEL_API Camera : public Actor 
     {
     public:
-        class Interface
-        {
-            friend class Level;
-        private:
-            static Actor* create(glm::vec3& transform = glm::vec3(0.0f, 0.0f, 0.0f)) { return new Camera(transform); }
-        };
-    public:
-        float getZoom() { return m_Zoom; }
-        glm::mat4 getViewMatrix(){ return glm::lookAt(m_Transform, m_Transform + m_Front, m_Up); }
+        // constructor with vectors
+        Camera(void* level, std::string name, glm::vec3 transform = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = s_YAW, float pitch = s_PITCH);
+
+        const float getZoom() const { return m_Zoom; }
+
+        const glm::mat4& getCameraViewMatrix() const { return m_CameraViewMatrix; }
+
+        const glm::mat4& getCameraProjectionMatrix() const { return m_CameraProjectionMatrix; }
+
+        float m_MouseSensitivity;
+
+        float m_Zoom;
+
+        float m_NearPlaneDistance;
+
+        float m_FarPlaneDistance;
+
+        glm::mat4 m_CameraViewMatrix;
+
+        glm::mat4 m_CameraProjectionMatrix;
 
     protected:
-        // constructor with vectors
-        Camera(glm::vec3 transform = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = s_YAW, float pitch = s_PITCH);
-        // constructor with scalar values
-        Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch);
- 
-        virtual void onEvent(Event& event);
+        
+        virtual void onPlayerInputEvent(Event& event);
+
         virtual void onUpdate();
 
-    private:
-        bool onMouseMoved(MouseMovedEvent& e);
-        bool onMouseScrolled(MouseScrolledEvent& e);
-        bool onKeyPressed(KeyPressedEvent& e);
-        bool onKeyReleased(KeyReleasedEvent& e);
-
-    protected:
         // calculates the front vector from the Camera's (updated) Euler Angles
         void updateCameraVectors();
+
+        void updateCameraViewMatrix() { m_CameraViewMatrix = glm::lookAt(m_Transform, m_Transform + m_Front, m_Up); }
+
+        void updateCameraProjectionMatrix();
 
         // camera Attributes
         glm::vec3 m_Front;
@@ -58,8 +63,6 @@ namespace Hazel {
         bool m_BackwardMove = false;
         bool m_LeftMove = false;
         bool m_RightMove = false;
-        float m_MouseSensitivity;
-        float m_Zoom;
         bool m_ConstrainPitch = true;
         // Default camera values
         static float s_YAW;
@@ -67,5 +70,15 @@ namespace Hazel {
         static float s_SPEED;
         static float s_SENSITIVITY;
         static float s_ZOOM;
+        static float s_NearPlaneDistance;
+        static float s_FarPlaneDistance;
+
+
+    private:
+        bool onMouseMoved(MouseMovedEvent& e);
+        bool onMouseScrolled(MouseScrolledEvent& e);
+        bool onKeyPressed(KeyPressedEvent& e);
+        bool onKeyReleased(KeyReleasedEvent& e);
+
     };
 }

@@ -6,8 +6,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SanboxApp.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
+    <ClCompile Include="src\SanboxApp.cpp" />
   </ItemGroup>
 </Project>

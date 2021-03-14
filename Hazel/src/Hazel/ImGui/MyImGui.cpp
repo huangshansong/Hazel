@@ -9,14 +9,18 @@
 #include <GLFW/glfw3.h>
 #include <Glad/glad.h>
 
-#include "Hazel/Application.h"
+#include "Hazel/Window.h"
+#include "Hazel/Editor/Editor.h"
 
-#include "ImGuiLayer.h"
+#include "MyImGui.h"
 
 namespace Hazel {
 
-	void ImGuiLayer::onAttach()
+	MyImGui::MyImGui(void* window)
+		: m_OfWindow(window)
 	{
+		((Window*)window)->m_ImGui = std::unique_ptr<MyImGui>(this);
+
 		// Setup Dear ImGui context
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -24,7 +28,9 @@ namespace Hazel {
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
 		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+
 		//io.ConfigViewportsNoAutoMerge = true;
 		//io.ConfigViewportsNoTaskBarIcon = true;
 
@@ -41,12 +47,12 @@ namespace Hazel {
 		}
 
 		// Setup Platform/Renderer bindings
-		ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(Application::getWindow()->getNativeWindow()), true);
+		ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)(((Window*)m_OfWindow)->getNativeWindow()), true);
 		ImGui_ImplOpenGL3_Init("#version 330");
 
 	}
 
-	void ImGuiLayer::onDetach()
+	MyImGui::~MyImGui()
 	{
 		// Cleanup
 		ImGui_ImplOpenGL3_Shutdown();
@@ -68,31 +74,30 @@ namespace Hazel {
 		
 	}
 
-	void ImGuiLayer::onRender()
+	void MyImGui::onRender()
 	{
-		//static bool show_demo_window = true;
-		//ImGui::ShowDemoWindow(&show_demo_window);
+
 		showDemo2();
 	}
 
-	void ImGuiLayer::onUpdate()
+	void MyImGui::onUpdate()
 	{
 		begin();
 		onRender();
 		end();
 	}
 
-	void ImGuiLayer::begin()
+	void MyImGui::begin()
 	{
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 	}
 
-	void ImGuiLayer::end()
+	void MyImGui::end()
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		io.DisplaySize = ImVec2(Application::getWindow()->getWidth(), Application::getWindow()->getHeight());
+		io.DisplaySize = ImVec2(((Window*)m_OfWindow)->getWidth(), ((Window*)m_OfWindow)->getHeight());
 
 		// Rendering
 		ImGui::Render();

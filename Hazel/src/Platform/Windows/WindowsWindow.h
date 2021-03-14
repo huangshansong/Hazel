@@ -1,4 +1,5 @@
 #pragma once
+#include "hzpch.h"
 
 #include <GLFW/glfw3.h>
 
@@ -9,44 +10,40 @@ namespace Hazel {
 
 	class WindowsWindow : public Window
 	{
-		friend class WindowLayer;
-		friend class Window;
 	public:
-		unsigned int getWidth() const override { return m_Data.Width; }
-		unsigned int getHeight() const override { return m_Data.Height; }
+		WindowsWindow(void* application, const WindowProps& props);
+
+		virtual ~WindowsWindow() override;
+
+		virtual bool isWindowClosed() const override { return m_WindowClosed; }
+
+		virtual uint32_t getWidth() const override { return m_Data.Width; }
+
+		virtual uint32_t getHeight() const override { return m_Data.Height; }
+
 		virtual void* getNativeWindow() const override { return m_Window; }
-		virtual Viewport* getViewport() const override { return m_Viewport; }
-
 		
-	private:
-		WindowsWindow(const WindowProps& props);
 		virtual void init(const WindowProps& props);
-		virtual void shutdown();
-		virtual ~WindowsWindow();
 
+		virtual void shutdown();
+		
 		// Window attributes
 		virtual void setEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
-		virtual void setViewport(Viewport* viewport) override { m_Viewport = viewport; }
+	
+		// Window attributes
+		virtual void setVSync(bool enabled) override;
+
+		virtual bool isVSync() const override;
+
+		virtual void onUpdate() override;
 
 		virtual void onRender() override;
 
-		// Window attributes
-		void setVSync(bool enabled) override;
-		bool isVSync() const override;
+		virtual void onPlayerInputEvent(Event&) override;
 
-		
+		virtual bool onWindowClose(WindowCloseEvent&) override;
+	protected:
 		GLFWwindow* m_Window;
-		
-		struct WindowData
-		{
-			std::string Title;
-			unsigned int Width, Height;
-			bool VSync;
-
-			EventCallbackFn EventCallback;
-		};
-
-		WindowData m_Data;
 	};
 
 }

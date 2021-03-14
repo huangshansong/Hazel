@@ -4910,7 +4910,7 @@ GLFWAPI GLFWdropfun glfwSetDropCallback(GLFWwindow* window, GLFWdropfun callback
  *  This function returns whether the specified joystick is present.
  *
  *  There is no need to call this function before other functions that accept
- *  a joystick ID, as they all check for presence before performing any other
+ *  a joystick m_ID, as they all check for presence before performing any other
  *  work.
  *
  *  @param[in] jid The [joystick](@ref joysticks) to query.

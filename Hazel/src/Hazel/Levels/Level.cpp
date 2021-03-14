@@ -1,12 +1,5 @@
 #include "hzpch.h"
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
-#include <gtc/type_ptr.hpp>
-
-
 #include "Hazel/Application.h"
 #include "Hazel/Actors/Actor.h"
 #include "Hazel/Actors/camera.h"
@@ -18,62 +11,54 @@
 using namespace std;
 namespace Hazel
 {
-	bool Level::m_FirstLevel = true;
-
-	void Level::init()
-	{
-        if (m_FirstLevel) {
-            m_FirstLevel = false;
-
-            Actor* camera = createCamera();
-            m_Actors.emplace_back(camera);
-            m_CurrentCamera = dynamic_cast<Camera*>(camera);
-
-            if (Application::getCanDisplayTest())
-            {
-                Actor* actor = createActor("Backpack");
-                m_Actors.emplace_back(actor);
-            }
-            else
-            {
-                Actor* actor;
-                actor = createActor("Landscape");
-                m_Actors.emplace_back(actor);
-                actor = createActor("Sphere");
-                m_Actors.emplace_back(actor);
-            }
-        }
-	}
-
+    Level::Level(Level* level, std::string name)
+        : m_OfViewport(level->m_OfViewport), m_Name(name)
+    {
+        level->m_ChildLevels.emplace_back(shared_ptr<Level>(this));
+        setCamera(this, level->m_Camera);
+    }
+    Level::Level(void* viewport, std::string name)
+        : m_OfViewport(viewport), m_Name(name)
+    {
+        ((Viewport*)viewport)->m_RootLevels.emplace_back(shared_ptr<Level>(this));
+    }
     void Level::onRender()
     {
-        for (Actor* actor : m_Actors)
+        for (shared_ptr<Actor> actor : m_Actors)
         {
-            callActorOnRender(actor);
+            actor->onRender();
+        }
+        for (shared_ptr<Level> childLevel : m_ChildLevels)
+        {
+            childLevel->onRender();
         }
     }
 
     void Level::onUpdate()
     {
         //should add physics processing here later!!!!!!!!!
-        //multi-thread processing needed, physics one, and render one
-        for (Actor* actor : m_Actors)
+        for (shared_ptr<Actor> actor : m_Actors)
         {
-            callActorOnUpdate(actor);
+            actor->onUpdate();
         }
-        onRender();
+        for (shared_ptr<Level> childLevel : m_ChildLevels)
+        {
+            childLevel->onUpdate();
+        }
+        
     }
 
-    void Level::onEvent(Event& event)
+    void Level::onPlayerInputEvent(Event& event)
     {
-        for (Actor* actor : m_Actors)
+        for (shared_ptr<Actor> actor : m_Actors)
         {
-            callActorOnEvent(actor, event);
+            actor->onPlayerInputEvent(event);
         }
-    }
+        for (shared_ptr<Level> childLevel : m_ChildLevels)
+        {
+            childLevel->onPlayerInputEvent(event);
+        }
 
-    void Level::gen_ItemLocation()
-    {
     }
 
 }

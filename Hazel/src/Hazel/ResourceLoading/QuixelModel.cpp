@@ -11,38 +11,39 @@ using namespace std;
 namespace Hazel
 {
     // constructor, expects a filepath to a 3D model.
-    QuixelModel::QuixelModel(void* actor, const string& folderPath, QuixelObjectType type, bool gamma)
-        : Model(actor, gamma), m_Type(type)
+    QuixelModel::QuixelModel(void* actor, const string& ditectory, QuixelObjectType type, bool gamma)
+        : FromResourceModel(actor, ditectory, gamma), m_Type(type)
     {
-        m_Directory = folderPath;
+        loadDirectory();
+    }
+    void QuixelModel::loadDirectory()
+    {
+        //set the model's name
+        if (m_Type == QuixelObjectType::_3dplant)
+        {
+            m_Name = m_Directory.substr(m_Directory.find_last_of('V'), m_Directory.find_last_of('/') - m_Directory.find_last_of('V'));
+        }
+        else
+        {
+            m_Name = m_Directory.substr(m_Directory.find_last_of('_') + 1, m_Directory.find_last_of('/') - m_Directory.find_last_of('_') - 1);
 
-        //set the model's name, only for the Quxel's model
-        m_Name = folderPath.substr(folderPath.find_last_of('/') + 1, folderPath.find_last_of('_') - folderPath.find_last_of('/') - 1);
-
+        }
         //load LODs from 0 to n
         bool stillHaveLODs = true;
+        unsigned int LODsNumber = 0;
         while (stillHaveLODs)
         {
-            string modelFileName = folderPath + m_Name + "_LOD" + to_string(m_LODs.size()) + ".fbx";
-            
-            std::vector<Mesh*> meshes;
-            stillHaveLODs = loadModel(modelFileName);
+            string modelFileName = m_Directory + m_Name + "_LOD" + to_string(LODsNumber) + ".fbx";
+
+            stillHaveLODs = loadModel(modelFileName, LODsNumber);
             if (stillHaveLODs)
             {
-                meshes.clear();
-                meshes = m_Meshes;
-                m_LODs.emplace_back(meshes);
-                m_Meshes.clear();
-
-                for (Mesh* mesh : meshes)
-                {
-                    setMeshQuixelMaterial(mesh, folderPath, m_TexturesLoaded, m_Type, m_LODs.size());
-                }
+                LODsNumber++;
             }
             else//failed to read LODn's model file
             {
                 break;
-            }  
+            }
         }
     }
 }

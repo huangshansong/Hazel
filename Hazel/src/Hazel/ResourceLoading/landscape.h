@@ -1,45 +1,45 @@
 #pragma once
 #include "hzpch.h"
 
-#include "model.h"
+#include "ProceduralModel.h"
 
 namespace Hazel
 {
-	struct Peak
+	struct HAZEL_API Peak
 	{
 		int x;
 		int y;
 		float height;
 		float direction;
 	};
-	struct Mountain
+	struct HAZEL_API Mountain
 	{
 		std::vector<Peak> peaks;
 	};
 
 	//LandscapeModel is a model
-	class LandscapeModel : public Model
+	class HAZEL_API LandscapeModel : public ProceduralModel
 	{
 	public:
-		class Interface
-		{
-			friend class Actor;
-		private:
-			static Model* create(void* actor, unsigned int width = 1000, unsigned int length = 1000) { return new LandscapeModel(actor);}
-		};
-		
-		int getWidth() const { return m_Width; }
-		int getLength() const { return m_Length; }
-		float getHeight(int x, int y) const { return m_HeightMap[x][y]; }
-		
-	protected:
 		LandscapeModel(void* actor, unsigned int width = 1000, unsigned int length = 1000);
+
 		virtual ~LandscapeModel();
 
-		void gen_Landscape();
+		int getWidth() { return m_Width; }
+
+		int getLength() { return m_Length; }
+
+		float getHeight(int x, int y) { return m_HeightMap[x][y]; }
+		
+	protected:
+		virtual void setupModel() override;
+
+		virtual void processMesh() override;
 
 		void mountains2heightMap(std::vector<Mountain>&);
+
 		void setMainpeak(Peak&);
+
 		void setPeak(Peak&, Peak&, Peak&);
 
 		int m_Width;
@@ -47,6 +47,22 @@ namespace Hazel
 		float m_Maxheight;
 		float**  m_HeightMap = nullptr;
 		float** m_Peak2hillMap = nullptr;
+
+	};
+
+	class HAZEL_API LandscapeMesh : public Mesh
+	{
+	public:
+		// initializes all the buffer objects/arrays
+		LandscapeMesh(LandscapeModel* landscape);
+
+		
+	protected:
+		virtual void setupMesh() override;
+
+		virtual void drawAfterBindTextures() const override;
+
+		unsigned int m_IndexCount = 0;
 
 	};
 }

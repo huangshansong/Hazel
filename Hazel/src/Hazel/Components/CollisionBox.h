@@ -3,10 +3,11 @@
 
 #include <glm.hpp>
 
+#include "Hazel/HObject.h"
 
 namespace Hazel
 {
-	struct PhysicsProps
+	struct HAZEL_API PhysicsProps
 	{
 		glm::vec3 transform;
 		float mass;
@@ -16,19 +17,17 @@ namespace Hazel
 	};
 
 
-	class CollisionBox
+	class HAZEL_API CollisionBox : public HObject
 	{
 	public:
 		CollisionBox() {}
 		virtual ~CollisionBox() = default;
 
-	private:
 		PhysicsProps props;
 	};
 
-	class SphereBox : public CollisionBox
+	class HAZEL_API SphereBox : public CollisionBox
 	{
-	private:
 		float radius;
 	};
 }

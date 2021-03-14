@@ -87,7 +87,8 @@ project "Hazel"
 		postbuildcommands
 		{
 			"{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox",
-			"{COPY} ../%{IncludeDir.assimp}/assimp-vc142-mtd.dll ../bin/" .. outputdir .. "/Sandbox"
+			"{COPY} ../%{IncludeDir.assimp}/assimp-vc142-mtd.dll ../bin/" .. outputdir .. "/Sandbox",
+			"{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/GUI",
 		}
 	
 	filter "configurations:Debug"
@@ -104,6 +105,62 @@ project "Hazel"
 		defines "HZ_DIST"
 		runtime "Release"
 		optimize "On"
+	
+project "GUI"
+	location "GUI"
+	kind "SharedLib"
+	language "C#"
+	staticruntime "off"
+	clr "Unsafe"
+	
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+	
+	
+	files
+	{
+		"%{prj.name}/src/**.cs"
+		
+	}
+	
+	includedirs
+	{
+		"Hazel"
+	}
+	
+	links
+	{
+		"HAZEL"
+	}
+	
+	filter "system:windows"
+		systemversion "latest"
+		
+		defines
+		{
+			"HZ_PLATFORM_WINDOWS",
+			"HZ_BUILD_DLL"
+		}
+		
+		postbuildcommands
+		{
+			"{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox",
+		}
+	
+	filter "configurations:Debug"
+		defines "HZ_DEBUG"
+		runtime "Debug"
+		symbols "On"
+	
+	filter "configurations:Release"
+		defines "HZ_RELEASE"
+		runtime "Release"
+		optimize "On"
+	
+	filter "configurations:Dist"
+		defines "HZ_DIST"
+		runtime "Release"
+		optimize "On"	
 	
 project "Sandbox"
 	location "Sandbox"
@@ -124,20 +181,19 @@ project "Sandbox"
 	{
 		"Hazel",
 		"Hazel/src",
-		"%{IncludeDir.spdlog}",
-		"%{IncludeDir.glm}",
-		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.Glad}",
-		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.vendor}",
-		"%{IncludeDir.assimp}"
-		
-		
+		"%{IncludeDir.spdlog}",
+		"%{IncludeDir.GLFW}",
+		"%{IncludeDir.Glad}",
+		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.assimp}"		
 	}
 	
 	links
 	{
-		"Hazel"
+		"Hazel",
+		"GUI"
 	}
 	
 	

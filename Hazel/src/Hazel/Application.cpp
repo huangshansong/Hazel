@@ -1,60 +1,33 @@
 #include "hzpch.h"
 
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
-#include "ImGui/ImGuiLayer.h"
-#include "Hazel/Levels/LevelLayer.h"
 
 #include "Application.h"
 #include "Log.h"
-#include "WindowLayer.h"
-#include "ViewportLayer.h"
 
-
-namespace Hazel {
-
-	Window* Application::s_Window = nullptr;
+using namespace std;
+namespace Hazel 
+{
 	float Application::s_DeltaTime = 0.0f;
 	float Application::s_LastFrameTime = 0.0f;
-	bool Application::s_CanDisplayTest = true;
 
-	Application::Application() {
+	Application::Application() 
+	{
+		//Editor
+		Editor* editor = new Editor(this);
 
 		//Window
-		WindowLayer* windowLayer = new WindowLayer;
-		pushLayer(windowLayer);
+		Window* window1 = Window::create(this);
 		//bind event function of the application to the window events
-		WindowLayer::setEventCallback(Application::s_Window, BIND_EVENT_FN(Application::onEvent));
+		window1->setEventCallback(BIND_EVENT_FN(Application::onPlayerInputEvent));
 
-		//Viewport
-		ViewportLayer* viewportLayer = new ViewportLayer;
-		pushLayer(viewportLayer);
+		//just for testing!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		m_Editor->canDiplayTest(window1);
 
-		//Level, the first level
-		s_CanDisplayTest = false;
-		LevelLayer* levelLayer = new LevelLayer;
-		//if you push a level, it will be the current level
-		pushLayer(levelLayer);
-
-		//GUI
-		ImGuiLayer* imGuiLayer = new ImGuiLayer;
-		pushOverlay(imGuiLayer);
-
-		
 	}
 
-	void Application::pushLayer(Layer* layer) {
-		m_LayerStack.pushLayer(layer);
-		layer->onAttach();
-	}
-
-	void Application::pushOverlay(Layer* layer) {
-		m_LayerStack.pushOverlay(layer);
-		layer->onAttach();
-	}
-
-	void Application::run() {
+	void Application::run() 
+	{
 
 		//app start
 		m_Running = true;
@@ -67,31 +40,35 @@ namespace Hazel {
 			s_DeltaTime = currentFrameTime - s_LastFrameTime;
 			s_LastFrameTime = currentFrameTime;
 
-			//render and update
-			for (Layer* layer : m_LayerStack) {
-				layer->onUpdate();
+			m_Running = false;
+			for (vector<shared_ptr<Window>>::iterator it = m_Windows.begin(); it != m_Windows.end();)
+			{
+				if ((*it)->isWindowClosed())
+				{
+					it = m_Windows.erase(it);
+				}
+				else 
+				{
+					it++;
+					m_Running = true;
+				}
 			}
-			
-			//app needs to be closed when window is closed
-			m_Running = !s_Window->isWindowClosed();
-		}
 
-		//backward close all layers
-		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();) {
-			(*--it)->onDetach();
-		}
-	}
-
-	void Application::onEvent(Event& e) {
-		
-		
-		HZ_CORE_TRACE("{0}", e);
-
-		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();) {
-			(*--it)->onEvent(e);
-			if (e.m_Handled)
-				break;
+			for (shared_ptr<Window> window : m_Windows)
+			{
+				window->onUpdate();
+				//the playerInputs and GuiInputs will be handled here, see window->onUpdate()'s last ine, it's glfwPollEvents().
+			}
+			m_Editor->pollEditions();
 		}
 	}
 
+	void Application::onPlayerInputEvent(Event& event) 
+	{
+		HZ_CORE_TRACE("{0}", event);
+		for (shared_ptr<Window> window : m_Windows)
+		{
+			window->onPlayerInputEvent(event);
+		}	
+	}
 }

@@ -6,61 +6,68 @@
 #include "Hazel/Log.h"
 #include "Hazel/HazelMathLib.h"
 
-#include "LandscapeMesh.h"
 #include "landscape.h"
 
 using namespace std;
 namespace Hazel
 {
 	LandscapeModel::LandscapeModel(void* actor, unsigned int width, unsigned int length)
-		: Model(actor), m_Width(width), m_Length(length)
+		: ProceduralModel(actor), m_Width(width), m_Length(length)
 	{
-		m_Directory = "resources/surfaces/landscape/";
+		setupModel();
 
-		gen_Landscape();
+		processMesh();
 	}
-	void LandscapeModel::gen_Landscape()
-	{
-		//set the MAXHEIGHT according to the WIDTH and LENGTH
-		m_Maxheight = std::fminf(m_Width, m_Length) / 4.0f;
 
-		//malloc heightMap
+	LandscapeModel::~LandscapeModel()
+	{
 		if (m_HeightMap != nullptr)
 		{
 			for (int i = 1; i < m_Width; i++)
 			{
-				free(m_HeightMap[i]);
+				if (m_HeightMap[i] != nullptr)
+				{
+					free(m_HeightMap[i]);
+				}
 			}
 			free(m_HeightMap);
 		}
-		m_HeightMap = nullptr;
-		m_HeightMap = (float**)malloc(sizeof(float*) * m_Width);
-		HZ_CORE_ASSERT(m_HeightMap, "heightMap not successfully malloced!");
-		for (int i = 0; i < m_Width; i++)
-		{
-			m_HeightMap[i] = (float*)malloc(sizeof(float) * m_Length);
-			HZ_CORE_ASSERT(m_HeightMap[i], "heightMap not successfully malloced!");
-			//HZ_CORE_INFO((void*)heightMap[i]);
-		}
-		//set heightMap values
-		for (int j = 0; j < m_Length; j++)
+		if (m_Peak2hillMap != nullptr)
 		{
 			for (int i = 1; i < m_Width; i++)
 			{
-				m_HeightMap[i][j] = 1E-5f;
-				//HZ_CORE_INFO(heightMap[i][j]);
+				if (m_Peak2hillMap[i] != nullptr)
+				{
+					free(m_Peak2hillMap[i]);
+				}
 			}
+			free(m_Peak2hillMap);
 		}
-		//malloc peak2hillMap
+	}
+
+	void LandscapeModel::setupModel()
+	{
+		//set the MAXHEIGHT according to the WIDTH and LENGTH
+		m_Maxheight = std::fminf(m_Width, m_Length) / 4.0f;
+
+		//malloc and set peak2hillMap only once
 		if (m_Peak2hillMap == nullptr)
 		{
-			m_Peak2hillMap = (float**)malloc(sizeof(float*) * m_Width);
-			HZ_CORE_ASSERT(m_Peak2hillMap, "peak2hillMap not successfully malloced!");
+			while (m_Peak2hillMap == nullptr)
+			{
+				m_Peak2hillMap = (float**)malloc(sizeof(float*) * m_Width);
+
+				if(m_Peak2hillMap == nullptr) HZ_CORE_INFO("peak2hillMap not successfully malloced!");
+			}
 			for (int i = 0; i < m_Width; i++)
 			{
 				m_Peak2hillMap[i] = nullptr;
-				m_Peak2hillMap[i] = (float*)malloc(sizeof(float) * m_Length);
-				HZ_CORE_ASSERT(m_Peak2hillMap[i], "peak2hillMap not successfully malloced!");
+				while (m_Peak2hillMap[i] = nullptr)
+				{
+					m_Peak2hillMap[i] = (float*)malloc(sizeof(float) * m_Length);
+
+					if (m_Peak2hillMap[i] == nullptr) HZ_CORE_INFO("peak2hillMap not successfully malloced!");
+				}
 			}
 			//set peak2hillMap values
 			for (int j = 0; j < m_Length; j++)
@@ -86,6 +93,46 @@ namespace Hazel
 			//return;
 		}
 
+		//malloc heightMap
+		if (m_HeightMap != nullptr)
+		{
+			for (int i = 1; i < m_Width; i++)
+			{
+				if (m_HeightMap[i] != nullptr)
+				{
+					free(m_HeightMap[i]);
+				}
+			}
+			free(m_HeightMap);
+		}
+		m_HeightMap = nullptr;
+		while (m_HeightMap == nullptr)
+		{
+			m_HeightMap = (float**)malloc(sizeof(float*) * m_Width);
+
+			if(m_HeightMap == nullptr) HZ_CORE_INFO("heightMap not successfully malloced!");
+		}
+		for (int i = 0; i < m_Width; i++)
+		{
+			m_HeightMap[i] = nullptr;
+			while (m_HeightMap[i] == nullptr)
+			{
+				m_HeightMap[i] = (float*)malloc(sizeof(float) * m_Length);
+
+				if (m_HeightMap[i] == nullptr) HZ_CORE_INFO("heightMap[i] not successfully malloced!");
+			}
+			//HZ_CORE_INFO((void*)heightMap[i]);
+		}
+		//set heightMap values
+		for (int j = 0; j < m_Length; j++)
+		{
+			for (int i = 1; i < m_Width; i++)
+			{
+				m_HeightMap[i][j] = 1E-5f;
+				//HZ_CORE_INFO(heightMap[i][j]);
+			}
+		}
+		
 		//set the number of total peaks
 		std::random_device rd;
 		std::default_random_engine random_Generator{ rd() };
@@ -102,14 +149,14 @@ namespace Hazel
 		while (peakCount < peaksTotal)
 		{
 			Mountain mountain;
-			
+
 			int peaksOfMountain = -1;
 			distribution.param(std::normal_distribution<float>::param_type(10, 10));
 			while (peaksOfMountain < 0 || peaksOfMountain >= 20)
 			{
 				peaksOfMountain = (int)distribution(random_Generator);
 			}
-			
+
 			Peak mainpeak;
 			setMainpeak(mainpeak);
 			mountain.peaks.emplace_back(mainpeak);
@@ -153,30 +200,12 @@ namespace Hazel
 		}
 
 		mountains2heightMap(mountains);
-
-		LandscapeMesh* landscapeMesh = new LandscapeMesh(this);
-		m_Meshes.emplace_back(landscapeMesh);
 	}
-
-	LandscapeModel::~LandscapeModel()
+	void LandscapeModel::processMesh()
 	{
-		if (m_HeightMap != nullptr)
-		{
-			for (int i = 1; i < m_Width; i++)
-			{
-				free(m_HeightMap[i]);
-			}
-			free(m_HeightMap);
-		}
-		if (m_Peak2hillMap != nullptr)
-		{
-			for (int i = 1; i < m_Width; i++)
-			{
-				free(m_Peak2hillMap[i]);
-			}
-			free(m_Peak2hillMap);
-		}
-		
+		vector< shared_ptr<Mesh>> temp;
+		m_LODs.emplace_back(temp);
+		m_LODs[0].emplace_back(shared_ptr<Mesh>(new LandscapeMesh(this)));
 	}
 
 	void LandscapeModel::mountains2heightMap(std::vector<Mountain>& mountains)
@@ -271,5 +300,98 @@ namespace Hazel
 			peakCur.height = distribution(random_Generator);
 		}
 	}
+
+	LandscapeMesh::LandscapeMesh(LandscapeModel* landscape)
+		: Mesh(landscape)
+	{
+	}
+
+	void LandscapeMesh::drawAfterBindTextures() const
+	{
+		// draw mesh
+		glBindVertexArray(m_VAO);
+		//HZ_CORE_INFO("glBindVertexArray(m_VAO);");
+
+		glDrawArrays(GL_TRIANGLES, 0, m_IndexCount);
+
+
+		glBindVertexArray(0);
+	}
+
+	void LandscapeMesh::setupMesh()
+	{
+		LandscapeModel* landscapeModel = (LandscapeModel*)m_OfModel;
+		// data to fill, no need to store the data in m_XX
+		vector<Vertex>* vertices = new vector<Vertex>;
+
+		unsigned int Width = landscapeModel->getWidth();
+		unsigned int Length = landscapeModel->getLength();
+
+		for (unsigned int i = 0; i < Width - 1; i++)
+		{
+			for (unsigned int j = 0; j < Length - 1; j++)
+			{
+				Vertex vertex;
+
+				glm::vec3 vectorLT;
+				vectorLT.x = (float)i;
+				vectorLT.z = (float)j;
+				vectorLT.y = landscapeModel->getHeight(i, j);
+
+				glm::vec3 vectorRT;
+				vectorRT.x = (float)i;
+				vectorRT.z = (float)(j + 1);
+				vectorRT.y = landscapeModel->getHeight(i, j + 1);
+
+				glm::vec3 vectorLB;
+				vectorLB.x = (float)(i + 1);
+				vectorLB.z = (float)j;
+				vectorLB.y = landscapeModel->getHeight(i + 1, j);
+
+				glm::vec3 vectorRB;
+				vectorRB.x = (float)(i + 1);
+				vectorRB.z = (float)(j + 1);
+				vectorRB.y = landscapeModel->getHeight(i + 1, j + 1);
+
+				glm::vec3 normalofLTtriangel = glm::normalize(glm::cross(vectorLT - vectorRT, vectorLB - vectorLT));
+				glm::vec3 normalofRBtriangel = glm::normalize(glm::cross(vectorRB - vectorLB, vectorRT - vectorRB));
+
+				vertex.Position = vectorLT / 10.0f;
+				vertex.Normal = normalofLTtriangel;
+				vertex.TexCoords = glm::vec2(vertex.Position.x / 10.0f, vertex.Position.z / 10.0f);
+				//vertex.TexCoords = glm::vec2(0.5, 0.5);
+				vertices->emplace_back(vertex);
+				vertex.Position = vectorRT / 10.0f;
+				vertex.Normal = normalofLTtriangel;
+				vertex.TexCoords = glm::vec2(vertex.Position.x / 10.0f, vertex.Position.z / 10.0f);
+				//vertex.TexCoords = glm::vec2(0.5, 0.5);
+				vertices->emplace_back(vertex);
+				vertex.Position = vectorLB / 10.0f;
+				vertex.Normal = normalofLTtriangel;
+				vertex.TexCoords = glm::vec2(vertex.Position.x / 10.0f, vertex.Position.z / 10.0f);
+				//vertex.TexCoords = glm::vec2(0.5, 0.5);
+				vertices->emplace_back(vertex);
+				vertex.Position = vectorLB / 10.0f;
+				vertex.Normal = normalofRBtriangel;
+				vertex.TexCoords = glm::vec2(vertex.Position.x / 10.0f, vertex.Position.z / 10.0f);
+				//vertex.TexCoords = glm::vec2(0.5, 0.5);
+				vertices->emplace_back(vertex);
+				vertex.Position = vectorRT / 10.0f;
+				vertex.Normal = normalofRBtriangel;
+				vertex.TexCoords = glm::vec2(vertex.Position.x / 10.0f, vertex.Position.z / 10.0f);
+				//vertex.TexCoords = glm::vec2(0.5, 0.5);
+				vertices->emplace_back(vertex);
+				vertex.Position = vectorRB / 10.0f;
+				vertex.Normal = normalofRBtriangel;
+				vertex.TexCoords = glm::vec2(vertex.Position.x / 10.0f, vertex.Position.z / 10.0f);
+				//vertex.TexCoords = glm::vec2(0.5, 0.5);
+				vertices->emplace_back(vertex);
+			}
+		}
+
+		m_Vertices = vertices;
+		m_IndexCount = Width * Length * 6;
+	}
+
 }
 	  

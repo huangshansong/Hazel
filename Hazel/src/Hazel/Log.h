@@ -4,10 +4,12 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/fmt/ostr.h>
 
+#include "Hazel/HObject.h"
+
 #include "Core.h"
 
 namespace Hazel {
-	class HAZEL_API Log
+	class HAZEL_API Log : public HObject
 	{
 		
 	public:

@@ -1,14 +1,15 @@
 #pragma once
 #include "hzpch.h"
 
+#include "Hazel/HObject.h"
+
 #include "CollisionBox.h"
 
 namespace Hazel
 {
 
-	class PhysicsComponent
+	class HAZEL_API PhysicsComponent : public HObject
 	{
-	private:
 		PhysicsProps props;
 	};
 }
