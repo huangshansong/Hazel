@@ -1414,6 +1414,8 @@
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
     <ClInclude Include="src\Hazel\badAllocHandler.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\FromResourceMesh.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\ProceduralMesh.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Hazel\Actors\Actor.cpp">
@@ -1501,5 +1503,7 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\Hazel\badAllocHandler.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\FromResourceMesh.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\ProceduralMesh.cpp" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,8 @@
 #include "hzpch.h"
 
 #include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtx/vector_angle.hpp>
 
 #include "Hazel/Core.h"
 #include "Hazel/Log.h"
@@ -62,7 +64,7 @@ namespace Hazel
 			for (int i = 0; i < m_Width; i++)
 			{
 				m_Peak2hillMap[i] = nullptr;
-				while (m_Peak2hillMap[i] = nullptr)
+				while (m_Peak2hillMap[i] == nullptr)
 				{
 					m_Peak2hillMap[i] = (float*)malloc(sizeof(float) * m_Length);
 
@@ -203,7 +205,7 @@ namespace Hazel
 	}
 	void LandscapeModel::processMesh()
 	{
-		vector< shared_ptr<Mesh>> temp;
+		vector<shared_ptr<Mesh>> temp;
 		m_LODs.emplace_back(temp);
 		m_LODs[0].emplace_back(shared_ptr<Mesh>(new LandscapeMesh(this)));
 	}
@@ -224,9 +226,7 @@ namespace Hazel
 					}
 				}
 			}
-		}
-
-		
+		}		
 	}
 
 	void LandscapeModel::setMainpeak(Peak& mainpeak)
@@ -302,8 +302,10 @@ namespace Hazel
 	}
 
 	LandscapeMesh::LandscapeMesh(LandscapeModel* landscape)
-		: Mesh(landscape)
+		: ProceduralMesh(landscape)
 	{
+		setupMesh();
+		bindBufferAndAttribute();
 	}
 
 	void LandscapeMesh::drawAfterBindTextures() const
@@ -312,7 +314,7 @@ namespace Hazel
 		glBindVertexArray(m_VAO);
 		//HZ_CORE_INFO("glBindVertexArray(m_VAO);");
 
-		glDrawArrays(GL_TRIANGLES, 0, m_IndexCount);
+		glDrawElements(GL_TRIANGLE_STRIP, m_Indices->size(), GL_UNSIGNED_INT, 0);
 
 
 		glBindVertexArray(0);
@@ -321,77 +323,102 @@ namespace Hazel
 	void LandscapeMesh::setupMesh()
 	{
 		LandscapeModel* landscapeModel = (LandscapeModel*)m_OfModel;
-		// data to fill, no need to store the data in m_XX
-		vector<Vertex>* vertices = new vector<Vertex>;
+		unsigned int WIDTH = landscapeModel->getWidth();
+		unsigned int LENGTH = landscapeModel->getLength();
 
-		unsigned int Width = landscapeModel->getWidth();
-		unsigned int Length = landscapeModel->getLength();
-
-		for (unsigned int i = 0; i < Width - 1; i++)
+		m_Vertices = new vector<Vertex>;
+		m_Indices = new vector<unsigned int>;
+		for (unsigned int i = 0; i < WIDTH; i++)
 		{
-			for (unsigned int j = 0; j < Length - 1; j++)
+			for (unsigned int j = 0; j < LENGTH; j++)
 			{
-				Vertex vertex;
-
-				glm::vec3 vectorLT;
-				vectorLT.x = (float)i;
-				vectorLT.z = (float)j;
-				vectorLT.y = landscapeModel->getHeight(i, j);
-
-				glm::vec3 vectorRT;
-				vectorRT.x = (float)i;
-				vectorRT.z = (float)(j + 1);
-				vectorRT.y = landscapeModel->getHeight(i, j + 1);
-
-				glm::vec3 vectorLB;
-				vectorLB.x = (float)(i + 1);
-				vectorLB.z = (float)j;
-				vectorLB.y = landscapeModel->getHeight(i + 1, j);
-
-				glm::vec3 vectorRB;
-				vectorRB.x = (float)(i + 1);
-				vectorRB.z = (float)(j + 1);
-				vectorRB.y = landscapeModel->getHeight(i + 1, j + 1);
-
-				glm::vec3 normalofLTtriangel = glm::normalize(glm::cross(vectorLT - vectorRT, vectorLB - vectorLT));
-				glm::vec3 normalofRBtriangel = glm::normalize(glm::cross(vectorRB - vectorLB, vectorRT - vectorRB));
-
-				vertex.Position = vectorLT / 10.0f;
-				vertex.Normal = normalofLTtriangel;
-				vertex.TexCoords = glm::vec2(vertex.Position.x / 10.0f, vertex.Position.z / 10.0f);
-				//vertex.TexCoords = glm::vec2(0.5, 0.5);
-				vertices->emplace_back(vertex);
-				vertex.Position = vectorRT / 10.0f;
-				vertex.Normal = normalofLTtriangel;
-				vertex.TexCoords = glm::vec2(vertex.Position.x / 10.0f, vertex.Position.z / 10.0f);
-				//vertex.TexCoords = glm::vec2(0.5, 0.5);
-				vertices->emplace_back(vertex);
-				vertex.Position = vectorLB / 10.0f;
-				vertex.Normal = normalofLTtriangel;
-				vertex.TexCoords = glm::vec2(vertex.Position.x / 10.0f, vertex.Position.z / 10.0f);
-				//vertex.TexCoords = glm::vec2(0.5, 0.5);
-				vertices->emplace_back(vertex);
-				vertex.Position = vectorLB / 10.0f;
-				vertex.Normal = normalofRBtriangel;
-				vertex.TexCoords = glm::vec2(vertex.Position.x / 10.0f, vertex.Position.z / 10.0f);
-				//vertex.TexCoords = glm::vec2(0.5, 0.5);
-				vertices->emplace_back(vertex);
-				vertex.Position = vectorRT / 10.0f;
-				vertex.Normal = normalofRBtriangel;
-				vertex.TexCoords = glm::vec2(vertex.Position.x / 10.0f, vertex.Position.z / 10.0f);
-				//vertex.TexCoords = glm::vec2(0.5, 0.5);
-				vertices->emplace_back(vertex);
-				vertex.Position = vectorRB / 10.0f;
-				vertex.Normal = normalofRBtriangel;
-				vertex.TexCoords = glm::vec2(vertex.Position.x / 10.0f, vertex.Position.z / 10.0f);
-				//vertex.TexCoords = glm::vec2(0.5, 0.5);
-				vertices->emplace_back(vertex);
+				Vertex vertexTemp;
+				vertexTemp.Position = glm::vec3(i, j, landscapeModel->getHeight(i, j)) / 10.0f;// 10.0f is just about scale
+				vertexTemp.Normal = glm::vec3(1.0f);//set normal to (0,0,0)
+				m_Vertices->emplace_back(vertexTemp);
 			}
 		}
+		//calculate the normal
+		for (unsigned int i = 0; i < WIDTH - 1; i++)
+		{
+			for (unsigned int j = 0; j < LENGTH - 1; j++)
+			{
+				glm::vec3 normalofLTtriangel;//left top triangle
+				glm::vec3 normalofRBtriangel;// right bottom triangle
+				normalofLTtriangel = glm::normalize(glm::cross((*m_Vertices)[i * LENGTH + j].Position - (*m_Vertices)[i * LENGTH + j + 1].Position, (*m_Vertices)[i * LENGTH + 1 + j].Position - (*m_Vertices)[i * LENGTH + j].Position));
+				normalofRBtriangel = glm::normalize(glm::cross((*m_Vertices)[i * LENGTH + 1 + j + 1].Position - (*m_Vertices)[i * LENGTH + 1 + j].Position, (*m_Vertices)[i * LENGTH + j + 1].Position - (*m_Vertices)[i * LENGTH + 1 + j + 1].Position));
+				(*m_Vertices)[i * LENGTH + j].Normal += normalofLTtriangel / 4.0f;// 1/4 of 360бу
+				(*m_Vertices)[i * LENGTH + 1 + j].Normal += normalofLTtriangel / 8.0f;// 1/8 of 360бу
+				(*m_Vertices)[i * LENGTH + j + 1].Normal += normalofLTtriangel / 8.0f;// 1/8 of 360бу
+				(*m_Vertices)[i * LENGTH + 1 + j + 1].Normal += normalofRBtriangel / 4.0f;// 1/4 of 360бу
+				(*m_Vertices)[i * LENGTH + 1 + j].Normal += normalofRBtriangel / 8.0f;// 1/8 of 360бу
+				(*m_Vertices)[i * LENGTH + j + 1].Normal += normalofRBtriangel / 8.0f;// 1/8 of 360бу		
+			}
+		}
+		for (unsigned int i = 0; i < WIDTH; i++)
+		{
+			for (unsigned int j = 0; j < LENGTH; j++)
+			{
+				(*m_Vertices)[i * LENGTH + j].Normal = glm::normalize((*m_Vertices)[i * LENGTH + j].Normal);
+			}
+		}
+		//calculate the texCoords
+		for (unsigned int i = 0; i < WIDTH - 1; i++)
+		{
+			if (i == 0)
+			{
+				//only the first two points' texCoords are set by myself, others' are calculated to match the triangle's shape in the world space and the triangle's shape in texture
+				(*m_Vertices)[0].TexCoords = glm::vec2(0.0f, 0.0f);
+				(*m_Vertices)[1].TexCoords = glm::vec2(0.0f, glm::distance((*m_Vertices)[0].Position, (*m_Vertices)[1].Position));//you can scale the texture up by dividing this
+				calcAndSetTexCoords(1 * LENGTH, 1, 0);
+				calcAndSetTexCoords(1 * LENGTH + 1, 1, 1 * LENGTH);
+				for (unsigned int j = 2; j < LENGTH; j++)
+				{
+					calcAndSetTexCoords(j, j - 1, 1 * LENGTH + j - 1);
+					calcAndSetTexCoords(1 * LENGTH + j, j, 1 * LENGTH + j - 1);
+				}
+			}
+			else
+			{
+				calcAndSetTexCoords((i + 1) * LENGTH, i * LENGTH + 1, i * LENGTH);
+				for (unsigned int j = 1; j < LENGTH; j++)
+				{
+					calcAndSetTexCoords((i + 1) * LENGTH + j, i * LENGTH + j, (i + 1) * LENGTH + j - 1);
+				}
+			}
+		}
+		//the draw sequence is zig-zag
+		bool oddRow = false;
+        for (unsigned int i = 0; i < WIDTH - 1; i++)
+        {
+            if (!oddRow) // even rows: i == 0, i == 2; and so on
+            {
+                for (unsigned int j = 0; j < LENGTH; j++)
+                {
+                    m_Indices->emplace_back(i * WIDTH + j);
+                    m_Indices->emplace_back((i + 1) * WIDTH + j);
+                }
+            }
+            else
+            {
+                for (int j = LENGTH - 1; j >= 0; j--)
+                {
+                    m_Indices->emplace_back((i + 1) * WIDTH + j);
+                    m_Indices->emplace_back(i * WIDTH + j);
+                }
+            }
+            oddRow = !oddRow;
+        }
 
-		m_Vertices = vertices;
-		m_IndexCount = Width * Length * 6;
 	}
-
+	//when put the parameters, make sure the rotation angle is positive
+	void LandscapeMesh::calcAndSetTexCoords(unsigned int targetVertexIndex, int preparedVertex1Index, int preparedVertex2Index)
+	{
+		(*m_Vertices)[targetVertexIndex].TexCoords = (*m_Vertices)[preparedVertex1Index].TexCoords +
+			glm::distance((*m_Vertices)[targetVertexIndex].Position, (*m_Vertices)[preparedVertex1Index].Position) *
+			glm::rotate((*m_Vertices)[preparedVertex2Index].TexCoords - (*m_Vertices)[preparedVertex1Index].TexCoords,
+				glm::angle(glm::normalize((*m_Vertices)[targetVertexIndex].Position - (*m_Vertices)[preparedVertex1Index].Position),
+				glm::normalize((*m_Vertices)[preparedVertex2Index].Position - (*m_Vertices)[preparedVertex1Index].Position)));
+	}
 }
 	  

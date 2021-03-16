@@ -19,12 +19,9 @@ using namespace std;
 namespace Hazel
 {
 
-    Mesh::Mesh(void* model, std::vector<Vertex>* vertices, std::vector<unsigned int>* indices, const std::string name)
-        : m_OfModel(model), m_Vertices(vertices), m_Indices(indices), m_Name(name)
+    Mesh::Mesh(void* model, const std::string name)
+        : m_OfModel(model), m_Name(name)
     {
-        setupMesh();
-
-        bindBufferAndAttribute();
     }
 
     Mesh::~Mesh()
@@ -86,24 +83,6 @@ namespace Hazel
         float heightScale = 1.0f;
         m_Shader->setFloat("heightScale", heightScale);
 
-
-    }
-
-    void Mesh::drawAfterBindTextures() const
-    {
-        // draw mesh
-        glBindVertexArray(m_VAO);
-        //HZ_CORE_INFO("glBindVertexArray(VAO);");
-
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        //ONLY MESH WITH INDICES CAN BE DRAW IN CLASS:Mesh!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        glDrawElements(GL_TRIANGLES, m_Indices->size(), GL_UNSIGNED_INT, 0);
-        //HZ_CORE_INFO("glDrawElements(GL_TRIANGLES, (*m_Indices).size(), GL_UNSIGNED_INT, 0);");
-        //ONLY MESH WITH INDICES CAN BE DRAW IN CLASS:Mesh!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-        
-        glBindVertexArray(0);
 
     }
 

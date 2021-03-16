@@ -158,6 +158,8 @@ IF EXIST ..\bin\Dist-windows-x86_64\Hazel\Hazel.dll\ (xcopy /Q /E /Y /I ..\bin\D
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Hazel\ResourceLoading\ProceduralMesh.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\FromResourceMesh.h" />
     <ClInclude Include="src\Hazel.h" />
     <ClInclude Include="src\Hazel\Actors\Actor.h" />
     <ClInclude Include="src\Hazel\Actors\camera.h" />
@@ -613,6 +615,8 @@ IF EXIST ..\bin\Dist-windows-x86_64\Hazel\Hazel.dll\ (xcopy /Q /E /Y /I ..\bin\D
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Hazel\ResourceLoading\ProceduralMesh.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\FromResourceMesh.cpp" />
     <ClCompile Include="src\Hazel\Actors\Actor.cpp" />
     <ClCompile Include="src\Hazel\Actors\camera.cpp" />
     <ClCompile Include="src\Hazel\Application.cpp" />

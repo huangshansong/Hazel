@@ -2,6 +2,7 @@
 
 #include "Geometry.h"
 #include "ProceduralModel.h"
+#include "ProceduralMesh.h"
 
 namespace Hazel
 {
@@ -21,18 +22,16 @@ namespace Hazel
 		Sphere m_Sphere;
     };
 
-	class HAZEL_API SphereMesh : public Mesh
+	class HAZEL_API SphereMesh : public ProceduralMesh
 	{
 	public:
-		SphereMesh(void*);
+		SphereMesh(void*, const std::string name = "Unnamed");
 
 	protected:
 		// initializes all the buffer objects/arrays
 		virtual void setupMesh() override;
 
 		virtual void drawAfterBindTextures() const override;
-
-		unsigned int m_IndexCount = 0;
 	};
 }
 

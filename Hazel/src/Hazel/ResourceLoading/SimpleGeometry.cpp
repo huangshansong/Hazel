@@ -20,9 +20,11 @@ namespace Hazel
         m_LODs[0].emplace_back(shared_ptr<Mesh>(new SphereMesh(this)));
     }
 
-    SphereMesh::SphereMesh(void* model)
-        : Mesh(model)
+    SphereMesh::SphereMesh(void* model, const std::string name)
+        : ProceduralMesh(model, name)
     {
+        setupMesh();
+        bindBufferAndAttribute();
     }
     void SphereMesh::setupMesh()
     {
@@ -34,25 +36,24 @@ namespace Hazel
 
         const unsigned int X_SEGMENTS = 64;
         const unsigned int Y_SEGMENTS = 64;
-        const float PI = 3.14159265359;
         for (unsigned int y = 0; y <= Y_SEGMENTS; ++y)
         {
             for (unsigned int x = 0; x <= X_SEGMENTS; ++x)
             {
                 float xSegment = (float)x / (float)X_SEGMENTS;
                 float ySegment = (float)y / (float)Y_SEGMENTS;
-                float xPos = std::cos(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
-                float yPos = std::cos(ySegment * PI);
-                float zPos = std::sin(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
+                float xPos = std::cos(xSegment * 2.0 * std::_Pi) * std::sin(ySegment * std::_Pi);
+                float yPos = std::cos(ySegment * std::_Pi);
+                float zPos = std::sin(xSegment * 2.0 * std::_Pi) * std::sin(ySegment * std::_Pi);
 
                 Vertex vertex;
                 vertex.Position = glm::vec3(xPos, yPos, zPos) * radius;
                 vertex.Normal = glm::vec3(xPos, yPos, zPos);
-                vertex.TexCoords = glm::vec2(xSegment, ySegment);
+                vertex.TexCoords = glm::vec2(xSegment, ySegment) * radius;
                 vertices->emplace_back(vertex);
             }
         }
-
+        
         bool oddRow = false;
         for (unsigned int y = 0; y < Y_SEGMENTS; ++y)
         {
@@ -60,22 +61,23 @@ namespace Hazel
             {
                 for (unsigned int x = 0; x <= X_SEGMENTS; ++x)
                 {
-                    indices->push_back(y * (X_SEGMENTS + 1) + x);
-                    indices->push_back((y + 1) * (X_SEGMENTS + 1) + x);
+                    indices->emplace_back(y * (X_SEGMENTS + 1) + x);
+                    indices->emplace_back((y + 1) * (X_SEGMENTS + 1) + x);
                 }
             }
             else
             {
                 for (int x = X_SEGMENTS; x >= 0; --x)
                 {
-                    indices->push_back((y + 1) * (X_SEGMENTS + 1) + x);
-                    indices->push_back(y * (X_SEGMENTS + 1) + x);
+                    indices->emplace_back((y + 1) * (X_SEGMENTS + 1) + x);
+                    indices->emplace_back(y * (X_SEGMENTS + 1) + x);
                 }
             }
             oddRow = !oddRow;
         }
+        
         m_Vertices = vertices;
-        m_IndexCount = indices->size(); 
+        m_Indices = indices;
     }
 
     void SphereMesh::drawAfterBindTextures() const
@@ -84,7 +86,7 @@ namespace Hazel
         glBindVertexArray(m_VAO);
         //HZ_CORE_INFO("glBindVertexArray(m_VAO);");
 
-        glDrawElements(GL_TRIANGLE_STRIP, m_IndexCount, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLE_STRIP, m_Indices->size(), GL_UNSIGNED_INT, 0);
 
 
         glBindVertexArray(0);

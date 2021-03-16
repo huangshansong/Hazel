@@ -42,14 +42,15 @@ namespace Hazel
         Camera* camera = new Camera(rootLevel, "main camera");
         rootLevel->setCamera(rootLevel, camera);
 
-		addDefaultActor(rootLevel, DefaultActor::backpack);
-
+		addDefaultMap(rootLevel);
+		
     }
     void Editor::addDefaultMap(Level* level)
 	{
+		//addDefaultActor(level, DefaultActor::backpack);
 		addDefaultActor(level, DefaultActor::landscape);
-		addDefaultActor(level, DefaultActor::sphere);
-		addDefaultActor(level, DefaultActor::grass);
+		//addDefaultActor(level, DefaultActor::sphere);
+		//addDefaultActor(level, DefaultActor::grass);
    
 	}
 	void Editor::addDefaultActor(Level* level, DefaultActor actor)
@@ -65,7 +66,10 @@ namespace Hazel
 		{
 			Actor* landscape = new Actor(level, "Landscape");
 			Model* model = new LandscapeModel(landscape);
-			QuixelMaterial* material = new QuixelMaterial("resources/surfaces/landscape/", QuixelObjectType::_surface, Resolution::_2K);
+			vector<string> paths;
+			paths.emplace_back("resources/surfaces/rock_rough_vctkajjg/");
+			paths.emplace_back("resources/surfaces/snow_pure_uephfgudy/");
+			QuixelMaterial* material = new QuixelMaterial(paths, QuixelObjectType::_surface, Resolution::_2K);
 			model->setModelUniversalMaterial(shared_ptr<Material>(material));
 			Shader* shader = new Shader("resources/surfaces/landscape/");
 			model->setModelUniversalShader(shared_ptr<Shader>(shader));
@@ -74,7 +78,9 @@ namespace Hazel
 		{
 			Actor* sphere = new Actor(level, "Sphere");
 			Model* model = new SphereModel(sphere);
-			QuixelMaterial* material = new QuixelMaterial("resources/simpleGeometry/", QuixelObjectType::_surface, Resolution::_2K);
+			vector<string> paths;
+			paths.emplace_back("resources/surfaces/ground_other_vbljegefw/");
+			QuixelMaterial* material = new QuixelMaterial(paths, QuixelObjectType::_surface, Resolution::_2K);
 			model->setModelUniversalMaterial(shared_ptr<Material>(material));
 			Shader* shader = new Shader("resources/simpleGeometry/");
 			model->setModelUniversalShader(shared_ptr<Shader>(shader));
