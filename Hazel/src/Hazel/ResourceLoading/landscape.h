@@ -63,6 +63,6 @@ namespace Hazel
 
 		virtual void drawAfterBindTextures() const override;
 
-		void calcAndSetTexCoords(unsigned int targetVertexIndex, int preparedVertex1Index, int preparedVertex2Index);
+		void calcAndSetTexCoords(unsigned int targetVertexIndex, int preparedVertex1Index, int preparedVertex2Index, bool interpolation = false);
 	};
 }

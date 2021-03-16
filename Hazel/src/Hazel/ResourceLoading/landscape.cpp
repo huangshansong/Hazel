@@ -3,6 +3,7 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtx/vector_angle.hpp>
+#include <glm/glm/geometric.hpp>
 
 #include "Hazel/Core.h"
 #include "Hazel/Log.h"
@@ -333,8 +334,8 @@ namespace Hazel
 			for (unsigned int j = 0; j < LENGTH; j++)
 			{
 				Vertex vertexTemp;
-				vertexTemp.Position = glm::vec3(i, j, landscapeModel->getHeight(i, j)) / 10.0f;// 10.0f is just about scale
-				vertexTemp.Normal = glm::vec3(1.0f);//set normal to (0,0,0)
+				vertexTemp.Position = glm::vec3(i, landscapeModel->getHeight(i, j), j) / 10.0f;// 10.0f is just about scale
+				vertexTemp.Normal = glm::vec3(0.0f);//set normal to (0,0,0)
 				m_Vertices->emplace_back(vertexTemp);
 			}
 		}
@@ -345,13 +346,17 @@ namespace Hazel
 			{
 				glm::vec3 normalofLTtriangel;//left top triangle
 				glm::vec3 normalofRBtriangel;// right bottom triangle
-				normalofLTtriangel = glm::normalize(glm::cross((*m_Vertices)[i * LENGTH + j].Position - (*m_Vertices)[i * LENGTH + j + 1].Position, (*m_Vertices)[i * LENGTH + 1 + j].Position - (*m_Vertices)[i * LENGTH + j].Position));
-				normalofRBtriangel = glm::normalize(glm::cross((*m_Vertices)[i * LENGTH + 1 + j + 1].Position - (*m_Vertices)[i * LENGTH + 1 + j].Position, (*m_Vertices)[i * LENGTH + j + 1].Position - (*m_Vertices)[i * LENGTH + 1 + j + 1].Position));
+				glm::vec3 up = (*m_Vertices)[i * LENGTH + j].Position - (*m_Vertices)[i * LENGTH + j + 1].Position;
+				glm::vec3 left = (*m_Vertices)[(i + 1) * LENGTH + j].Position - (*m_Vertices)[i * LENGTH + j].Position;
+				normalofLTtriangel = glm::normalize(glm::cross(up, left));
+				glm::vec3 down = (*m_Vertices)[(i + 1) * LENGTH + j + 1].Position - (*m_Vertices)[(i + 1) * LENGTH + j].Position;
+				glm::vec3 right = (*m_Vertices)[i * LENGTH + j + 1].Position - (*m_Vertices)[(i + 1) * LENGTH + j + 1].Position;
+				normalofRBtriangel = glm::normalize(glm::cross(down,right));
 				(*m_Vertices)[i * LENGTH + j].Normal += normalofLTtriangel / 4.0f;// 1/4 of 360бу
-				(*m_Vertices)[i * LENGTH + 1 + j].Normal += normalofLTtriangel / 8.0f;// 1/8 of 360бу
+				(*m_Vertices)[(i + 1) * LENGTH + j].Normal += normalofLTtriangel / 8.0f;// 1/8 of 360бу
 				(*m_Vertices)[i * LENGTH + j + 1].Normal += normalofLTtriangel / 8.0f;// 1/8 of 360бу
-				(*m_Vertices)[i * LENGTH + 1 + j + 1].Normal += normalofRBtriangel / 4.0f;// 1/4 of 360бу
-				(*m_Vertices)[i * LENGTH + 1 + j].Normal += normalofRBtriangel / 8.0f;// 1/8 of 360бу
+				(*m_Vertices)[(i + 1) * LENGTH + j + 1].Normal += normalofRBtriangel / 4.0f;// 1/4 of 360бу
+				(*m_Vertices)[(i + 1) * LENGTH + j].Normal += normalofRBtriangel / 8.0f;// 1/8 of 360бу
 				(*m_Vertices)[i * LENGTH + j + 1].Normal += normalofRBtriangel / 8.0f;// 1/8 of 360бу		
 			}
 		}
@@ -381,9 +386,11 @@ namespace Hazel
 			else
 			{
 				calcAndSetTexCoords((i + 1) * LENGTH, i * LENGTH + 1, i * LENGTH);
-				for (unsigned int j = 1; j < LENGTH; j++)
+				calcAndSetTexCoords((i + 1) * LENGTH + 1, i * LENGTH + 1, (i + 1) * LENGTH);
+				for (unsigned int j = 1; j < LENGTH - 1; j++)
 				{
-					calcAndSetTexCoords((i + 1) * LENGTH + j, i * LENGTH + j, (i + 1) * LENGTH + j - 1);
+					calcAndSetTexCoords((i + 1) * LENGTH + j, i * LENGTH + j + 1, i * LENGTH + j, true);
+					calcAndSetTexCoords((i + 1) * LENGTH + j + 1, i * LENGTH + j + 1, (i + 1) * LENGTH + j);
 				}
 			}
 		}
@@ -395,16 +402,16 @@ namespace Hazel
             {
                 for (unsigned int j = 0; j < LENGTH; j++)
                 {
-                    m_Indices->emplace_back(i * WIDTH + j);
-                    m_Indices->emplace_back((i + 1) * WIDTH + j);
+                    m_Indices->emplace_back(i * LENGTH + j);
+                    m_Indices->emplace_back((i + 1) * LENGTH + j);
                 }
             }
             else
             {
                 for (int j = LENGTH - 1; j >= 0; j--)
                 {
-                    m_Indices->emplace_back((i + 1) * WIDTH + j);
-                    m_Indices->emplace_back(i * WIDTH + j);
+                    m_Indices->emplace_back((i + 1) * LENGTH + j);
+                    m_Indices->emplace_back(i * LENGTH + j);
                 }
             }
             oddRow = !oddRow;
@@ -412,13 +419,23 @@ namespace Hazel
 
 	}
 	//when put the parameters, make sure the rotation angle is positive
-	void LandscapeMesh::calcAndSetTexCoords(unsigned int targetVertexIndex, int preparedVertex1Index, int preparedVertex2Index)
+	void LandscapeMesh::calcAndSetTexCoords(unsigned int targetVertexIndex, int preparedVertex1Index, int preparedVertex2Index, bool interpolation)
 	{
-		(*m_Vertices)[targetVertexIndex].TexCoords = (*m_Vertices)[preparedVertex1Index].TexCoords +
-			glm::distance((*m_Vertices)[targetVertexIndex].Position, (*m_Vertices)[preparedVertex1Index].Position) *
-			glm::rotate((*m_Vertices)[preparedVertex2Index].TexCoords - (*m_Vertices)[preparedVertex1Index].TexCoords,
-				glm::angle(glm::normalize((*m_Vertices)[targetVertexIndex].Position - (*m_Vertices)[preparedVertex1Index].Position),
-				glm::normalize((*m_Vertices)[preparedVertex2Index].Position - (*m_Vertices)[preparedVertex1Index].Position)));
+		glm::vec3 P1toT_Position = (*m_Vertices)[targetVertexIndex].Position - (*m_Vertices)[preparedVertex1Index].Position;
+		glm::vec2 P1toP2_TexCoords = (*m_Vertices)[preparedVertex2Index].TexCoords - (*m_Vertices)[preparedVertex1Index].TexCoords;
+		glm::vec3 P1toP2_Position = (*m_Vertices)[preparedVertex2Index].Position - (*m_Vertices)[preparedVertex1Index].Position;
+		float angle = glm::angle(glm::normalize(P1toT_Position), glm::normalize(P1toP2_Position));
+		glm::vec2 P1toT_TexCoords = glm::normalize(glm::rotate(P1toP2_TexCoords, angle));
+
+		if (interpolation)
+		{
+			(*m_Vertices)[targetVertexIndex].TexCoords = ((*m_Vertices)[targetVertexIndex].TexCoords + 
+				(*m_Vertices)[preparedVertex1Index].TexCoords + glm::length(P1toT_Position) * P1toT_TexCoords) / 2.0f;
+		}
+		else
+		{
+			(*m_Vertices)[targetVertexIndex].TexCoords = (*m_Vertices)[preparedVertex1Index].TexCoords + glm::length(P1toT_Position) * P1toT_TexCoords;
+		}
 	}
 }
 	  
