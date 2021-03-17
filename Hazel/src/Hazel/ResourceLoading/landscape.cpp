@@ -4,7 +4,9 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtx/vector_angle.hpp>
 #include <glm/glm/geometric.hpp>
+#include <gtx/normal.hpp>
 
+#include "Hazel/Actors/Actor.h"
 #include "Hazel/Core.h"
 #include "Hazel/Log.h"
 #include "Hazel/HazelMathLib.h"
@@ -17,6 +19,9 @@ namespace Hazel
 	LandscapeModel::LandscapeModel(void* actor, unsigned int width, unsigned int length)
 		: ProceduralModel(actor), m_Width(width), m_Length(length)
 	{
+		//((Actor*)m_OfActor)->setTransform(glm::vec3(- (int)width / 10.0f / 2.0f, 0.0f, -(int)length / 10.0f / 2.0f));
+		//((Actor*)m_OfActor)->setTransform(glm::vec3(-1.0f, 0.0f, -1.0f));
+
 		setupModel();
 
 		processMesh();
@@ -141,8 +146,8 @@ namespace Hazel
 		std::default_random_engine random_Generator{ rd() };
 		std::normal_distribution<float> distribution;
 		int peaksTotal = -1;
-		distribution.param(std::normal_distribution<float>::param_type(75, 25));
-		while (peaksTotal < 50 || peaksTotal >= 100)
+		distribution.param(std::normal_distribution<float>::param_type(15, 5));
+		while (peaksTotal < 10 || peaksTotal >= 20)
 		{
 			peaksTotal = (int)distribution(random_Generator);
 		}
@@ -154,8 +159,8 @@ namespace Hazel
 			Mountain mountain;
 
 			int peaksOfMountain = -1;
-			distribution.param(std::normal_distribution<float>::param_type(10, 10));
-			while (peaksOfMountain < 0 || peaksOfMountain >= 20)
+			distribution.param(std::normal_distribution<float>::param_type(3, 3));
+			while (peaksOfMountain < 0 || peaksOfMountain >= 5)
 			{
 				peaksOfMountain = (int)distribution(random_Generator);
 			}
@@ -286,7 +291,7 @@ namespace Hazel
 		{
 			peakCur.direction = distribution(random_Generator);
 		}
-		distribution.param(std::normal_distribution<float>::param_type(peakPre.height * 4.0f / 5.0f, peakPre.height * 4.0f / 5.0f / 2.0f));//4.0f is the length/height ratio.
+		distribution.param(std::normal_distribution<float>::param_type(peakPre.height * 4.0f * 2.0f, peakPre.height * 4.0f / 2.0f));//4.0f is the length/height ratio.
 		float distance = -1.0f;
 		while (distance < 1E-5f)
 		{
@@ -335,6 +340,7 @@ namespace Hazel
 			{
 				Vertex vertexTemp;
 				vertexTemp.Position = glm::vec3(i, landscapeModel->getHeight(i, j), j) / 10.0f;// 10.0f is just about scale
+				vertexTemp.TexCoords = glm::vec2(i / 50.0f, j / 50.0f);
 				vertexTemp.Normal = glm::vec3(0.0f);//set normal to (0,0,0)
 				m_Vertices->emplace_back(vertexTemp);
 			}
@@ -344,20 +350,23 @@ namespace Hazel
 		{
 			for (unsigned int j = 0; j < LENGTH - 1; j++)
 			{
-				glm::vec3 normalofLTtriangel;//left top triangle
-				glm::vec3 normalofRBtriangel;// right bottom triangle
-				glm::vec3 up = (*m_Vertices)[i * LENGTH + j].Position - (*m_Vertices)[i * LENGTH + j + 1].Position;
-				glm::vec3 left = (*m_Vertices)[(i + 1) * LENGTH + j].Position - (*m_Vertices)[i * LENGTH + j].Position;
-				normalofLTtriangel = glm::normalize(glm::cross(up, left));
-				glm::vec3 down = (*m_Vertices)[(i + 1) * LENGTH + j + 1].Position - (*m_Vertices)[(i + 1) * LENGTH + j].Position;
-				glm::vec3 right = (*m_Vertices)[i * LENGTH + j + 1].Position - (*m_Vertices)[(i + 1) * LENGTH + j + 1].Position;
-				normalofRBtriangel = glm::normalize(glm::cross(down,right));
-				(*m_Vertices)[i * LENGTH + j].Normal += normalofLTtriangel / 4.0f;// 1/4 of 360бу
-				(*m_Vertices)[(i + 1) * LENGTH + j].Normal += normalofLTtriangel / 8.0f;// 1/8 of 360бу
-				(*m_Vertices)[i * LENGTH + j + 1].Normal += normalofLTtriangel / 8.0f;// 1/8 of 360бу
-				(*m_Vertices)[(i + 1) * LENGTH + j + 1].Normal += normalofRBtriangel / 4.0f;// 1/4 of 360бу
-				(*m_Vertices)[(i + 1) * LENGTH + j].Normal += normalofRBtriangel / 8.0f;// 1/8 of 360бу
-				(*m_Vertices)[i * LENGTH + j + 1].Normal += normalofRBtriangel / 8.0f;// 1/8 of 360бу		
+				glm::vec3 LTPosition = (*m_Vertices)[i * LENGTH + j].Position;
+				glm::vec3 LBPosition = (*m_Vertices)[(i + 1) * LENGTH + j].Position;
+				glm::vec3 RTPosition = (*m_Vertices)[i * LENGTH + j + 1].Position;
+				glm::vec3 RBPosition = (*m_Vertices)[(i + 1) * LENGTH + j + 1].Position;
+				glm::vec3 normalofLTtriangle = glm::triangleNormal(RTPosition, LTPosition, LBPosition);
+				glm::vec3 normalofRBtriangle = glm::triangleNormal(LBPosition, RBPosition, RTPosition);
+				float areaofLTtriangle = areaOfTriangle(RTPosition, LTPosition, LBPosition);
+				float areaofRBtriangle = areaOfTriangle(LBPosition, RBPosition, RTPosition);
+				glm::vec3 weightednormalofLTtriangle = areaofLTtriangle * normalofLTtriangle;
+				glm::vec3 weightednormalofRBtriangle = areaofRBtriangle * normalofRBtriangle;
+
+				(*m_Vertices)[i * LENGTH + j].Normal += weightednormalofLTtriangle;
+				(*m_Vertices)[(i + 1) * LENGTH + j].Normal += weightednormalofLTtriangle;
+				(*m_Vertices)[i * LENGTH + j + 1].Normal += weightednormalofLTtriangle;
+				(*m_Vertices)[(i + 1) * LENGTH + j + 1].Normal += weightednormalofRBtriangle;
+				(*m_Vertices)[(i + 1) * LENGTH + j].Normal += weightednormalofRBtriangle;
+				(*m_Vertices)[i * LENGTH + j + 1].Normal += weightednormalofRBtriangle;	
 			}
 		}
 		for (unsigned int i = 0; i < WIDTH; i++)
@@ -367,33 +376,34 @@ namespace Hazel
 				(*m_Vertices)[i * LENGTH + j].Normal = glm::normalize((*m_Vertices)[i * LENGTH + j].Normal);
 			}
 		}
+		//abandoned now
 		//calculate the texCoords
-		for (unsigned int i = 0; i < WIDTH - 1; i++)
-		{
-			if (i == 0)
-			{
-				//only the first two points' texCoords are set by myself, others' are calculated to match the triangle's shape in the world space and the triangle's shape in texture
-				(*m_Vertices)[0].TexCoords = glm::vec2(0.0f, 0.0f);
-				(*m_Vertices)[1].TexCoords = glm::vec2(0.0f, glm::distance((*m_Vertices)[0].Position, (*m_Vertices)[1].Position));//you can scale the texture up by dividing this
-				calcAndSetTexCoords(1 * LENGTH, 1, 0);
-				calcAndSetTexCoords(1 * LENGTH + 1, 1, 1 * LENGTH);
-				for (unsigned int j = 2; j < LENGTH; j++)
-				{
-					calcAndSetTexCoords(j, j - 1, 1 * LENGTH + j - 1);
-					calcAndSetTexCoords(1 * LENGTH + j, j, 1 * LENGTH + j - 1);
-				}
-			}
-			else
-			{
-				calcAndSetTexCoords((i + 1) * LENGTH, i * LENGTH + 1, i * LENGTH);
-				calcAndSetTexCoords((i + 1) * LENGTH + 1, i * LENGTH + 1, (i + 1) * LENGTH);
-				for (unsigned int j = 1; j < LENGTH - 1; j++)
-				{
-					calcAndSetTexCoords((i + 1) * LENGTH + j, i * LENGTH + j + 1, i * LENGTH + j, true);
-					calcAndSetTexCoords((i + 1) * LENGTH + j + 1, i * LENGTH + j + 1, (i + 1) * LENGTH + j);
-				}
-			}
-		}
+		//for (unsigned int i = 0; i < WIDTH - 1; i++)
+		//{
+		//	if (i == 0)
+		//	{
+		//		//only the first two points' texCoords are set by myself, others' are calculated to match the triangle's shape in the world space and the triangle's shape in texture
+		//		(*m_Vertices)[0].TexCoords = glm::vec2(0.0f, 0.0f);
+		//		(*m_Vertices)[1].TexCoords = glm::vec2(0.0f, glm::distance((*m_Vertices)[0].Position, (*m_Vertices)[1].Position));//you can scale the texture up by dividing this
+		//		calcAndSetTexCoords(1 * LENGTH, 1, 0);
+		//		calcAndSetTexCoords(1 * LENGTH + 1, 1, 1 * LENGTH);
+		//		for (unsigned int j = 2; j < LENGTH; j++)
+		//		{
+		//			calcAndSetTexCoords(j, j - 1, 1 * LENGTH + j - 1);
+		//			calcAndSetTexCoords(1 * LENGTH + j, j, 1 * LENGTH + j - 1);
+		//		}
+		//	}
+		//	else
+		//	{
+		//		calcAndSetTexCoords((i + 1) * LENGTH, i * LENGTH + 1, i * LENGTH);
+		//		calcAndSetTexCoords((i + 1) * LENGTH + 1, i * LENGTH + 1, (i + 1) * LENGTH);
+		//		for (unsigned int j = 1; j < LENGTH - 1; j++)
+		//		{
+		//			calcAndSetTexCoords((i + 1) * LENGTH + j, i * LENGTH + j + 1, i * LENGTH + j, true);
+		//			calcAndSetTexCoords((i + 1) * LENGTH + j + 1, i * LENGTH + j + 1, (i + 1) * LENGTH + j);
+		//		}
+		//	}
+		//}
 		//the draw sequence is zig-zag
 		bool oddRow = false;
         for (unsigned int i = 0; i < WIDTH - 1; i++)

@@ -16,7 +16,7 @@ namespace Hazel
     class HAZEL_API Model : public HObject
     {
     public:
-        Model(void* actor);
+        Model(void* actor, glm::vec3 scale = glm::vec3(1.0f));
 
         virtual ~Model() = default;
 
@@ -27,10 +27,15 @@ namespace Hazel
         void setModelUniversalMaterial(std::shared_ptr<Material>& material);
 
         void setModelUniversalShader(std::shared_ptr<Shader>& shader);
-       
+        
+        void setScale(glm::vec3& scale) { m_Scale = scale; }
+
         const void* getOfActor() const { return m_OfActor; }
 
         const glm::mat4& getModelTransformMatrix() const { return m_ModelTransformMatrix; }
+
+        const glm::vec3& getScale() const { return m_Scale; }
+
 
         void onUpdate();
 
@@ -44,6 +49,8 @@ namespace Hazel
         std::string m_Name = "Unnamed";
 
         glm::mat4 m_ModelTransformMatrix;
+
+        glm::vec3 m_Scale;
 
     protected: 
         

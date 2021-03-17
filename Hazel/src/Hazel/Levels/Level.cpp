@@ -26,12 +26,21 @@ namespace Hazel
     {
         for (shared_ptr<Actor> actor : m_Actors)
         {
-            actor->onRender();
+            if (actor.get() != m_Enviroment)
+            {
+                actor->onRender();
+            }
         }
         for (shared_ptr<Level> childLevel : m_ChildLevels)
         {
             childLevel->onRender();
         }
+        //draw enviroment at last
+        if (m_Enviroment != nullptr)
+        {
+            m_Enviroment->onRender();
+        }
+        
     }
 
     void Level::onUpdate()

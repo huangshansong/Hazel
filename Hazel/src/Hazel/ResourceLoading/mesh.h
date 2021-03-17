@@ -43,6 +43,9 @@ namespace Hazel
         // render the mesh
         void draw() const;
 
+        //override this if the mesh is without indices!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        virtual void drawAfterBindTextures() const = 0;
+
         std::string m_Name;
 
         std::shared_ptr<Material> m_Material;
@@ -51,9 +54,6 @@ namespace Hazel
 
     protected:
         
-        //override this if the mesh is without indices!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        virtual void drawAfterBindTextures() const = 0;
-
         // initializes all the buffer objects/arrays, textures, and shader
         void bindBufferAndAttribute();
 
@@ -67,8 +67,8 @@ namespace Hazel
         unsigned int m_VAO;
         unsigned int m_VBO, m_EBO;
         // mesh data
-        std::vector<Vertex>* m_Vertices;
-        std::vector<unsigned int>* m_Indices;
+        std::vector<Vertex>* m_Vertices = nullptr;
+        std::vector<unsigned int>* m_Indices = nullptr;
 
     };
 

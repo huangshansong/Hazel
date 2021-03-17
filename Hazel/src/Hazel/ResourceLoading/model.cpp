@@ -16,10 +16,13 @@
 using namespace std;
 namespace Hazel
 {
-    Model::Model(void* actor)
-        : m_OfActor(actor)
+    Model::Model(void* actor, glm::vec3 scale)
+        : m_OfActor(actor), m_Scale(scale)
     {
-        ((Actor*)actor)->m_Model = shared_ptr<Model>(this);
+        if (actor != nullptr)
+        {
+            ((Actor*)actor)->m_Model = shared_ptr<Model>(this);
+        }
     }
 
     uint32_t Model::selectLODbyDistance(float distance) const

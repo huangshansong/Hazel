@@ -19,11 +19,39 @@ namespace Hazel
         m_LODs.emplace_back(temp);
         m_LODs[0].emplace_back(shared_ptr<Mesh>(new SphereMesh(this)));
     }
+    CubeModel::CubeModel(void* actor, Cube cube)
+        : ProceduralModel(actor), m_Cube(cube)
+    {
+        setupModel();
+
+        processMesh();
+    }
+    void CubeModel::processMesh()
+    {
+        vector<shared_ptr<Mesh>> temp;
+        m_LODs.emplace_back(temp);
+        m_LODs[0].emplace_back(shared_ptr<Mesh>(new CubeMesh(this)));
+    }
+    QuadModel::QuadModel(void* actor, Quad quad)
+        : ProceduralModel(actor), m_Quad(quad)
+    {
+        setupModel();
+
+        processMesh();
+    }
+
+    void QuadModel::processMesh()
+    {
+        vector<shared_ptr<Mesh>> temp;
+        m_LODs.emplace_back(temp);
+        m_LODs[0].emplace_back(shared_ptr<Mesh>(new QuadMesh(this)));
+    }
 
     SphereMesh::SphereMesh(void* model, const std::string name)
         : ProceduralMesh(model, name)
     {
         setupMesh();
+
         bindBufferAndAttribute();
     }
     void SphereMesh::setupMesh()
@@ -91,4 +119,126 @@ namespace Hazel
 
         glBindVertexArray(0);
     }
+
+    CubeMesh::CubeMesh(void* model, const std::string name)
+        : ProceduralMesh(model, name)
+    {
+        setupMesh();
+
+        bindBufferAndAttribute();
+    }
+    void CubeMesh::setupMesh()
+    {
+        float length = ((CubeModel*)m_OfModel)->getCube().length;
+
+        float vertices[] = {
+            // back face
+            -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+             1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+             1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right         
+             1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+            -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+            -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
+            // front face
+            -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+             1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // bottom-right
+             1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+             1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+            -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // top-left
+            -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+            // left face
+            -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+            -1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left
+            -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+            -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+            -1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+            -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+            // right face
+             1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+             1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+             1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right         
+             1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+             1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+             1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left     
+            // bottom face
+            -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+             1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left
+             1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+             1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+            -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+            -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+            // top face
+            -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+             1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+             1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right     
+             1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+            -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+            -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left        
+        };
+        m_Vertices = new vector<Vertex>;
+        for (int i = 0; i < 6 * 6; i++)
+        {
+            Vertex vertex;
+            vertex.Position.x = vertices[i * 8 + 0] * length;
+            vertex.Position.y = vertices[i * 8 + 1] * length;
+            vertex.Position.z = vertices[i * 8 + 2] * length;
+            vertex.Normal.x = vertices[i * 8 + 3];
+            vertex.Normal.y = vertices[i * 8 + 4];
+            vertex.Normal.z = vertices[i * 8 + 5];
+            vertex.TexCoords.x = vertices[i * 8 + 6];
+            vertex.TexCoords.y = vertices[i * 8 + 7];
+            m_Vertices->emplace_back(vertex);
+        }
+    }
+    void CubeMesh::drawAfterBindTextures() const
+    {
+        glBindVertexArray(m_VAO);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        glBindVertexArray(0);
+    }
+    
+    
+
+    QuadMesh::QuadMesh(void* model, const std::string name)
+        : ProceduralMesh(model, name)
+    {
+        setupMesh();
+
+        bindBufferAndAttribute();
+    }
+    void QuadMesh::setupMesh()
+    {
+        float length = ((CubeModel*)m_OfModel)->getCube().length;
+
+        float vertices[] = {
+            // positions        // texture Coords
+            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+             1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+             1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        };
+
+        m_Vertices = new vector<Vertex>;
+        for (int i = 0; i < 4; i++)
+        {
+            Vertex vertex;
+            vertex.Position.x = vertices[i * 5 + 0] * length;
+            vertex.Position.y = vertices[i * 5 + 1] * length;
+            vertex.Position.z = vertices[i * 5 + 2] * length;
+            vertex.TexCoords.x = vertices[i * 5 + 3];
+            vertex.TexCoords.y = vertices[i * 5 + 4];
+            m_Vertices->emplace_back(vertex);
+        }
+    }
+    void QuadMesh::drawAfterBindTextures() const
+    {
+        glBindVertexArray(m_VAO);
+
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+        glBindVertexArray(0);
+    }
+
 }

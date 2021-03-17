@@ -10,58 +10,40 @@ uniform sampler2D normalMap[2];
 uniform sampler2D metallicMap[2];
 uniform sampler2D roughnessMap[2];
 uniform sampler2D aoMap[2];
-uniform sampler2D displacementMap[2];
+
+// IBL
+uniform samplerCube irradianceMap[1];
+uniform samplerCube prefilterMap[1];
+uniform sampler2D brdfLUT[1];
 
 // lights
-uniform vec3 lightDirection;
-uniform vec3 lightColor;
-
-uniform float heightScale;
+uniform vec3 lightDirections[1];
+uniform vec3 lightPositions[1];
+uniform vec3 lightColors[1];
 
 uniform vec3 camPos;
 
 const float PI = 3.14159265359;
 // ----------------------------------------------------------------------------
-vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir, int index)
-{ 
-    // number of depth layers
-    const float minLayers = 8;
-    const float maxLayers = 32;
-    float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));  
-    // calculate the size of each layer
-    float layerDepth = 1.0 / numLayers;
-    // depth of current layer
-    float currentLayerDepth = 0.0;
-    // the amount to shift the texture coordinates per layer (from vector P)
-    vec2 P = viewDir.xy / viewDir.z * heightScale; 
-    vec2 deltaTexCoords = P / numLayers;
-  
-    // get initial values
-    vec2  currentTexCoords     = texCoords;
-    float currentDepthMapValue = texture(displacementMap[index], currentTexCoords).r;
-      
-    while(currentLayerDepth < currentDepthMapValue)
-    {
-        // shift texture coordinates along direction of P
-        currentTexCoords -= deltaTexCoords;
-        // get depthmap value at current texture coordinates
-        currentDepthMapValue = texture(displacementMap[index], currentTexCoords).r;  
-        // get depth of next layer
-        currentLayerDepth += layerDepth;  
-    }
-    
-    // get texture coordinates before collision (reverse operations)
-    vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
+// Easy trick to get tangent-normals to world-space to keep PBR code simplified.
+// Don't worry if you don't get what's going on; you generally want to do normal 
+// mapping the usual way for performance anways; I do plan make a note of this 
+// technique somewhere later in the normal mapping tutorial.
+vec3 getNormalFromMap(int index)
+{
+    vec3 tangentNormal = texture(normalMap[index], TexCoords).xyz * 2.0 - 1.0;
 
-    // get depth after and before collision for linear interpolation
-    float afterDepth  = currentDepthMapValue - currentLayerDepth;
-    float beforeDepth = texture(displacementMap[index], prevTexCoords).r - currentLayerDepth + layerDepth;
- 
-    // interpolation of texture coordinates
-    float weight = afterDepth / (afterDepth - beforeDepth);
-    vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
+    vec3 Q1  = dFdx(WorldPos);
+    vec3 Q2  = dFdy(WorldPos);
+    vec2 st1 = dFdx(TexCoords);
+    vec2 st2 = dFdy(TexCoords);
 
-    return finalTexCoords;
+    vec3 N   = normalize(Normal);
+    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
+    vec3 B  = -normalize(cross(N, T));
+    mat3 TBN = mat3(T, B, N);
+
+    return normalize(TBN * tangentNormal);
 }
 // ----------------------------------------------------------------------------
 float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -104,39 +86,33 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
     return F0 + (1.0 - F0) * pow(max(1.0 - cosTheta, 0.0), 5.0);
 }
 // ----------------------------------------------------------------------------
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(max(1.0 - cosTheta, 0.0), 5.0);
+}  
+// ----------------------------------------------------------------------------
 void main()
-{	
-    // ----------------------------------------------------------------------------
-    // Easy trick to get tangent-normals to world-space to keep PBR code simplified.
-    // Don't worry if you don't get what's going on; you generally want to do normal 
-    // mapping the usual way for performance anways; I do plan make a note of this 
-    // technique somewhere later in the normal mapping tutorial.
-    vec3 Q1  = dFdx(WorldPos);
-    vec3 Q2  = dFdy(WorldPos);
-    vec2 st1 = dFdx(TexCoords);
-    vec2 st2 = dFdy(TexCoords);
-    vec3 tN   = normalize(Normal);
-    vec3 tT  = normalize(Q1*st2.t - Q2*st1.t);
-    vec3 tB  = -normalize(cross(tN, tT));
-    mat3 TBN = mat3(tT, tB, tN);
-
-    int i;
-    if(WorldPos.y < 10.0)
-        i = 0;
+{		
+    // material properties
+    int index;
+    if(WorldPos.y < 10.0f)
+    {
+        index = 0;
+    }
     else
-        i = 1;
-    // ----------------------------------------------------------------------------   
-    vec3 tangentNormal = texture(normalMap[i], TexCoords).xyz * 2.0 - 1.0;
-    vec3 N = normalize(TBN * tangentNormal);
+    {
+        index = 1;
+    }
+    
+    vec3 albedo = pow(texture(albedoMap[index], TexCoords).rgb, vec3(2.2));
+    float metallic = texture(metallicMap[index], TexCoords).r;
+    float roughness = texture(roughnessMap[index], TexCoords).r;
+    float ao = texture(aoMap[index], TexCoords).r ;
+       ao = ao < 1E-3F ? 0.03 : ao;
+    // input lighting data
+    vec3 N = getNormalFromMap(index);
     vec3 V = normalize(camPos - WorldPos);
-
-    vec3 tangentViewDir = TBN * V;
-    vec2 texCoords = ParallaxMapping(TexCoords,  tangentViewDir, i);  
-    vec3 albedo     = pow(texture(albedoMap[i], texCoords).rgb, vec3(2.2));
-    float metallic  = texture(metallicMap[i], texCoords).r;
-    float roughness = texture(roughnessMap[i], texCoords).r;
-    float ao        = texture(aoMap[i], texCoords).r;
-
+    vec3 R = reflect(-V, N); 
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
     // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
@@ -145,49 +121,81 @@ void main()
 
     // reflectance equation
     vec3 Lo = vec3(0.0);
+    for(int i = -1; i < 1; ++i) 
+    {
+        vec3 L;
+        vec3 H;
+        vec3 radiance;
+        if(i == -1)
+        {
+            //sunlight
+            // calculate per-light radiance
+            L = normalize(lightDirections[0]);
+            H = normalize(V + L);
+            radiance = vec3(100.0f, 100.0f, 100.0f);
+        }
+        else
+        {
+            // calculate per-light radiance
+            L = normalize(lightPositions[i] - WorldPos);
+            H = normalize(V + L);
+            float distance = length(lightPositions[i] - WorldPos);
+            float attenuation = 1.0 / (distance * distance);
+            radiance = lightColors[i] * attenuation;
+        }
+        
+        // Cook-Torrance BRDF
+        float NDF = DistributionGGX(N, H, roughness);   
+        float G   = GeometrySmith(N, V, L, roughness);    
+        vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);        
+        
+        vec3 nominator    = NDF * G * F;
+        float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.001; // 0.001 to prevent divide by zero.
+        vec3 specular = nominator / denominator;
+        
+         // kS is equal to Fresnel
+        vec3 kS = F;
+        // for energy conservation, the diffuse and specular light can't
+        // be above 1.0 (unless the surface emits light); to preserve this
+        // relationship the diffuse component (kD) should equal 1.0 - kS.
+        vec3 kD = vec3(1.0) - kS;
+        // multiply kD by the inverse metalness such that only non-metals 
+        // have diffuse lighting, or a linear blend if partly metal (pure metals
+        // have no diffuse light).
+        kD *= 1.0 - metallic;	                
+            
+        // scale light by NdotL
+        float NdotL = max(dot(N, L), 0.0);        
 
-    // calculate per-light radiance
-    vec3 L = normalize(lightDirection);
-    vec3 H = normalize(V + L);
-    vec3 radiance = lightColor;
+        // add to outgoing radiance Lo
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL; // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 
-    // Cook-Torrance BRDF
-    float NDF = DistributionGGX(N, H, roughness);   
-    float G   = GeometrySmith(N, V, L, roughness);      
-    vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
-       
-    vec3 nominator    = NDF * G * F; 
-    float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.001; // 0.001 to prevent divide by zero.
-    vec3 specular = nominator / denominator;
+    }   
+
+    // ambient lighting (we now use IBL as the ambient term)
+    vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
     
-    // kS is equal to Fresnel
     vec3 kS = F;
-    // for energy conservation, the diffuse and specular light can't
-    // be above 1.0 (unless the surface emits light); to preserve this
-    // relationship the diffuse component (kD) should equal 1.0 - kS.
-    vec3 kD = vec3(1.0) - kS;
-    // multiply kD by the inverse metalness such that only non-metals 
-    // have diffuse lighting, or a linear blend if partly metal (pure metals
-    // have no diffuse light).
+    vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;	  
-
-    // scale light by NdotL
-    float NdotL = max(dot(N, L), 0.0);        
-
-    // add to outgoing radiance Lo
-    Lo += (kD * albedo / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again   
     
-    // ambient lighting (note that the next IBL tutorial will replace 
-    // this ambient lighting with environment lighting).
-    vec3 ambient = vec3(0.03) * albedo * ao;
+    vec3 irradiance = texture(irradianceMap[0], N).rgb;
+    vec3 diffuse      = irradiance * albedo;
+    
+    // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
+    const float MAX_REFLECTION_LOD = 4.0;
+    vec3 prefilteredColor = textureLod(prefilterMap[0], R,  roughness * MAX_REFLECTION_LOD).rgb;    
+    vec2 brdf  = texture(brdfLUT[0], vec2(max(dot(N, V), 0.0), roughness)).rg;
+    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+
+    vec3 ambient = (kD * diffuse + specular) * ao;
     
     vec3 color = ambient + Lo;
-    vec3 finalColor = color;   
-    
-    // HDR tonemapping
-    finalColor = finalColor / (finalColor + vec3(1.0));
-    // gamma correct
-    finalColor = pow(finalColor, vec3(1.0/2.2));
 
-    FragColor = vec4(finalColor, 1.0);
+    // HDR tonemapping
+    color = color / (color + vec3(1.0));
+    // gamma correct
+    color = pow(color, vec3(1.0/2.2)); 
+
+    FragColor = vec4(color , 1.0);
 }

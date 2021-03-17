@@ -19,11 +19,11 @@ namespace Hazel
 {
     float Camera::s_YAW = -90.0f;
     float Camera::s_PITCH = 0.0f;
-    float Camera::s_SPEED = 2.5f;
+    float Camera::s_SPEED = 5.0f;
     float Camera::s_SENSITIVITY = 0.1f;
     float Camera::s_ZOOM = 45.0f;
     float Camera::s_NearPlaneDistance = 0.1f;
-    float Camera::s_FarPlaneDistance = 100.0f;
+    float Camera::s_FarPlaneDistance = 300.0f;
 
 
     // constructor with vectors
@@ -52,17 +52,17 @@ namespace Hazel
         //no need to update the camera except the main camera
         if (((Level*)m_OfLevel)->getCamera() == this)
         {
-            float velocity = m_MovementSpeed * Application::getDeltaTime();
+            float moveDistance = m_MovementSpeed * Application::getDeltaTime();
             if (m_ForwardMove)
-                m_Transform += m_Front * velocity;
-            //Position += glm::vec3(Front.x, .0f, Front.z) * velocity; //Make the camera move only on a flat surface
+                m_Transform += m_Front * moveDistance;
+            //Position += glm::vec3(Front.x, .0f, Front.z) * moveDistance; //Make the camera move only on a flat surface
             if (m_BackwardMove)
-                m_Transform -= m_Front * velocity;
-            //Position -= glm::vec3(Front.x, .0f, Front.z) * velocity; //Make the camera move only on a flat surface
+                m_Transform -= m_Front * moveDistance;
+            //Position -= glm::vec3(Front.x, .0f, Front.z) * moveDistance; //Make the camera move only on a flat surface
             if (m_LeftMove)
-                m_Transform -= m_Right * velocity;
+                m_Transform -= m_Right * moveDistance;
             if (m_RightMove)
-                m_Transform += m_Right * velocity;
+                m_Transform += m_Right * moveDistance;
 
             updateCameraVectors();
             updateCameraViewMatrix();
@@ -178,6 +178,10 @@ namespace Hazel
         m_Up = glm::normalize(glm::cross(m_Right, m_Front));
 
         //HZ_CORE_INFO(m_Front.x);
+    }
+    void Camera::updateCameraViewMatrix()
+    {
+        m_CameraViewMatrix = glm::lookAt(m_Transform, m_Transform + m_Front, m_Up);
     }
     void Camera::updateCameraProjectionMatrix()
     {

@@ -19,11 +19,8 @@ namespace Hazel {
     protected:
         virtual void loadDirectory() override;
 
-        //just set Universal material for LearnOpenGLModel
+        //this is useless, should improve the model classes later!!
         virtual void processMaterial(Mesh* mesh, aiMaterial* material) override {};
-
-        //just set Universal shader for LearnOpenGLModel
-        virtual void processShader(Mesh* mesh) override {};
      
     };
 

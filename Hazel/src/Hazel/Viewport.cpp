@@ -19,19 +19,9 @@ namespace Hazel {
 	}
 	void Viewport::init()
 	{
-		m_Width = ((Window*)m_OfWindow)->getWidth();
-		m_Height = ((Window*)m_OfWindow)->getHeight();
-
-		//should change this for mutiple viewports implementation
-		glViewport(0, 0, m_Width, m_Height);
 
 		m_IsCursorCaptured = false;
 
-		// configure global opengl state
-		glEnable(GL_DEPTH_TEST);
-		HZ_CORE_INFO("glEnable(GL_DEPTH_TEST).");
-		glfwWindowHint(GLFW_SAMPLES, 4);
-		HZ_CORE_INFO("glfwWindowHint(GLFW_SAMPLES, 4).");
 		glfwSetInputMode((GLFWwindow*)(((Window*)m_OfWindow)->getNativeWindow()), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		HZ_CORE_INFO("CURSOR APPEAR!");
 
@@ -39,7 +29,6 @@ namespace Hazel {
 
 	void Viewport::onUpdate()
 	{
-		onRender();
 		for (shared_ptr<Level> rootLevel : m_RootLevels)
 		{
 			rootLevel->onUpdate();
@@ -47,13 +36,24 @@ namespace Hazel {
 
 		//multi-thread processing needed, physics one, and render one
 
+		onRender();
 		m_CurrentRootLevel->onRender();
 	}
 
 	void Viewport::onRender()
 	{
+		m_Width = ((Window*)m_OfWindow)->getWidth();
+		m_Height = ((Window*)m_OfWindow)->getHeight();
+
+		//should change this for mutiple viewports implementation
+		glViewport(0, 0, m_Width, m_Height);
+
 		// render
 		// ------
+		glEnable(GL_DEPTH_TEST);
+		//HZ_CORE_INFO("glEnable(GL_DEPTH_TEST).");
+		glfwWindowHint(GLFW_SAMPLES, 4);
+		//HZ_CORE_INFO("glfwWindowHint(GLFW_SAMPLES, 4).");
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		//HZ_CORE_INFO("glClearColor();");
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
