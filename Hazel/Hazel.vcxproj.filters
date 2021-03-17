@@ -120,6 +120,9 @@
     <ClInclude Include="src\Hazel\ResourceLoading\FileSystem.h">
       <Filter>src\Hazel\ResourceLoading</Filter>
     </ClInclude>
+    <ClInclude Include="src\Hazel\ResourceLoading\FromResourceMesh.h">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClInclude>
     <ClInclude Include="src\Hazel\ResourceLoading\FromResourceModel.h">
       <Filter>src\Hazel\ResourceLoading</Filter>
     </ClInclude>
@@ -130,6 +133,9 @@
       <Filter>src\Hazel\ResourceLoading</Filter>
     </ClInclude>
     <ClInclude Include="src\Hazel\ResourceLoading\Material.h">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\ResourceLoading\ProceduralMesh.h">
       <Filter>src\Hazel\ResourceLoading</Filter>
     </ClInclude>
     <ClInclude Include="src\Hazel\ResourceLoading\ProceduralModel.h">
@@ -163,6 +169,9 @@
       <Filter>src\Hazel</Filter>
     </ClInclude>
     <ClInclude Include="src\Hazel\Window.h">
+      <Filter>src\Hazel</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\badAllocHandler.h">
       <Filter>src\Hazel</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Windows\OpenGLTexture.h">
@@ -1413,7 +1422,7 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
-    <ClInclude Include="src\Hazel\badAllocHandler.h" />
+    <ClInclude Include="src\Hazel\Actors\Enviroment.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Hazel\Actors\Actor.cpp">
@@ -1452,6 +1461,9 @@
     <ClCompile Include="src\Hazel\Log.cpp">
       <Filter>src\Hazel</Filter>
     </ClCompile>
+    <ClCompile Include="src\Hazel\ResourceLoading\FromResourceMesh.cpp">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClCompile>
     <ClCompile Include="src\Hazel\ResourceLoading\FromResourceModel.cpp">
       <Filter>src\Hazel\ResourceLoading</Filter>
     </ClCompile>
@@ -1459,6 +1471,9 @@
       <Filter>src\Hazel\ResourceLoading</Filter>
     </ClCompile>
     <ClCompile Include="src\Hazel\ResourceLoading\Material.cpp">
+      <Filter>src\Hazel\ResourceLoading</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\ResourceLoading\ProceduralMesh.cpp">
       <Filter>src\Hazel\ResourceLoading</Filter>
     </ClCompile>
     <ClCompile Include="src\Hazel\ResourceLoading\ProceduralModel.cpp">
@@ -1488,6 +1503,9 @@
     <ClCompile Include="src\Hazel\Window.cpp">
       <Filter>src\Hazel</Filter>
     </ClCompile>
+    <ClCompile Include="src\Hazel\badAllocHandler.cpp">
+      <Filter>src\Hazel</Filter>
+    </ClCompile>
     <ClCompile Include="src\Platform\Windows\OpenGLTexture.cpp">
       <Filter>src\Platform\Windows</Filter>
     </ClCompile>
@@ -1500,6 +1518,9 @@
     <ClCompile Include="src\hzpch.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Hazel\badAllocHandler.cpp" />
+    <ClCompile Include="src\Hazel\Actors\Enviroment.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\3d\container_barrel_udlmcdhqx\Universal.fs" />
   </ItemGroup>
 </Project>

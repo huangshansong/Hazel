@@ -5,6 +5,7 @@
 #include "Hazel/ResourceLoading/_ResourceLoading.h"
 #include "Hazel/Levels/PlantsLevel.h"
 #include "Hazel/Core.h"
+#include "Platform/Windows/OpenGLTexture.h"
 
 #include "Editor.h"
 
@@ -40,32 +41,60 @@ namespace Hazel
         Level* rootLevel = new Level(viewport);
 		viewport->setCurrentRootLevel(rootLevel);
         Camera* camera = new Camera(rootLevel, "main camera");
-        rootLevel->setCamera(rootLevel, camera);
+        Level::setCamera(rootLevel, camera);
 
-		addDefaultActor(rootLevel, DefaultActor::backpack);
-
+		addDefaultMap(rootLevel);
+		
     }
     void Editor::addDefaultMap(Level* level)
 	{
-		addDefaultActor(level, DefaultActor::landscape);
+		addDefaultActor(level, DefaultActor::enviroment);
+		//addDefaultActor(level, DefaultActor::container);
+		//addDefaultActor(level, DefaultActor::backpack);
+		//addDefaultActor(level, DefaultActor::landscape);
 		addDefaultActor(level, DefaultActor::sphere);
-		addDefaultActor(level, DefaultActor::grass);
+		//addDefaultActor(level, DefaultActor::grass);
+		//addDefaultActor(level, DefaultActor::cerberus); //can't read the texture type by assimp!!
    
 	}
 	void Editor::addDefaultActor(Level* level, DefaultActor actor)
 	{
-		if (actor == DefaultActor::backpack)
+		if (actor == DefaultActor::enviroment)
+		{
+			Enviroment* enviroment = new Enviroment(level, "Enviroment");
+			level->setEnviroment(enviroment);
+			CubeModel* model = new CubeModel(enviroment);
+			EnvironmentMaterial* material = new EnvironmentMaterial("resources/textures/skybox/", FileSuffix::jpg);
+			model->setModelUniversalMaterial(shared_ptr<Material>(material));
+			Shader* shader = new Shader("resources/textures/IBL/");
+			model->setModelUniversalShader(shared_ptr<Shader>(shader));
+
+		}
+		else if (actor == DefaultActor::container)
+		{
+			Actor* container = new Actor(level, "Container");
+			Model* model = new QuixelModel(container, "resources/3d/container_barrel_udlmcdhqx/", QuixelObjectType::_3d);
+			model->setScale(glm::vec3(0.1f));
+		}
+		else if (actor == DefaultActor::cerberus)
+		{
+			Actor* cerberus = new Actor(level, "Cerberus");
+			Model* model = new LearnOpenGLModel(cerberus, "resources/objects/Cerberus/", FileSuffix::fbx);
+		}
+		else if (actor == DefaultActor::backpack)
 		{
 			Actor* backpack = new Actor(level, "Backpack");
-			Model* model = new LearnOpenGLModel(backpack, "resources/objects/backpack/");
-			Shader* shader = new Shader("resources/objects/backpack/");
-			model->setModelUniversalShader(shared_ptr<Shader>(shader));
+			Model* model = new LearnOpenGLModel(backpack, "resources/objects/backpack/", FileSuffix::obj);
 		}
 		else if (actor == DefaultActor::landscape)
 		{
 			Actor* landscape = new Actor(level, "Landscape");
 			Model* model = new LandscapeModel(landscape);
-			QuixelMaterial* material = new QuixelMaterial("resources/surfaces/landscape/", QuixelObjectType::_surface, Resolution::_2K);
+			model->setScale(glm::vec3(5.0f));
+			vector<string> paths;
+			paths.emplace_back("resources/surfaces/rock_rough_vctkajjg/");
+			paths.emplace_back("resources/surfaces/snow_pure_uephfgudy/");
+			QuixelMaterial* material = new QuixelMaterial(paths, QuixelObjectType::_surface, Resolution::_2K);
 			model->setModelUniversalMaterial(shared_ptr<Material>(material));
 			Shader* shader = new Shader("resources/surfaces/landscape/");
 			model->setModelUniversalShader(shared_ptr<Shader>(shader));
@@ -74,7 +103,7 @@ namespace Hazel
 		{
 			Actor* sphere = new Actor(level, "Sphere");
 			Model* model = new SphereModel(sphere);
-			QuixelMaterial* material = new QuixelMaterial("resources/simpleGeometry/", QuixelObjectType::_surface, Resolution::_2K);
+			OrdinaryMaterial* material = new OrdinaryMaterial("resources/textures/pbr/gold/", FileSuffix::png);
 			model->setModelUniversalMaterial(shared_ptr<Material>(material));
 			Shader* shader = new Shader("resources/simpleGeometry/");
 			model->setModelUniversalShader(shared_ptr<Shader>(shader));

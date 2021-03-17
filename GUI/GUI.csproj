@@ -51,9 +51,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="src\Class1.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\Class1.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Hazel\Hazel.vcxproj">

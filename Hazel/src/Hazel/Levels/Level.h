@@ -2,6 +2,7 @@
 #include "hzpch.h"
 
 #include "Hazel/Core.h"
+#include "Hazel/Actors/Enviroment.h"
 #include "Hazel/Actors/camera.h"
 #include "Hazel/Actors/Actor.h"
 #include "Hazel/Events/Event.h"
@@ -26,7 +27,11 @@ namespace Hazel
 			}
 		}
 
+		void setEnviroment(Enviroment* enviroment){ m_Enviroment = enviroment; }
+
 		const Camera* getCamera() const{ return m_Camera; }
+
+		const Enviroment* getEnviroment() const { return m_Enviroment; }
 
 		const void* getOfViewport() const { return m_OfViewport; }
 
@@ -45,6 +50,7 @@ namespace Hazel
 	protected:
 		void* m_OfViewport;
 		Camera* m_Camera = nullptr;
+		Enviroment* m_Enviroment = nullptr;
 		//manage levels with a tree structure
 		
 	};

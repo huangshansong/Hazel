@@ -2,6 +2,7 @@
 
 #include "Geometry.h"
 #include "ProceduralModel.h"
+#include "ProceduralMesh.h"
 
 namespace Hazel
 {
@@ -20,19 +21,70 @@ namespace Hazel
 
 		Sphere m_Sphere;
     };
-
-	class HAZEL_API SphereMesh : public Mesh
+	class HAZEL_API CubeModel : public ProceduralModel
 	{
 	public:
-		SphereMesh(void*);
+		CubeModel(void*, Cube = Cube());
+
+		const Cube& getCube() const { return m_Cube; }
+
+	protected:
+		virtual void setupModel() override {};
+
+		virtual void processMesh() override;
+
+		Cube m_Cube;
+	};
+	class HAZEL_API QuadModel : public ProceduralModel
+	{
+	public:
+		QuadModel(void*, Quad = Quad());
+
+		const Quad& getCube() const { return m_Quad; }
+
+	protected:
+		virtual void setupModel() override {};
+
+		virtual void processMesh() override;
+
+		Quad m_Quad;
+	};
+	class HAZEL_API SphereMesh : public ProceduralMesh
+	{
+	public:
+		SphereMesh(void*, const std::string name = "Unnamed");
+
+		virtual void drawAfterBindTextures() const override;
+
+	protected:
+		// initializes all the buffer objects/arrays
+		virtual void setupMesh() override;
+	
+	};
+
+	class HAZEL_API CubeMesh : public ProceduralMesh
+	{
+	public:
+		CubeMesh(void*, const std::string name = "Unnamed");
+
+		virtual void drawAfterBindTextures() const override;
+
+	protected:
+		// initializes all the buffer objects/arrays
+		virtual void setupMesh() override;
+	
+	};
+	class HAZEL_API QuadMesh : public ProceduralMesh
+	{
+	public:
+		QuadMesh(void*, const std::string name = "Unnamed");
+
+		virtual void drawAfterBindTextures() const override;
 
 	protected:
 		// initializes all the buffer objects/arrays
 		virtual void setupMesh() override;
 
-		virtual void drawAfterBindTextures() const override;
-
-		unsigned int m_IndexCount = 0;
 	};
 }
 

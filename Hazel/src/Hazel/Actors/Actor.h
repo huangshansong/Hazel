@@ -17,14 +17,20 @@ namespace Hazel
 		"Backpack",
 		"Landscape",
 		"Sphere",
-		"Grass"
+		"Grass",
+		"Enviroment",
+		"Cerberus",
+		"Container"
 	};
 	enum class DefaultActor
 	{
 		backpack = 0,
 		landscape,
 		sphere,
-		grass
+		grass,
+		enviroment,
+		cerberus,
+		container
 	};
 
 	class HAZEL_API Actor : public HObject
@@ -50,7 +56,7 @@ namespace Hazel
 
 		virtual void onUpdate();
 
-		virtual void onRender();
+		virtual void onRender() const;
 
 		std::shared_ptr<Model> m_Model = nullptr;
 

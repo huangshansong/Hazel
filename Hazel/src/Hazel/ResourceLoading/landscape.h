@@ -2,6 +2,7 @@
 #include "hzpch.h"
 
 #include "ProceduralModel.h"
+#include "ProceduralMesh.h"
 
 namespace Hazel
 {
@@ -50,7 +51,7 @@ namespace Hazel
 
 	};
 
-	class HAZEL_API LandscapeMesh : public Mesh
+	class HAZEL_API LandscapeMesh : public ProceduralMesh
 	{
 	public:
 		// initializes all the buffer objects/arrays
@@ -62,7 +63,6 @@ namespace Hazel
 
 		virtual void drawAfterBindTextures() const override;
 
-		unsigned int m_IndexCount = 0;
-
+		void calcAndSetTexCoords(unsigned int targetVertexIndex, int preparedVertex1Index, int preparedVertex2Index, bool interpolation = false);
 	};
 }

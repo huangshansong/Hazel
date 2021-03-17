@@ -158,11 +158,11 @@ IF EXIST ..\bin\Dist-windows-x86_64\Hazel\Hazel.dll\ (xcopy /Q /E /Y /I ..\bin\D
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Hazel\Actors\Enviroment.h" />
     <ClInclude Include="src\Hazel.h" />
     <ClInclude Include="src\Hazel\Actors\Actor.h" />
     <ClInclude Include="src\Hazel\Actors\camera.h" />
     <ClInclude Include="src\Hazel\Application.h" />
-    <ClInclude Include="src\Hazel\badAllocHandler.h" />
     <ClInclude Include="src\Hazel\Components\CollisionBox.h" />
     <ClInclude Include="src\Hazel\Components\PhysicsComponent.h" />
     <ClInclude Include="src\Hazel\Core.h" />
@@ -180,10 +180,12 @@ IF EXIST ..\bin\Dist-windows-x86_64\Hazel\Hazel.dll\ (xcopy /Q /E /Y /I ..\bin\D
     <ClInclude Include="src\Hazel\Levels\PlantsLevel.h" />
     <ClInclude Include="src\Hazel\Log.h" />
     <ClInclude Include="src\Hazel\ResourceLoading\FileSystem.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\FromResourceMesh.h" />
     <ClInclude Include="src\Hazel\ResourceLoading\FromResourceModel.h" />
     <ClInclude Include="src\Hazel\ResourceLoading\Geometry.h" />
     <ClInclude Include="src\Hazel\ResourceLoading\LearnOpenGLModel.h" />
     <ClInclude Include="src\Hazel\ResourceLoading\Material.h" />
+    <ClInclude Include="src\Hazel\ResourceLoading\ProceduralMesh.h" />
     <ClInclude Include="src\Hazel\ResourceLoading\ProceduralModel.h" />
     <ClInclude Include="src\Hazel\ResourceLoading\QuixelFile.h" />
     <ClInclude Include="src\Hazel\ResourceLoading\QuixelModel.h" />
@@ -195,6 +197,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Hazel\Hazel.dll\ (xcopy /Q /E /Y /I ..\bin\D
     <ClInclude Include="src\Hazel\ResourceLoading\shader.h" />
     <ClInclude Include="src\Hazel\Viewport.h" />
     <ClInclude Include="src\Hazel\Window.h" />
+    <ClInclude Include="src\Hazel\badAllocHandler.h" />
     <ClInclude Include="src\Platform\Windows\OpenGLTexture.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\hzpch.h" />
@@ -613,10 +616,10 @@ IF EXIST ..\bin\Dist-windows-x86_64\Hazel\Hazel.dll\ (xcopy /Q /E /Y /I ..\bin\D
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Hazel\Actors\Enviroment.cpp" />
     <ClCompile Include="src\Hazel\Actors\Actor.cpp" />
     <ClCompile Include="src\Hazel\Actors\camera.cpp" />
     <ClCompile Include="src\Hazel\Application.cpp" />
-    <ClCompile Include="src\Hazel\badAllocHandler.cpp" />
     <ClCompile Include="src\Hazel\Components\CollisionBox.cpp" />
     <ClCompile Include="src\Hazel\Components\PhysicsComponent.cpp" />
     <ClCompile Include="src\Hazel\Editor\Editor.cpp" />
@@ -626,9 +629,11 @@ IF EXIST ..\bin\Dist-windows-x86_64\Hazel\Hazel.dll\ (xcopy /Q /E /Y /I ..\bin\D
     <ClCompile Include="src\Hazel\Levels\Level.cpp" />
     <ClCompile Include="src\Hazel\Levels\PlantsLevel.cpp" />
     <ClCompile Include="src\Hazel\Log.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\FromResourceMesh.cpp" />
     <ClCompile Include="src\Hazel\ResourceLoading\FromResourceModel.cpp" />
     <ClCompile Include="src\Hazel\ResourceLoading\LearnOpenGLModel.cpp" />
     <ClCompile Include="src\Hazel\ResourceLoading\Material.cpp" />
+    <ClCompile Include="src\Hazel\ResourceLoading\ProceduralMesh.cpp" />
     <ClCompile Include="src\Hazel\ResourceLoading\ProceduralModel.cpp" />
     <ClCompile Include="src\Hazel\ResourceLoading\QuixelModel.cpp" />
     <ClCompile Include="src\Hazel\ResourceLoading\SimpleGeometry.cpp" />
@@ -638,6 +643,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Hazel\Hazel.dll\ (xcopy /Q /E /Y /I ..\bin\D
     <ClCompile Include="src\Hazel\ResourceLoading\shader.cpp" />
     <ClCompile Include="src\Hazel\Viewport.cpp" />
     <ClCompile Include="src\Hazel\Window.cpp" />
+    <ClCompile Include="src\Hazel\badAllocHandler.cpp" />
     <ClCompile Include="src\Platform\Windows\OpenGLTexture.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\VenderSetting.cpp" />
@@ -655,6 +661,9 @@ IF EXIST ..\bin\Dist-windows-x86_64\Hazel\Hazel.dll\ (xcopy /Q /E /Y /I ..\bin\D
     <ProjectReference Include="vendor\imgui\ImGui.vcxproj">
       <Project>{C0FF640D-2C14-8DBE-F595-301E616989EF}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\3d\container_barrel_udlmcdhqx\Universal.fs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

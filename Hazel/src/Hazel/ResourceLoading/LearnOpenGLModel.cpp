@@ -24,16 +24,17 @@
 using namespace std;
 namespace Hazel
 {
-	LearnOpenGLModel::LearnOpenGLModel(void* actor, std::string directory, bool gamma)
+	LearnOpenGLModel::LearnOpenGLModel(void* actor, std::string directory, FileSuffix fileSuffix, bool gamma)
 		: FromResourceModel(actor, directory, gamma)
 	{
+        m_FileSuffix = fileSuffix;
         loadDirectory();
 	}
 
 	void LearnOpenGLModel::loadDirectory()
 	{
 		m_Name = m_Directory.substr(m_Directory.find_last_of('/', m_Directory.size() - 2) + 1, m_Directory.find_last_of('/') - m_Directory.find_last_of('/', m_Directory.size() - 2) - 1);
-		string filePath = m_Directory + m_Name + ".obj";
+		string filePath = m_Directory + m_Name + fileSuffixName[(unsigned int)m_FileSuffix];
 		loadModel(filePath, 0);
 	}
 

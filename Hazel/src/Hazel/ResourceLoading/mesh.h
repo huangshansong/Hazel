@@ -20,15 +20,15 @@ namespace Hazel
         // texCoords
         glm::vec2 TexCoords;
         // tangent
-        glm::vec3 Tangent;
+        //glm::vec3 Tangent;
         // bitangent
-        glm::vec3 Bitangent;
+        //glm::vec3 Bitangent;
     };
 
     class HAZEL_API Mesh : public HObject
     {
     public:
-        Mesh(void* model, std::vector<Vertex>* vertices = nullptr, std::vector<unsigned int>* indices = nullptr, const std::string name = "Unnamed");
+        Mesh(void* model, const std::string name = "Unnamed");
 
         virtual ~Mesh();
 
@@ -43,6 +43,9 @@ namespace Hazel
         // render the mesh
         void draw() const;
 
+        //override this if the mesh is without indices!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        virtual void drawAfterBindTextures() const = 0;
+
         std::string m_Name;
 
         std::shared_ptr<Material> m_Material;
@@ -50,11 +53,7 @@ namespace Hazel
         std::shared_ptr<Shader> m_Shader;
 
     protected:
-        virtual void setupMesh() {};
-
-        //override this if the mesh is without indices!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        virtual void drawAfterBindTextures() const;
-
+        
         // initializes all the buffer objects/arrays, textures, and shader
         void bindBufferAndAttribute();
 
@@ -68,8 +67,8 @@ namespace Hazel
         unsigned int m_VAO;
         unsigned int m_VBO, m_EBO;
         // mesh data
-        std::vector<Vertex>* m_Vertices;
-        std::vector<unsigned int>* m_Indices;
+        std::vector<Vertex>* m_Vertices = nullptr;
+        std::vector<unsigned int>* m_Indices = nullptr;
 
     };
 

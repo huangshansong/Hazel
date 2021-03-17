@@ -1,6 +1,7 @@
 #include "hzpch.h"
 
 #include <Glad/glad.h> // holds all OpenGL type declarations
+#include <GLFW/glfw3.h>
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 
@@ -19,12 +20,9 @@ using namespace std;
 namespace Hazel
 {
 
-    Mesh::Mesh(void* model, std::vector<Vertex>* vertices, std::vector<unsigned int>* indices, const std::string name)
-        : m_OfModel(model), m_Vertices(vertices), m_Indices(indices), m_Name(name)
+    Mesh::Mesh(void* model, const std::string name)
+        : m_OfModel(model), m_Name(name)
     {
-        setupMesh();
-
-        bindBufferAndAttribute();
     }
 
     Mesh::~Mesh()
@@ -36,6 +34,7 @@ namespace Hazel
     // render the mesh
     void Mesh::draw() const
     {
+       
         bindTexture();
 
         setShaderUniforms();
@@ -52,19 +51,35 @@ namespace Hazel
         for (unsigned int i = 0; i < TYPES; i++) TypeCount[i] = 0;
         
         GLint totalCount = 0;
-        const vector<Texture*>& textures = m_Material->getTextures();
-        for (const Texture * texture : textures)
+        const vector<Texture*>& ownedTextures = m_Material->getTextures();
+        for (const Texture * texture : ownedTextures)
         {
             glActiveTexture(GL_TEXTURE0 + totalCount);
-            glBindTexture(GL_TEXTURE_2D, texture->id);
             string textureName = textureTypes[texture->type];
             textureName += '[' + to_string(TypeCount[texture->type]) + ']';
             //HZ_CORE_INFO(textureName);
+            glBindTexture(GL_TEXTURE_2D, texture->id);
+            m_Shader->setInt(textureName, totalCount);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, texture->id);
             m_Shader->setInt(textureName, totalCount);
             TypeCount[texture->type] ++;
             totalCount++;
         }
-
+        const Enviroment* enviroment = ((Level*)((Actor*)((Model*)m_OfModel)->getOfActor())->getOfLevel())->getEnviroment();
+        const vector<Texture*>& envMatTexs = enviroment->m_Model->m_LODs[0][0]->m_Material->getTextures();
+        for (const Texture* texture : envMatTexs)
+        {
+            glActiveTexture(GL_TEXTURE0 + totalCount);
+            string textureName = textureTypes[texture->type];
+            textureName += '[' + to_string(TypeCount[texture->type]) + ']';
+            //HZ_CORE_INFO(textureName);
+            glBindTexture(GL_TEXTURE_2D, texture->id);
+            m_Shader->setInt(textureName, totalCount);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, texture->id);
+            m_Shader->setInt(textureName, totalCount);
+            TypeCount[texture->type] ++;
+            totalCount++;
+        }
         // always good practice to set everything back to defaults once configured.
         glActiveTexture(GL_TEXTURE0);
     }
@@ -72,7 +87,7 @@ namespace Hazel
     void Mesh::setShaderUniforms() const
     {
         m_Shader->use();
-        m_Shader->setMat4("model", ((Model*)m_OfModel)->getModelTransformMatrix());
+        m_Shader->setMat4("model", glm::scale(((Model*)m_OfModel)->getModelTransformMatrix(), ((Model*)m_OfModel)->getScale()));
         const Camera* camera = ((Level*)((Actor*)((Model*)m_OfModel)->getOfActor())->getOfLevel())->getCamera();
         m_Shader->setMat4("view", camera->getCameraViewMatrix());
         m_Shader->setMat4("projection", camera->getCameraProjectionMatrix());
@@ -80,37 +95,19 @@ namespace Hazel
         m_Shader->setVec3("camPos", camera->getTransform());
 
         glm::vec3 lightDirection = glm::vec3(1.0f, 1.0f, 1.0f);
-        m_Shader->setVec3("lightDirection", lightDirection);
-        glm::vec3 lightColor = glm::vec3(100.0f, 100.0f, 100.0f);
-        m_Shader->setVec3("lightColor", lightColor);
-        float heightScale = 1.0f;
+        m_Shader->setVec3("lightDirections[0]", lightDirection);
+        glm::vec3 lightPosition = glm::vec3(10.0f, 10.0f, -10.0f);
+        m_Shader->setVec3("lightPositions[0]", lightPosition);
+        glm::vec3 lightColor = glm::vec3(300.0f, 300.0f, 300.0f);
+        m_Shader->setVec3("lightColors[0]", lightColor);
+        float heightScale = 0.1f;
         m_Shader->setFloat("heightScale", heightScale);
-
-
-    }
-
-    void Mesh::drawAfterBindTextures() const
-    {
-        // draw mesh
-        glBindVertexArray(m_VAO);
-        //HZ_CORE_INFO("glBindVertexArray(VAO);");
-
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        //ONLY MESH WITH INDICES CAN BE DRAW IN CLASS:Mesh!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        glDrawElements(GL_TRIANGLES, m_Indices->size(), GL_UNSIGNED_INT, 0);
-        //HZ_CORE_INFO("glDrawElements(GL_TRIANGLES, (*m_Indices).size(), GL_UNSIGNED_INT, 0);");
-        //ONLY MESH WITH INDICES CAN BE DRAW IN CLASS:Mesh!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-        
-        glBindVertexArray(0);
-
     }
 
     // initializes all the buffer objects/arrays
     void Mesh::bindBufferAndAttribute()
     {
-        if (!m_Vertices->empty())
+        if (m_Vertices != nullptr && !m_Vertices->empty())
         {
             // create buffers/arrays
             glGenVertexArrays(1, &m_VAO);
@@ -124,7 +121,7 @@ namespace Hazel
             // again translates to 3/2 floats which translates to a byte array.
             glBufferData(GL_ARRAY_BUFFER, m_Vertices->size() * sizeof(Vertex), m_Vertices->data(), GL_STATIC_DRAW);
 
-            if (!m_Indices->empty())
+            if (m_Indices != nullptr && !m_Indices->empty())
             {
                 glGenBuffers(1, &m_EBO);
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);

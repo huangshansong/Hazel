@@ -3,6 +3,7 @@
 
 #include "Hazel/HObject.h"
 
+#include "FileSystem.h"
 #include "QuixelFile.h"
 
 namespace Hazel
@@ -117,7 +118,15 @@ namespace Hazel
          *  above is considered to be 'unknown'. It is still imported,
          *  but is excluded from any further post-processing.
         */
-        myTextureType_UNKNOWN = 18
+        myTextureType_UNKNOWN = 18,
+
+        myTextureType_HDR = 19,
+        myTextureType_ENVIRONMENT = 20,
+        myTextureType_IRRADIANCE_IBL = 21,
+        myTextureType_PREFILTER_IBL = 22,
+        myTextureType_BRDFLUT_IBL = 23,
+
+        myTextureType_SHADOW = 24,
     };
     const char* const textureTypes[] =
     {
@@ -139,7 +148,13 @@ namespace Hazel
         "metallicMap",
         "roughnessMap",
         "aoMap",
-        "unknown"
+        "unknown",
+        "hdrMap",
+        "enviromentMap",
+        "irradianceMap",
+        "prefilterMap",
+        "brdfLUT",
+        "shadowMap",
     };
 
     struct HAZEL_API Texture : public HObject
@@ -173,10 +188,6 @@ namespace Hazel
         std::string m_Name;
 
     protected:
-        virtual bool loadTexture(const std::string&, std::vector<Texture*>&, MyTextureType) = 0;
-
-        virtual void loadTexturesFromFolder(const std::string&, std::vector<Texture*>&, QuixelObjectType, Resolution, unsigned int) = 0;
-        
         std::vector<Texture*> m_Textures;
         
     };
@@ -188,9 +199,9 @@ namespace Hazel
         QuixelMaterial(const std::string&, QuixelObjectType, Resolution, unsigned int = 0);
         
     protected:
-        virtual bool loadTexture(const std::string&, std::vector<Texture*>&, MyTextureType) override;
+        bool loadTexture(const std::string&, std::vector<Texture*>&, MyTextureType);
 
-        virtual void loadTexturesFromFolder(const std::string&, std::vector<Texture*>&, QuixelObjectType, Resolution, unsigned int) override;
+        void loadTexturesFromFolder(const std::string&, std::vector<Texture*>&, QuixelObjectType, Resolution, unsigned int);
 
     };
 
@@ -198,12 +209,21 @@ namespace Hazel
     {
     public:
         OrdinaryMaterial(std::vector<Texture*>& textures) { m_Textures = textures; }
-
+        OrdinaryMaterial(const std::string& directory, FileSuffix);
     protected:
-        virtual bool loadTexture(const std::string&, std::vector<Texture*>&, MyTextureType) override { return true; }
+        bool loadTexture(const std::string&, std::vector<Texture*>&, MyTextureType);
 
-        virtual void loadTexturesFromFolder(const std::string&, std::vector<Texture*>&, QuixelObjectType, Resolution, unsigned int) override {}
+        void loadTexturesFromFolder(const std::string&, std::vector<Texture*>&, FileSuffix);
 
     };
-    
+
+    class HAZEL_API EnvironmentMaterial : public Material
+    {
+    public:
+        EnvironmentMaterial(const std::string&, FileSuffix);
+        EnvironmentMaterial(const std::string&);
+
+    protected:
+        void gen_IBL();
+    };
 }

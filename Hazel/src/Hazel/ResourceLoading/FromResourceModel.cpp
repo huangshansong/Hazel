@@ -18,6 +18,7 @@
 #include "mesh.h"
 #include "model.h"
 #include "FromResourceModel.h"
+#include "FromResourceMesh.h"
 
 using namespace std;
 namespace Hazel
@@ -133,7 +134,7 @@ namespace Hazel
                 (*indices).push_back(face.mIndices[j]);
         }
 
-        Mesh* myMesh = new Mesh(this, vertices, indices, mesh->mName.C_Str());
+        Mesh* myMesh = new FromResourceMesh(this, vertices, indices, mesh->mName.C_Str());
 
         // process material
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];

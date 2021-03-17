@@ -45,7 +45,7 @@ namespace Hazel {
         // calculates the front vector from the Camera's (updated) Euler Angles
         void updateCameraVectors();
 
-        void updateCameraViewMatrix() { m_CameraViewMatrix = glm::lookAt(m_Transform, m_Transform + m_Front, m_Up); }
+        void updateCameraViewMatrix();
 
         void updateCameraProjectionMatrix();
 

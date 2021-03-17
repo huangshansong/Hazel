@@ -28,7 +28,7 @@ namespace Hazel
 
 		onRender();
 	}
-	void Actor::onRender()
+	void Actor::onRender() const
 	{
 		if (m_Model != nullptr)
 		{
