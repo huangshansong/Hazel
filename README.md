@@ -19,6 +19,20 @@ I haven't written the UI yet, so if you want to see a different Actor, you'll ne
 
 我当前未编写UI，所以如果你想要看到不同的Actor, 你需要到Editor.cpp里修改代码, 将addDefaultActorXXX的//去除掉，就能显示XXX这个Actor了。
 
+How to play:
+F5: enter the scene.
+Esc: leave the scene.
+Mouse move: camera direction.
+Mouse scroll: camera move speed.
+WSAD: camera move.
+
+怎么操作:
+F5:进入场景。
+Esc:离开现场。
+鼠标移动:摄像机方向。
+鼠标滚动:相机移动速度。
+WSAD:相机移动。
+
 
 reference:
 
