@@ -66,20 +66,24 @@ namespace Hazel
             totalCount++;
         }
         const Enviroment* enviroment = ((Level*)((Actor*)((Model*)m_OfModel)->getOfActor())->getOfLevel())->getEnviroment();
-        const vector<Texture*>& envMatTexs = enviroment->m_Model->m_LODs[0][0]->m_Material->getTextures();
-        for (const Texture* texture : envMatTexs)
+        if (enviroment != nullptr)
         {
-            glActiveTexture(GL_TEXTURE0 + totalCount);
-            string textureName = textureTypes[texture->type];
-            textureName += '[' + to_string(TypeCount[texture->type]) + ']';
-            //HZ_CORE_INFO(textureName);
-            glBindTexture(GL_TEXTURE_2D, texture->id);
-            m_Shader->setInt(textureName, totalCount);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, texture->id);
-            m_Shader->setInt(textureName, totalCount);
-            TypeCount[texture->type] ++;
-            totalCount++;
+            const vector<Texture*>& envMatTexs = enviroment->m_Model->m_LODs[0][0]->m_Material->getTextures();
+            for (const Texture* texture : envMatTexs)
+            {
+                glActiveTexture(GL_TEXTURE0 + totalCount);
+                string textureName = textureTypes[texture->type];
+                textureName += '[' + to_string(TypeCount[texture->type]) + ']';
+                //HZ_CORE_INFO(textureName);
+                glBindTexture(GL_TEXTURE_2D, texture->id);
+                m_Shader->setInt(textureName, totalCount);
+                glBindTexture(GL_TEXTURE_CUBE_MAP, texture->id);
+                m_Shader->setInt(textureName, totalCount);
+                TypeCount[texture->type] ++;
+                totalCount++;
+            }
         }
+        
         // always good practice to set everything back to defaults once configured.
         glActiveTexture(GL_TEXTURE0);
     }
@@ -87,7 +91,8 @@ namespace Hazel
     void Mesh::setShaderUniforms() const
     {
         m_Shader->use();
-        m_Shader->setMat4("model", glm::scale(((Model*)m_OfModel)->getModelTransformMatrix(), ((Model*)m_OfModel)->getScale()));
+        m_Shader->setMat4("model", glm::scale(((Model*)m_OfModel)->getModelMatrix(), ((Model*)m_OfModel)->getScale()));
+        //m_Shader->setMat4("model", glm::scale(glm::mat4(1.0f), ((Model*)m_OfModel)->getScale()));
         const Camera* camera = ((Level*)((Actor*)((Model*)m_OfModel)->getOfActor())->getOfLevel())->getCamera();
         m_Shader->setMat4("view", camera->getCameraViewMatrix());
         m_Shader->setMat4("projection", camera->getCameraProjectionMatrix());

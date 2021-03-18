@@ -2,6 +2,7 @@
 #include "hzpch.h"
 
 #include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -32,7 +33,7 @@ namespace Hazel
 
         const void* getOfActor() const { return m_OfActor; }
 
-        const glm::mat4& getModelTransformMatrix() const { return m_ModelTransformMatrix; }
+        const glm::mat4& getModelMatrix() const { return m_ModelMatrix; }
 
         const glm::vec3& getScale() const { return m_Scale; }
 
@@ -48,7 +49,7 @@ namespace Hazel
 
         std::string m_Name = "Unnamed";
 
-        glm::mat4 m_ModelTransformMatrix;
+        glm::mat4 m_ModelMatrix = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
         glm::vec3 m_Scale;
 

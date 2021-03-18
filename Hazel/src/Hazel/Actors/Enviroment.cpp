@@ -5,8 +5,8 @@
 using namespace std;
 namespace Hazel
 {
-	Enviroment::Enviroment(void* level, std::string name, glm::vec3 transform)
-		: Actor(level, name, transform)
+	Enviroment::Enviroment(void* level, std::string name)
+		: Actor(level, name)
 	{
 	}
 	void Enviroment::onRender() const

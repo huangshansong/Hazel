@@ -48,13 +48,15 @@ namespace Hazel
     }
     void Editor::addDefaultMap(Level* level)
 	{
-		addDefaultActor(level, DefaultActor::enviroment);
-		//addDefaultActor(level, DefaultActor::container);
-		//addDefaultActor(level, DefaultActor::backpack);
-		//addDefaultActor(level, DefaultActor::landscape);
-		addDefaultActor(level, DefaultActor::sphere);
-		//addDefaultActor(level, DefaultActor::grass);
-		//addDefaultActor(level, DefaultActor::cerberus); //can't read the texture type by assimp!!
+		addDefaultActor(level, DefaultActor::enviroment);//A skybox as IBL
+		addDefaultActor(level, DefaultActor::sphere);//A shpere
+		//addDefaultActor(level, DefaultActor::container);//A Quixel PBR model
+		//addDefaultActor(level, DefaultActor::landscape);//A landscape with auto-generated heightmap
+		
+		//addDefaultActor(level, DefaultActor::backpack);// A blinn-phong model
+
+		//addDefaultActor(level, DefaultActor::grass);// currently, I can't use the plant textures correctly. and I haven't writen the gen_Location(). Later I will write thense thing, and use DrawInstanced to draw the plants.
+		//addDefaultActor(level, DefaultActor::cerberus); //can't read the textures by assimp!!
    
 	}
 	void Editor::addDefaultActor(Level* level, DefaultActor actor)
@@ -64,7 +66,8 @@ namespace Hazel
 			Enviroment* enviroment = new Enviroment(level, "Enviroment");
 			level->setEnviroment(enviroment);
 			CubeModel* model = new CubeModel(enviroment);
-			EnvironmentMaterial* material = new EnvironmentMaterial("resources/textures/skybox/", FileSuffix::jpg);
+			//EnvironmentMaterial* material = new EnvironmentMaterial("resources/textures/skybox/", FileSuffix::jpg);//A outdoor environment
+			EnvironmentMaterial* material = new EnvironmentMaterial("resources/textures/hdr/newport_loft.hdr");//A indoor environment
 			model->setModelUniversalMaterial(shared_ptr<Material>(material));
 			Shader* shader = new Shader("resources/textures/IBL/");
 			model->setModelUniversalShader(shared_ptr<Shader>(shader));
@@ -112,7 +115,7 @@ namespace Hazel
 		{
 			PlantsLevel* plantsLevel = new PlantsLevel(level);
 
-			string directory = "resources/3dplant/grass_wild_uddmcgbia/";
+			string directory = "resources/3dplant/garden plant_flowering_uegjcflia/";
 			vector<Actor*> temp;
 			unsigned int varCount = 1;
 			bool stillHaveVar = true;

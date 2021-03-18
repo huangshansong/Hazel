@@ -44,7 +44,7 @@ namespace Hazel {
     unsigned int textureFromHDRFile(const std::string& path)
     {
         int width, height, nrComponents;
-        unsigned char* data = stbi_load(FileSystem::getPath(path).c_str(), &width, &height, &nrComponents, 0);
+        float* data = stbi_loadf(FileSystem::getPath(path).c_str(), &width, &height, &nrComponents, 0);
         if (data)
         {
             unsigned int textureID;
@@ -138,11 +138,11 @@ namespace Hazel {
         Shader shader("resources/textures/hdr/cubemap.vs", "resources/textures/hdr/HDR2Cubemap.fs");
 
         shader.use();
-        shader.setInt("equirectangularMap", 0);
-        shader.setMat4("projection", captureProjection);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, HDRTexture);
-
+        shader.setInt("equirectangularMap", 0);
+        shader.setMat4("projection", captureProjection);
+        
         glViewport(0, 0, 512, 512); // don't forget to configure the viewport to the capture dimensions.
         glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 
