@@ -12,8 +12,8 @@
 using namespace std;
 namespace Hazel
 {
-	Actor::Actor(void* level, string name, glm::vec3 transform)
-		: m_OfLevel(level), m_Name(name), m_Transform(transform)
+	Actor::Actor(void* level, string name)
+		: m_OfLevel(level), m_Name(name)
 	{
 		((Level*)level)->m_Actors.emplace_back(shared_ptr<Actor>(this));
 	}

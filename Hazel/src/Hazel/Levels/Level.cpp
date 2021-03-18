@@ -45,10 +45,17 @@ namespace Hazel
 
     void Level::onUpdate()
     {
+        if (m_Camera != nullptr)
+        {
+            static_cast<Actor*>(m_Camera)->onUpdate();
+        }
         //should add physics processing here later!!!!!!!!!
         for (shared_ptr<Actor> actor : m_Actors)
         {
-            actor->onUpdate();
+            if (actor.get() != m_Camera)
+            {
+                actor->onUpdate();
+            }
         }
         for (shared_ptr<Level> childLevel : m_ChildLevels)
         {

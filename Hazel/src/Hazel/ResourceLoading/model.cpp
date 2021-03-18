@@ -34,7 +34,7 @@ namespace Hazel
 
     void Model::onUpdate()
     {
-        m_ModelTransformMatrix = glm::translate(glm::mat4(1.0f), ((Actor*)m_OfActor)->getTransform());
+        m_ModelMatrix = glm::translate(glm::mat4(((Actor*)m_OfActor)->getRotation()), ((Actor*)m_OfActor)->getTransform());
     }
 
     void Model::setModelUniversalMaterial(shared_ptr<Material>& material)
