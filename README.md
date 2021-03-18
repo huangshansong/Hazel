@@ -16,6 +16,7 @@ If you want to try this out, you can download GLM to the corresponding folder，
 如果您想试试这个，你可以下载glm到对应文件夹，并下载premake5.exe到工作目录，然后打开cmd，运行代码：call premake5.exe vs2019（我的VS版本是vs2019，你可以自己尝试其他版本）。然后你可以双击刚才生成的.sln，在vs里打开它。生成解决方案时需要生成多次，以便dll文件被自动复制到指定目录。将Sandbox设为启动项。
 
 I haven't written the UI yet, so if you want to see a different Actor, you'll need to go to editor.cpp and get rid of the // of addDefaultActorXXX to display the ActorXXX.
+
 我当前未编写UI，所以如果你想要看到不同的Actor, 你需要到Editor.cpp里修改代码, 将addDefaultActorXXX的//去除掉，就能显示XXX这个Actor了。
 
 
