@@ -10,6 +10,9 @@ its name, Hazel, is the same with [1]’s.
 
 它的名字，Hazel，和[1]的是一样的。
 
+You can click on the screenshot file to see what it looks like.
+
+你可以点击屏幕截图文件看看实际渲染效果。
 
 If you want to try this out, you can download GLM to the corresponding folder，then you need to download premake5.exe to your working directory, then open the cmd and run code: call premake5.exe vs2019(my vs version is vs2019, you can try other versions by yourself). Then you can double click the .sln file just generated to open it in the vs. The solution needs to be built multiple times so that the DLL files are automatically copied to the specified directory.Set the Sandbox as a startup item.
 
