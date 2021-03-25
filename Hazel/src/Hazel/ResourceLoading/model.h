@@ -27,6 +27,8 @@ namespace Hazel
 
         void setModelUniversalMaterial(std::shared_ptr<Material>& material);
 
+        void setModelUniversalMaterial(std::shared_ptr<Material>& material, unsigned int LODsNumber);
+
         void setModelUniversalShader(std::shared_ptr<Shader>& shader);
         
         void setScale(glm::vec3& scale) { m_Scale = scale; }

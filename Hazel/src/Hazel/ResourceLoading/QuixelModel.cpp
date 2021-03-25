@@ -41,7 +41,7 @@ namespace Hazel
                 if (m_Type == QuixelObjectType::_3d)
                 {
                     QuixelMaterial* material = new QuixelMaterial(m_Directory, QuixelObjectType::_3d, Resolution::_2K, LODsNumber);
-                    setModelUniversalMaterial(shared_ptr<Material>(material));
+                    setModelUniversalMaterial(shared_ptr<Material>(material), LODsNumber);
                 }
                 LODsNumber++;
             }
