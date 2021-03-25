@@ -16,7 +16,7 @@ namespace Hazel {
     {
     public:
         // constructor with vectors
-        Camera(void* level, std::string name, glm::vec3 transform = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = s_YAW, float pitch = s_PITCH);
+        Camera(void* level, std::string name, glm::vec3 transform = glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f));
 
         const float getZoom() const { return m_Zoom; }
 

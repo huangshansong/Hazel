@@ -27,14 +27,12 @@ namespace Hazel
 
 
     // constructor with vectors
-    Camera::Camera(void* level, string name, glm::vec3 position, glm::vec3 up, float yaw, float pitch) 
+    Camera::Camera(void* level, string name, glm::vec3 position, glm::vec3 worldUp)
         : Actor(level, name), m_Front(glm::vec3(0.0f, 0.0f, -1.0f)),
-        m_MovementSpeed(s_SPEED), m_MouseSensitivity(s_SENSITIVITY), m_Zoom(s_ZOOM), m_NearPlaneDistance(s_NearPlaneDistance), m_FarPlaneDistance(s_FarPlaneDistance)
+        m_Yaw(s_YAW), m_Pitch(s_PITCH), m_MovementSpeed(s_SPEED), m_MouseSensitivity(s_SENSITIVITY), m_Zoom(s_ZOOM), m_NearPlaneDistance(s_NearPlaneDistance), m_FarPlaneDistance(s_FarPlaneDistance)
     {
         m_Transform = position;
-        m_WorldUp = up;
-        m_Yaw = yaw;
-        m_Pitch = pitch;
+        m_WorldUp = worldUp;
     }
 
     void Camera::onPlayerInputEvent(Event& event)

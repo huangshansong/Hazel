@@ -9,9 +9,13 @@ namespace Hazel
 {
 	struct HAZEL_API PhysicsProps
 	{
-		glm::vec3 transform;
 		float mass;
+		//all relative. model box related to model, mesh box related to mesh
+		glm::vec3 centerOfMassTransform;
 		glm::vec3 velocity;
+		glm::vec3 rotateAxis;
+		glm::vec3 rotateSpeed;
+
 		float rigid;//represents the energy loss in collision
 		bool dynamic;
 	};

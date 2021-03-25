@@ -103,16 +103,23 @@ namespace Hazel {
 		if (m_IsFirstCursor)
 		{
 			m_IsFirstCursor = false;
+
 			m_CursorLastX = e.getX();
 			m_CursorLastY = e.getY();
+			m_CursorOffsetX = 0.0f;
+			m_CursorOffsetY = 0.0f;
+
 			return false;
-
 		}
-		m_CursorOffsetX = e.getX() - m_CursorLastX;
-		m_CursorOffsetY = e.getY() - m_CursorLastY;
-		m_CursorLastX = e.getX();
-		m_CursorLastY = e.getY();
+		else
+		{
 
-		return false;
+			m_CursorOffsetX = e.getX() - m_CursorLastX;
+			m_CursorOffsetY = e.getY() - m_CursorLastY;
+			m_CursorLastX = e.getX();
+			m_CursorLastY = e.getY();
+
+			return false;
+		}
 	}
 }

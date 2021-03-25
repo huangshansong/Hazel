@@ -48,6 +48,14 @@ namespace Hazel
         }
     }
 
+    void Model::setModelUniversalMaterial(std::shared_ptr<Material>& material, unsigned int LODsNumber)
+    {
+        for (shared_ptr<Mesh>& mesh : m_LODs[LODsNumber])
+        {
+            mesh->setMaterial(material);
+        }
+    }
+
     void Model::setModelUniversalShader(shared_ptr<Shader>& shader)
     {
         for (unsigned int i = 0; i < m_LODs.size(); i++)

@@ -1,5 +1,7 @@
 #include "hzpch.h"
 
+#include <stb_image.h>
+
 #include "Hazel/Application.h"
 #include "Hazel/Actors/Actor.h"
 #include "Hazel/ResourceLoading/_ResourceLoading.h"
@@ -87,6 +89,8 @@ namespace Hazel
 		else if (actor == DefaultActor::backpack)
 		{
 			Actor* backpack = new Actor(level, "Backpack");
+			// tell stb_image.h to flip loaded texture's on the y-axis.
+			stbi_set_flip_vertically_on_load(false);
 			Model* model = new LearnOpenGLModel(backpack, "resources/objects/backpack/", FileSuffix::obj);
 		}
 		else if (actor == DefaultActor::landscape)
@@ -116,8 +120,11 @@ namespace Hazel
 			PlantsLevel* plantsLevel = new PlantsLevel(level);
 
 			string directory = "resources/3dplant/garden plant_flowering_uegjcflia/";
+			shared_ptr<Material> material = shared_ptr<Material>(new QuixelMaterial(directory, QuixelObjectType::_3dplant, Resolution::_2K));
+			shared_ptr<Shader> shader = shared_ptr<Shader>(new Shader(directory.c_str()));
+			
 			vector<Actor*> temp;
-			unsigned int varCount = 1;
+			unsigned int varCount = 11;
 			bool stillHaveVar = true;
 			while (stillHaveVar)
 			{
@@ -128,11 +135,8 @@ namespace Hazel
 				{
 					Actor* actor = new Actor(plantsLevel);
 					QuixelModel* model = new QuixelModel(actor, varFolderPath, QuixelObjectType::_3dplant);
-					QuixelMaterial* material = new QuixelMaterial(directory + "Textures/Billboard/", QuixelObjectType::_3dplant, Resolution::_2K);
-					model->setModelUniversalMaterial(shared_ptr<Material>(material));
-					Shader* shader = new Shader(directory.c_str());
-					model->setModelUniversalShader(shared_ptr<Shader>(shader));
-
+					model->setModelUniversalMaterial(material);
+					model->setModelUniversalShader(shader);
 					temp.emplace_back(actor);
 					varCount++;
 				}
