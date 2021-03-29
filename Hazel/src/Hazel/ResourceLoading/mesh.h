@@ -25,6 +25,13 @@ namespace Hazel
         //glm::vec3 Bitangent;
     };
 
+    enum class MY_OPENGL_TRIANGLE_TYPE
+    {
+        TRIANGLES = 0,
+        TRIANGLE_STRIP,
+        TRIANGLE_FAN
+    };
+
     class HAZEL_API Mesh : public HObject
     {
     public:
@@ -37,6 +44,8 @@ namespace Hazel
         void setMaterial(std::shared_ptr<Material>& material) { m_Material = material; }
 
         void setShader(std::shared_ptr<Shader>& shader) { m_Shader = shader; }
+
+        void setTriangleType(MY_OPENGL_TRIANGLE_TYPE type) { m_TriangleType = type; }
 
         const void* getOfModel() const { return m_OfModel; }
         
@@ -51,6 +60,8 @@ namespace Hazel
         std::shared_ptr<Material> m_Material;
 
         std::shared_ptr<Shader> m_Shader;
+
+        MY_OPENGL_TRIANGLE_TYPE m_TriangleType = MY_OPENGL_TRIANGLE_TYPE::TRIANGLES;
 
     protected:
         

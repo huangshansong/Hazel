@@ -67,6 +67,17 @@ namespace Hazel
         }
     }
 
+    void Model::setModelUniversalTriangleType(MY_OPENGL_TRIANGLE_TYPE type)
+    {
+        for (unsigned int i = 0; i < m_LODs.size(); i++)
+        {
+            for (shared_ptr<Mesh>& mesh : m_LODs[i])
+            {
+                mesh->setTriangleType(type);
+            }
+        }
+    }
+
     // draws the model, and thus all its meshes
     void Model::draw() const
     {

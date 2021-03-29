@@ -114,7 +114,7 @@ namespace Hazel
             {
                 //set the surface's name
                 m_Name = "Textures/Atlas/" + folderPath.substr(folderPath.find_last_of('_') + 1, folderPath.find_last_of('/') - folderPath.find_last_of('_') - 1);
-                m_Name = "Textures/Billboard/Billboard";
+                //m_Name = "Textures/Billboard/Billboard";
             }           
             textureFileName = folderPath + m_Name + '_' + ResolutionTypes[(unsigned int)resolution] + "_Normal.jpg";
             loadTexture(textureFileName, texturesLoaded, myTextureType_NORMAL_CAMERA);

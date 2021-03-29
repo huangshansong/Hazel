@@ -50,5 +50,9 @@ namespace Hazel
                 break;
             }
         }
+        if (m_Type == QuixelObjectType::_3dplant)
+        {
+            //setModelUniversalTriangleType(MY_OPENGL_TRIANGLE_TYPE::TRIANGLE_STRIP);
+        }
     }
 }

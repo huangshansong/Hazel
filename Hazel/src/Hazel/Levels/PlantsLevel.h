@@ -13,6 +13,8 @@ namespace Hazel
 		PlantsLevel(Level* level, std::string = "Unnamed") : Level(level) {};
 		PlantsLevel(void* viewport, std::string = "Unnamed") : Level(viewport) {};
 
+		virtual void onRender() override;
+
 		void gen_PlantsLocation(LandscapeModel*);
 
 		std::vector<std::vector<Actor*>> m_Plants;

@@ -10,6 +10,7 @@ uniform sampler2D normalMap[2];
 uniform sampler2D metallicMap[2];
 uniform sampler2D roughnessMap[2];
 uniform sampler2D aoMap[2];
+uniform sampler2D opacityMap[2];
 
 // IBL
 uniform samplerCube irradianceMap[1];
@@ -96,6 +97,16 @@ void main()
     // material properties
     int index;
     index = 0;
+
+    vec3 opacity = texture(opacityMap[index], TexCoords).rgb;
+    if(opacity.x  < 0.330867 + 1E-5F) 
+        discard;
+    //if(opacity.y  < 0.32118 + 1E-5F) 
+    //    discard;
+    //if(opacity.z  < 0.0660514 + 1E-5F) 
+    //    discard;
+
+
     vec3 albedo = pow(texture(albedoMap[index], TexCoords).rgb, vec3(2.2));
     float metallic = texture(metallicMap[index], TexCoords).r;
     float roughness = texture(roughnessMap[index], TexCoords).r;
@@ -124,7 +135,7 @@ void main()
             // calculate per-light radiance
             L = normalize(lightDirections[0]);
             H = normalize(V + L);
-            radiance = vec3(100.0f, 100.0f, 100.0f);
+            radiance = vec3(10.0f, 10.0f, 10.0f);
         }
         else
         {
@@ -182,7 +193,7 @@ void main()
     vec3 ambient = (kD * diffuse + specular) * ao;
     
     vec3 color = ambient + Lo;
-color = albedo;
+//color = ambient;
     // HDR tonemapping
     color = color / (color + vec3(1.0));
     // gamma correct
