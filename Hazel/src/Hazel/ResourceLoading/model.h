@@ -31,6 +31,8 @@ namespace Hazel
 
         void setModelUniversalShader(std::shared_ptr<Shader>& shader);
         
+        void setModelUniversalTriangleType(MY_OPENGL_TRIANGLE_TYPE type);
+
         void setScale(glm::vec3& scale) { m_Scale = scale; }
 
         const void* getOfActor() const { return m_OfActor; }

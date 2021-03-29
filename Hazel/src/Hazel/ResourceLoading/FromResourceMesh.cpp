@@ -19,9 +19,19 @@ namespace Hazel
         glBindVertexArray(m_VAO);
         //HZ_CORE_INFO("glBindVertexArray(VAO);");
 
-        glDrawElements(GL_TRIANGLES, m_Indices->size(), GL_UNSIGNED_INT, 0);
+        if (m_TriangleType == MY_OPENGL_TRIANGLE_TYPE::TRIANGLES)
+        {
+            glDrawElements(GL_TRIANGLES, m_Indices->size(), GL_UNSIGNED_INT, 0);
+        }
+        else if (m_TriangleType == MY_OPENGL_TRIANGLE_TYPE::TRIANGLE_STRIP)
+        {
+            glDrawElements(GL_TRIANGLE_STRIP, m_Indices->size(), GL_UNSIGNED_INT, 0);
+        }
+        else if (m_TriangleType == MY_OPENGL_TRIANGLE_TYPE::TRIANGLE_FAN)
+        {
+            glDrawElements(GL_TRIANGLE_FAN, m_Indices->size(), GL_UNSIGNED_INT, 0);
+        }
         
-
         glBindVertexArray(0);
 	}
 }

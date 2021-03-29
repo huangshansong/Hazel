@@ -51,13 +51,14 @@ namespace Hazel
     void Editor::addDefaultMap(Level* level)
 	{
 		addDefaultActor(level, DefaultActor::enviroment);//A skybox as IBL
-		addDefaultActor(level, DefaultActor::sphere);//A shpere
+		//addDefaultActor(level, DefaultActor::sphere);//A shpere
 		//addDefaultActor(level, DefaultActor::container);//A Quixel PBR model
 		//addDefaultActor(level, DefaultActor::landscape);//A landscape with auto-generated heightmap
-		
+		//addDefaultActor(level, DefaultActor::grass);// currently, I haven't writen the gen_Location(). Later I will write this, and use DrawInstanced to draw the plants.
+
 		//addDefaultActor(level, DefaultActor::backpack);// A blinn-phong model
 
-		//addDefaultActor(level, DefaultActor::grass);// currently, I can't use the plant textures correctly. and I haven't writen the gen_Location(). Later I will write thense thing, and use DrawInstanced to draw the plants.
+													
 		//addDefaultActor(level, DefaultActor::cerberus); //can't read the textures by assimp!!
    
 	}
@@ -118,6 +119,7 @@ namespace Hazel
 		else if (actor == DefaultActor::grass)
 		{
 			PlantsLevel* plantsLevel = new PlantsLevel(level);
+			plantsLevel->setEnviroment((Enviroment*)level->getEnviroment());
 
 			string directory = "resources/3dplant/garden plant_flowering_uegjcflia/";
 			shared_ptr<Material> material = shared_ptr<Material>(new QuixelMaterial(directory, QuixelObjectType::_3dplant, Resolution::_2K));
