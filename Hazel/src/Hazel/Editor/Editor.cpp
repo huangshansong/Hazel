@@ -54,7 +54,7 @@ namespace Hazel
 		//addDefaultActor(level, DefaultActor::sphere);//A shpere
 		//addDefaultActor(level, DefaultActor::container);//A Quixel PBR model
 		//addDefaultActor(level, DefaultActor::landscape);//A landscape with auto-generated heightmap
-		//addDefaultActor(level, DefaultActor::grass);// currently, I haven't writen the gen_Location(). Later I will write this, and use DrawInstanced to draw the plants.
+		addDefaultActor(level, DefaultActor::grass);// currently, I haven't writen the gen_Location(). Later I will write this, and use DrawInstanced to draw the plants.
 
 		//addDefaultActor(level, DefaultActor::backpack);// A blinn-phong model
 
@@ -69,8 +69,8 @@ namespace Hazel
 			Enviroment* enviroment = new Enviroment(level, "Enviroment");
 			level->setEnviroment(enviroment);
 			CubeModel* model = new CubeModel(enviroment);
-			//EnvironmentMaterial* material = new EnvironmentMaterial("resources/textures/skybox/", FileSuffix::jpg);//A outdoor environment
-			EnvironmentMaterial* material = new EnvironmentMaterial("resources/textures/hdr/newport_loft.hdr");//A indoor environment
+			EnvironmentMaterial* material = new EnvironmentMaterial("resources/textures/skybox/", FileSuffix::jpg);//A outdoor environment
+			//EnvironmentMaterial* material = new EnvironmentMaterial("resources/textures/hdr/newport_loft.hdr");//A indoor environment
 			model->setModelUniversalMaterial(shared_ptr<Material>(material));
 			Shader* shader = new Shader("resources/textures/IBL/");
 			model->setModelUniversalShader(shared_ptr<Shader>(shader));
