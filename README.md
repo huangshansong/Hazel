@@ -16,7 +16,7 @@ You can click on the screenshot file to see what it looks like.
 
 If you want to try this out, you can download GLM to the corresponding folder，then you need to download premake5.exe to your working directory, then open the cmd and run code: call premake5.exe vs2019(my vs version is vs2019, you can try other versions by yourself). Then you can double click the .sln file just generated to open it in the vs. The solution needs to be built multiple times so that the DLL files are automatically copied to the specified directory.Set the Sandbox as a startup item.
 
-如果您想试试这个，你可以下载glm到对应文件夹，并下载premake5.exe到工作目录，然后打开cmd，运行代码：call premake5.exe vs2019（我的VS版本是vs2019，你可以自己尝试其他版本）。然后你可以双击刚才生成的.sln，在vs里打开它。生成解决方案时需要生成多次，以便dll文件被自动复制到指定目录。将Sandbox设为启动项。
+如果您想试试这个，你可以下载premake5.exe到工作目录，然后打开cmd，运行代码：call premake5.exe vs2019（我的VS版本是vs2019，你可以自己尝试其他版本）。然后你可以双击刚才生成的.sln，在vs里打开它。生成解决方案时需要生成多次，以便dll文件被自动复制到指定目录。将Sandbox设为启动项。
 
 I haven't written the UI yet, so if you want to see a different Actor, you'll need to go to editor.cpp and get rid of the // of addDefaultActorXXX to display the ActorXXX.
 
