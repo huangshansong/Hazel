@@ -69,8 +69,8 @@ namespace Hazel
 			Enviroment* enviroment = new Enviroment(level, "Enviroment");
 			level->setEnviroment(enviroment);
 			CubeModel* model = new CubeModel(enviroment);
-			EnvironmentMaterial* material = new EnvironmentMaterial("resources/textures/skybox/", FileSuffix::jpg);//A outdoor environment
-			//EnvironmentMaterial* material = new EnvironmentMaterial("resources/textures/hdr/newport_loft.hdr");//A indoor environment
+			//EnvironmentMaterial* material = new EnvironmentMaterial("resources/textures/skybox/", FileSuffix::jpg);//A outdoor environment
+			EnvironmentMaterial* material = new EnvironmentMaterial("resources/textures/hdr/newport_loft.hdr");//A indoor environment
 			model->setModelUniversalMaterial(shared_ptr<Material>(material));
 			Shader* shader = new Shader("resources/textures/IBL/");
 			model->setModelUniversalShader(shared_ptr<Shader>(shader));
