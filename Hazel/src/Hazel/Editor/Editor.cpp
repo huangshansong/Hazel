@@ -54,7 +54,7 @@ namespace Hazel
 		//addDefaultActor(level, DefaultActor::sphere);//A shpere
 		//addDefaultActor(level, DefaultActor::container);//A Quixel PBR model
 		//addDefaultActor(level, DefaultActor::landscape);//A landscape with auto-generated heightmap
-		//addDefaultActor(level, DefaultActor::grass);// currently, I haven't writen the gen_Location(). Later I will write this, and use DrawInstanced to draw the plants.
+		addDefaultActor(level, DefaultActor::grass);// currently, I haven't writen the gen_Location(). Later I will write this, and use DrawInstanced to draw the plants.
 
 		//addDefaultActor(level, DefaultActor::backpack);// A blinn-phong model
 

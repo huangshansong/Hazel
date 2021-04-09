@@ -62,13 +62,19 @@ namespace Hazel {
 
 	void showDemo2() {
 
-		ImGui::SetNextWindowSize({220, 100});
+		ImGui::SetNextWindowSize({450, 250});
 
 		ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
 		ImGui::SetWindowFontScale(2.0f);
 
+		ImGui::Text("F5 to enter the scene.");
+		ImGui::Text("Esc to leave the scene.");
+		ImGui::Text("WSAD to move.");
+
 		ImGui::Text("\n(%.1f FPS)", ImGui::GetIO().Framerate);
+		ImGui::Text("Go to Editor::addDefaultMap()");
+		ImGui::Text("to add more actor to the scene.");
 
 		ImGui::End();
 		
